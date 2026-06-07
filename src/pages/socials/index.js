@@ -1354,14 +1354,18 @@ function _openGroupDetailModal(groupId) {
 
   const modalContentHtml = `
     <div class="group-detail-modal-body" style="max-height:72vh; overflow-y:auto; padding-right:4px;">
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px;">
         <div class="card" style="padding:10px; text-align:center;">
-          <span style="font-size:10px; color:var(--text-muted); display:block;">Your Rank</span>
+          <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase; letter-spacing:0.4px;">Your Rank</span>
           <strong style="font-size:16px; color:var(--aura-violet-light); display:block; margin-top:4px;">${myRank === 1 ? '🥇 1st' : myRank === 2 ? '🥈 2nd' : myRank === 3 ? '🥉 3rd' : `${myRank}th`}</strong>
         </div>
         <div class="card" style="padding:10px; text-align:center;">
-          <span style="font-size:10px; color:var(--text-muted); display:block;">Group Average</span>
+          <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase; letter-spacing:0.4px;">Group Avg</span>
           <strong style="font-size:16px; color:var(--aura-amber-light); display:block; margin-top:4px;">${avgScore} Disc</strong>
+        </div>
+        <div class="card" id="group-header-chat-btn" style="padding:10px; text-align:center; cursor:pointer; border-color:rgba(0,214,143,0.35); background:rgba(0,214,143,0.08); transition:all 0.2s ease;" onmouseenter="this.style.borderColor='rgba(0,214,143,0.65)'" onmouseleave="this.style.borderColor='rgba(0,214,143,0.35)'">
+          <span style="font-size:16px; display:block;">💬</span>
+          <strong style="font-size:13px; color:#00D68F; display:block; margin-top:2px;">Chat</strong>
         </div>
       </div>
 
@@ -1371,9 +1375,7 @@ function _openGroupDetailModal(groupId) {
       <span class="section-label" style="margin-top:12px; display:block;">Weekly Trends</span>
       ${chartsHtml}
 
-      ${openGroupChatBtnHtml}
-
-      <button class="btn btn-ghost btn-sm btn-full" id="close-group-details-btn" style="margin-top:4px;">Close Details</button>
+      <button class="btn btn-ghost btn-sm btn-full" id="close-group-details-btn" style="margin-top:12px;">Close Details</button>
     </div>
   `;
 
@@ -1383,7 +1385,7 @@ function _openGroupDetailModal(groupId) {
   });
 
   document.getElementById('close-group-details-btn')?.addEventListener('click', closeModal);
-  document.getElementById('group-open-chat-btn')?.addEventListener('click', () => {
+  document.getElementById('group-header-chat-btn')?.addEventListener('click', () => {
     closeModal();
     _openGroupChatFullscreen(group.id);
   });
