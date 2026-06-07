@@ -35,7 +35,11 @@ export function render() {
       <div class="settings-section">
         <div class="settings-section-title">Training</div>
         <div class="settings-group card">
-          ${_settingRow('goal-row', '🎯', 'Goal', { build_muscle: 'Build Muscle', lose_fat: 'Lose Fat', maintain: 'Maintain', endurance: 'Endurance', flexibility: 'Flexibility' }[ob?.goal] || 'Not set', 'nav')}
+          ${_settingRow('goal-row', '🎯', 'Goal', (() => {
+            const map = { build_muscle: 'Build Muscle', lose_fat: 'Lose Fat', maintain: 'Maintain', endurance: 'Endurance', flexibility: 'Flexibility' };
+            if (Array.isArray(ob?.goal)) return ob.goal.map(g => map[g]).filter(Boolean).join(' + ') || 'Not set';
+            return map[ob?.goal] || 'Not set';
+          })(), 'nav')}
           ${_settingRow('mode-row', '🏋️', 'Workout Mode', ob?.workoutMode === 'gym' ? 'Gym' : ob?.workoutMode === 'home' ? 'Home' : 'Not set', 'nav')}
           ${_settingRow('days-row', '📅', 'Training Days', ob?.trainingDays ? `${ob.trainingDays} days/week` : 'Not set', 'nav')}
           ${_settingRow('split-row', '🔄', 'Split Preference', ob?.splitPreference?.replace('_', '/').toUpperCase() || 'Not set', 'nav')}

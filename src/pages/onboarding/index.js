@@ -118,6 +118,7 @@ function _stepPersonal() {
 
 function _stepGoals() {
   const s = getState().onboarding;
+  const currentGoals = Array.isArray(s.goal) ? s.goal : (s.goal ? [s.goal] : []);
   const goals = [
     { id: 'build_muscle', emoji: '💪', label: 'Build Muscle', sub: 'Strength & size' },
     { id: 'lose_fat', emoji: '🔥', label: 'Lose Fat', sub: 'Cut & lean out' },
@@ -129,9 +130,10 @@ function _stepGoals() {
     <div class="ob-step anim-fade-in">
       <h2 class="ob-title">${STEPS[1].title}</h2>
       <p class="ob-subtitle">${STEPS[1].subtitle}</p>
+      <p class="ob-hint">Select all that apply</p>
       <div class="selector-grid selector-grid-2" id="goals-grid">
         ${goals.map(g => `
-          <button class="selector-card ob-select ${s.goal === g.id ? 'selected' : ''}"
+          <button class="selector-card ob-multi-select ${currentGoals.includes(g.id) ? 'selected' : ''}"
             data-field="goal" data-val="${g.id}">
             <span class="card-emoji">${g.emoji}</span>
             <span class="card-label">${g.label}</span>
@@ -195,24 +197,20 @@ function _stepMode() {
 function _stepEquipment() {
   const s = getState().onboarding;
   const eq = s.equipment || [];
-  const isHome = s.workoutMode === 'home';
-  const opts = isHome
-    ? [
-        { id: 'dumbbells', emoji: '🏋️', label: 'Dumbbells' },
-        { id: 'resistance_bands', emoji: '🔗', label: 'Bands' },
-        { id: 'pull_up_bar', emoji: '⬆️', label: 'Pull-up Bar' },
-        { id: 'kettlebell', emoji: '⚫', label: 'Kettlebell' },
-        { id: 'mat', emoji: '🟩', label: 'Yoga Mat' },
-        { id: 'none', emoji: '🤸', label: 'Bodyweight only' },
-      ]
-    : [
-        { id: 'barbell', emoji: '🏋️', label: 'Barbell' },
-        { id: 'dumbbells', emoji: '⚡', label: 'Dumbbells' },
-        { id: 'cable_machine', emoji: '🔩', label: 'Cable Machine' },
-        { id: 'machines', emoji: '🤖', label: 'Machines' },
-        { id: 'smith_machine', emoji: '🔧', label: 'Smith Machine' },
-        { id: 'full', emoji: '✅', label: 'Full Gym' },
-      ];
+  const opts = [
+    { id: 'full_gym', emoji: '🏢', label: 'Full Gym' },
+    { id: 'dumbbells', emoji: '🏋️', label: 'Dumbbells' },
+    { id: 'barbell', emoji: '⚖️', label: 'Barbell' },
+    { id: 'bench', emoji: '🪑', label: 'Bench' },
+    { id: 'cable_machine', emoji: '🔩', label: 'Cable Machine' },
+    { id: 'smith_machine', emoji: '🔧', label: 'Smith Machine' },
+    { id: 'pullup_bar', emoji: '⬆️', label: 'Pullup Bar' },
+    { id: 'resistance_bands', emoji: '🔗', label: 'Resistance Bands' },
+    { id: 'kettlebells', emoji: '⚫', label: 'Kettlebells' },
+    { id: 'yoga_mat', emoji: '🟩', label: 'Yoga Mat' },
+    { id: 'cardio_machines', emoji: '🏃', label: 'Cardio Machines' },
+    { id: 'bodyweight', emoji: '🤸', label: 'Bodyweight Only' },
+  ];
 
   return `
     <div class="ob-step anim-fade-in">
@@ -354,6 +352,10 @@ function _stepMuscles() {
     { id: 'arms', emoji: '💪', label: 'Arms' },
     { id: 'legs', emoji: '🦵', label: 'Legs' },
     { id: 'core', emoji: '⚡', label: 'Core' },
+    { id: 'abs', emoji: '🍫', label: 'Abs' },
+    { id: 'forearms', emoji: '✊', label: 'Forearms' },
+    { id: 'glutes', emoji: '🍑', label: 'Glutes' },
+    { id: 'calves', emoji: '🦵', label: 'Calves' },
     { id: 'full_body', emoji: '🌐', label: 'Full Body' },
   ];
   return `
@@ -500,15 +502,25 @@ function _wireEvents() {
       btn.closest('.selector-grid')?.querySelectorAll('.ob-select').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       setState(`onboarding.${field}`, parsedVal);
+
+      // Auto-advance if single-select step
+      const autoAdvanceSteps = [2, 3, 5, 6, 7, 10];
+      if (autoAdvanceSteps.includes(_step)) {
+        setTimeout(() => {
+          _goToStep(_step + 1);
+        }, 300);
+      }
     });
   });
 
-  // Multi-select cards (equipment)
+  // Multi-select cards (goals, equipment)
   document.querySelectorAll('.ob-multi-select').forEach(btn => {
     btn.addEventListener('click', () => {
       btn.classList.toggle('selected');
-      const vals = [...document.querySelectorAll('.ob-multi-select.selected')].map(b => b.dataset.val);
-      setState('onboarding.equipment', vals);
+      const field = btn.dataset.field;
+      const grid = btn.closest('.selector-grid');
+      const vals = [...grid.querySelectorAll('.ob-multi-select.selected')].map(b => b.dataset.val);
+      setState(`onboarding.${field}`, vals);
     });
   });
 
@@ -519,13 +531,6 @@ function _wireEvents() {
 
 function _handleNext() {
   const state = getState();
-
-  // Skip equipment step if gym user
-  if (_step === 3 && state.onboarding?.workoutMode === 'gym') {
-    setState('onboarding.equipment', ['full']);
-    _goToStep(5); // skip equipment step
-    return;
-  }
 
   // Validate key steps
   if (_step === 0) {
@@ -573,3 +578,4 @@ function _completeOnboarding() {
 
   setTimeout(() => navigate('/home', true), 600);
 }
+

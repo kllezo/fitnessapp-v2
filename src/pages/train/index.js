@@ -17,6 +17,118 @@ let _restInterval = null;
 let _sessionStartTime = null;
 let _celebrationShown = false;
 
+// Extra Exercises Database
+const EXTRA_EXERCISES_DB = {
+  chest: [
+    { name: 'Flat Bench Press', type: 'strength', muscle: 'Chest' },
+    { name: 'Incline Dumbbell Press', type: 'strength', muscle: 'Chest' },
+    { name: 'Cable Crossover', type: 'hypertrophy', muscle: 'Chest' },
+    { name: 'Chest Dips', type: 'strength', muscle: 'Chest' },
+    { name: 'Push-ups', type: 'bodyweight', muscle: 'Chest' }
+  ],
+  back: [
+    { name: 'Deadlift', type: 'strength', muscle: 'Back' },
+    { name: 'Lat Pulldown', type: 'hypertrophy', muscle: 'Back' },
+    { name: 'Barbell Row', type: 'strength', muscle: 'Back' },
+    { name: 'Pull-ups', type: 'bodyweight', muscle: 'Back' },
+    { name: 'Seated Cable Row', type: 'hypertrophy', muscle: 'Back' }
+  ],
+  shoulders: [
+    { name: 'Overhead Press', type: 'strength', muscle: 'Shoulders' },
+    { name: 'Dumbbell Lateral Raise', type: 'hypertrophy', muscle: 'Shoulders' },
+    { name: 'Rear Delt Fly', type: 'hypertrophy', muscle: 'Shoulders' },
+    { name: 'Front Raise', type: 'hypertrophy', muscle: 'Shoulders' }
+  ],
+  arms: [
+    { name: 'Bicep Curl', type: 'hypertrophy', muscle: 'Arms' },
+    { name: 'Tricep Pushdown', type: 'hypertrophy', muscle: 'Arms' },
+    { name: 'Hammer Curl', type: 'hypertrophy', muscle: 'Arms' },
+    { name: 'Skull Crusher', type: 'hypertrophy', muscle: 'Arms' }
+  ],
+  legs: [
+    { name: 'Squat', type: 'strength', muscle: 'Legs' },
+    { name: 'Leg Press', type: 'hypertrophy', muscle: 'Legs' },
+    { name: 'Leg Curl', type: 'hypertrophy', muscle: 'Legs' },
+    { name: 'Leg Extension', type: 'hypertrophy', muscle: 'Legs' },
+    { name: 'Romanian Deadlift', type: 'strength', muscle: 'Legs' }
+  ],
+  core: [
+    { name: 'Plank', type: 'duration', muscle: 'Core' },
+    { name: 'Ab Wheel Rollout', type: 'strength', muscle: 'Core' },
+    { name: 'Russian Twist', type: 'hypertrophy', muscle: 'Core' }
+  ],
+  abs: [
+    { name: 'Crunch', type: 'hypertrophy', muscle: 'Abs' },
+    { name: 'Hanging Leg Raise', type: 'strength', muscle: 'Abs' },
+    { name: 'Cable Crunch', type: 'hypertrophy', muscle: 'Abs' }
+  ],
+  glutes: [
+    { name: 'Hip Thrust', type: 'strength', muscle: 'Glutes' },
+    { name: 'Glute Kickback', type: 'hypertrophy', muscle: 'Glutes' },
+    { name: 'Glute Bridge', type: 'bodyweight', muscle: 'Glutes' }
+  ],
+  forearms: [
+    { name: 'Wrist Curl', type: 'hypertrophy', muscle: 'Forearms' },
+    { name: 'Reverse Bicep Curl', type: 'hypertrophy', muscle: 'Forearms' },
+    { name: 'Farmer\'s Walk', type: 'strength', muscle: 'Forearms' }
+  ],
+  calves: [
+    { name: 'Standing Calf Raise', type: 'hypertrophy', muscle: 'Calves' },
+    { name: 'Seated Calf Raise', type: 'hypertrophy', muscle: 'Calves' }
+  ],
+  cardio: [
+    { name: 'Treadmill Run', type: 'cardio', muscle: 'Cardio' },
+    { name: 'Cycling', type: 'cardio', muscle: 'Cardio' },
+    { name: 'Rowing', type: 'cardio', muscle: 'Cardio' },
+    { name: 'Jump Rope', type: 'cardio', muscle: 'Cardio' }
+  ]
+};
+
+function _getExerciseDetailHTML(name) {
+  const details = {
+    'Flat Bench Press': {
+      desc: 'Lie flat on a bench, grip the barbell slightly wider than shoulder-width, lower it to your mid-chest, and press it back up.',
+      mistakes: 'Bouncing bar off chest, flaring elbows out at 90 degrees, lifting hips off the bench.',
+      yt: 'https://www.youtube.com/watch?v=rT7DgCr-3pg',
+      anim: '🏋️'
+    },
+    'Squat': {
+      desc: 'Rest barbell on your upper back, keep chest up, squat down by bending hips and knees until thighs are parallel to the floor, then stand back up.',
+      mistakes: 'Knees caving inwards, heels rising off the floor, rounding the lower back ("butt wink").',
+      yt: 'https://www.youtube.com/watch?v=ultW1Gwy05c',
+      anim: '🦵'
+    }
+  };
+
+  const item = details[name] || {
+    desc: `Perform the ${name} with controlled form, focusing on the target muscle contraction.`,
+    mistakes: 'Using momentum, cutting range of motion short, ignoring mind-muscle connection.',
+    yt: `https://www.youtube.com/results?search_query=${encodeURIComponent(name + ' form tutorial')}`,
+    anim: '💪'
+  };
+
+  return `
+    <div class="ex-detail-guide card" style="margin-bottom:14px; background:rgba(255,255,255,0.02)">
+      <div class="ex-detail-anim" style="font-size:48px; text-align:center; margin-bottom:8px; animation: bounce 1.5s infinite;">
+        ${item.anim}
+      </div>
+      <div class="ex-detail-section">
+        <strong style="color:var(--text-primary); font-size:12px;">How to Perform:</strong>
+        <p style="font-size:11px; color:var(--text-secondary); margin-top:2px; line-height:1.4;">${item.desc}</p>
+      </div>
+      <div class="ex-detail-section" style="margin-top:8px;">
+        <strong style="color:var(--aura-rose-light); font-size:12px;">Common Mistakes:</strong>
+        <p style="font-size:11px; color:var(--text-secondary); margin-top:2px; line-height:1.4;">⚠️ ${item.mistakes}</p>
+      </div>
+      <div class="ex-detail-section" style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
+        <a href="${item.yt}" target="_blank" style="color:var(--aura-violet-light); font-size:11px; text-decoration:none; display:flex; align-items:center; gap:4px;">
+          🎥 Watch YouTube Tutorial →
+        </a>
+      </div>
+    </div>
+  `;
+}
+
 export function render() {
   const state = getState();
   let plan = state.workout?.generatedPlan;
@@ -60,34 +172,30 @@ export function render() {
       </div>
     </div>
 
-    <!-- Exercise Sheet -->
-    <div class="bottom-sheet-overlay" id="ex-sheet-overlay"></div>
-    <div class="bottom-sheet" id="ex-sheet">
-      <div class="modal-handle"></div>
-      <div id="ex-sheet-content"></div>
-    </div>
-
-    <!-- Rest Timer Sheet -->
-    <div class="bottom-sheet-overlay" id="rest-overlay"></div>
-    <div class="bottom-sheet" id="rest-sheet">
-      <div class="modal-handle"></div>
-      <div id="rest-content"></div>
-    </div>
-
-    <!-- History Sheet -->
-    <div class="bottom-sheet-overlay" id="hist-overlay"></div>
-    <div class="bottom-sheet" id="hist-sheet">
-      <div class="modal-handle"></div>
-      <div id="hist-content"></div>
-    </div>
-
     <!-- Celebration Overlay -->
     <div class="celebration-overlay hidden" id="celebration-overlay">
-      <div class="celebration-content">
+      <div class="celebration-content" style="max-height: 90vh; overflow-y: auto; padding-bottom: 24px;">
         <div class="celebration-emoji">🎉</div>
         <h2 class="celebration-title">Session Complete!</h2>
-        <div class="celebration-stats" id="celebration-stats"></div>
-        <button class="btn btn-primary btn-full" id="celebration-close">Awesome! 💪</button>
+        
+        <!-- Share Card -->
+        <div class="share-card" id="share-card-element">
+          <div class="share-card-header">
+            <span class="share-card-logo">✦ AURA</span>
+            <span class="share-card-date">${new Date().toLocaleDateString(undefined, {month:'short', day:'numeric'})}</span>
+          </div>
+          <p class="share-card-title" id="share-card-workout-name">Workout Session</p>
+          <div class="share-card-stats" id="share-card-stats"></div>
+          <div class="share-card-footer">Adaptive Fitness OS</div>
+        </div>
+
+        <div class="share-actions-grid">
+          <button class="share-action-btn btn-whatsapp" id="share-whatsapp">Share to WhatsApp</button>
+          <button class="share-action-btn btn-instagram" id="share-instagram">Instagram Story</button>
+          <button class="share-action-btn btn-download" id="share-download">Download Image</button>
+        </div>
+
+        <button class="btn btn-primary btn-full" id="celebration-close" style="margin-top: 16px;">Awesome! 💪</button>
       </div>
     </div>
   `;
@@ -102,7 +210,7 @@ function _renderDay(plan, dayIdx) {
     </div>`;
   }
   const day = plan[dayIdx];
-  const allDone = day.exercises?.every(ex => ex.done);
+  const allDone = day.exercises?.length > 0 && day.exercises?.every(ex => ex.done);
 
   return `
     <div class="day-header">
@@ -119,13 +227,23 @@ function _renderDay(plan, dayIdx) {
       ${(day.exercises || []).map((ex, i) => _renderExerciseCard(ex, i, dayIdx)).join('')}
     </div>
 
+    <!-- Extra actions -->
+    <div style="display:flex;gap:10px;margin:16px 0;">
+      <button class="btn btn-secondary btn-full btn-sm" id="add-extra-ex-btn">
+        🏋️‍♂️ + Add Exercise
+      </button>
+      <button class="btn btn-secondary btn-full btn-sm" id="log-custom-btn">
+        📝 + Custom Log
+      </button>
+    </div>
+
     ${allDone ? `
       <div class="session-complete-bar">
         <span>🏆 All exercises done!</span>
         <button class="btn btn-primary btn-sm" id="finish-session-btn">Finish Session</button>
       </div>
     ` : `
-      <button class="btn btn-secondary btn-full" style="margin:16px" id="rest-btn-main">
+      <button class="btn btn-secondary btn-full" style="margin-bottom:16px" id="rest-btn-main">
         ⏱ Rest Timer
       </button>
     `}
@@ -183,9 +301,6 @@ export function onEnter() {
 }
 
 export function onLeave() {
-  _closeExSheet();
-  _closeRestSheet();
-  _closeHistSheet();
   if (_restInterval) clearInterval(_restInterval);
 }
 
@@ -214,11 +329,6 @@ function _wireEvents() {
   });
 
   document.getElementById('history-btn')?.addEventListener('click', _openHistSheet);
-
-  // Sheet overlays
-  document.getElementById('ex-sheet-overlay')?.addEventListener('click', _closeExSheet);
-  document.getElementById('rest-overlay')?.addEventListener('click', _closeRestSheet);
-  document.getElementById('hist-overlay')?.addEventListener('click', _closeHistSheet);
 }
 
 function _wireContentEvents() {
@@ -232,6 +342,8 @@ function _wireContentEvents() {
 
   document.getElementById('rest-btn-main')?.addEventListener('click', _openRestSheet);
   document.getElementById('finish-session-btn')?.addEventListener('click', _finishSession);
+  document.getElementById('add-extra-ex-btn')?.addEventListener('click', () => _openAddExerciseModal(_activeDayIdx));
+  document.getElementById('log-custom-btn')?.addEventListener('click', _openCustomLogModal);
   document.getElementById('gen-btn')?.addEventListener('click', () => {
     generateWeeklyPlan(getState());
     const state = getState();
@@ -241,62 +353,45 @@ function _wireContentEvents() {
   });
 }
 
-// ── Exercise Sheet ──
+// ── Exercise Sheet (Log Set) ──
 function _openExSheet(dayIdx, exIdx) {
   _activeSheet = { dayIdx, exIdx };
-  const overlay = document.getElementById('ex-sheet-overlay');
-  const sheet = document.getElementById('ex-sheet');
-  overlay?.classList.add('open');
-  sheet?.classList.add('open');
-  _renderExSheetContent(dayIdx, exIdx);
-}
-
-function _closeExSheet() {
-  document.getElementById('ex-sheet-overlay')?.classList.remove('open');
-  document.getElementById('ex-sheet')?.classList.remove('open');
-  _activeSheet = null;
-}
-
-function _renderExSheetContent(dayIdx, exIdx) {
   const state = getState();
   const plan = state.workout?.generatedPlan;
   if (!plan) return;
   const ex = plan[dayIdx]?.exercises[exIdx];
   if (!ex) return;
 
-  const content = document.getElementById('ex-sheet-content');
-  if (!content) return;
-
-  content.innerHTML = `
-    <div class="ex-sheet-header">
-      <div>
-        <h3 class="ex-sheet-title">${ex.name}</h3>
-        <p class="ex-sheet-meta">${ex.muscle} · ${ex.type}</p>
+  const content = `
+    <div id="ex-sheet-content">
+      ${_getExerciseDetailHTML(ex.name)}
+      
+      <div class="sets-list" id="sets-list">
+        ${ex.sets.map((set, i) => _renderSetRow(set, i)).join('')}
       </div>
-      <button class="icon-btn" id="close-ex-sheet">✕</button>
-    </div>
 
-    <div class="sets-list" id="sets-list">
-      ${ex.sets.map((set, i) => _renderSetRow(set, i)).join('')}
-    </div>
-
-    <button class="btn btn-secondary btn-sm" id="add-set-btn" style="margin-top:8px;width:100%">
-      + Add Set
-    </button>
-
-    <div class="ex-sheet-actions">
-      <button class="btn btn-primary btn-full ${ex.done ? 'btn-mint' : ''}" id="mark-done-btn">
-        ${ex.done ? '✓ Marked Complete' : 'Mark Exercise Done'}
+      <button class="btn btn-secondary btn-sm" id="add-set-btn" style="margin-top:8px;width:100%">
+        + Add Set
       </button>
-    </div>
 
-    <div class="ex-notes">
-      <label class="field-label">Session Notes</label>
-      <textarea class="input" id="ex-notes" placeholder="How did it feel?" rows="2">${ex.notes || ''}</textarea>
+      <div class="ex-sheet-actions" style="margin-top:16px;">
+        <button class="btn btn-primary btn-full ${ex.done ? 'btn-mint' : ''}" id="mark-done-btn">
+          ${ex.done ? '✓ Marked Complete' : 'Mark Exercise Done'}
+        </button>
+      </div>
+
+      <div class="ex-notes" style="margin-top:12px;">
+        <label class="field-label">Session Notes</label>
+        <textarea class="input" id="ex-notes" placeholder="How did it feel?" rows="2">${ex.notes || ''}</textarea>
+      </div>
     </div>
   `;
 
-  document.getElementById('close-ex-sheet')?.addEventListener('click', _closeExSheet);
+  showModal({
+    title: ex.name,
+    content: content,
+    onClose: () => { _activeSheet = null; }
+  });
 
   document.getElementById('mark-done-btn')?.addEventListener('click', () => {
     const state = getState();
@@ -304,12 +399,10 @@ function _renderExSheetContent(dayIdx, exIdx) {
     plan[dayIdx].exercises[exIdx].done = true;
     plan[dayIdx].exercises[exIdx].notes = document.getElementById('ex-notes')?.value || '';
 
-    // Check all sets done and calculate volume
     const sets = plan[dayIdx].exercises[exIdx].sets;
     const volume = sets.reduce((s, set) => s + (set.weight || 0) * (set.targetReps || 0), 0);
     plan[dayIdx].exercises[exIdx].volume = volume;
 
-    // Check PR
     const maxWeight = Math.max(...sets.map(s => s.weight || 0));
     const maxReps = sets[0]?.targetReps || 10;
     if (maxWeight > 0 && checkForPR(ex.name, maxWeight, maxReps)) {
@@ -317,11 +410,10 @@ function _renderExSheetContent(dayIdx, exIdx) {
     }
 
     setState('workout.generatedPlan', plan);
-    _closeExSheet();
+    closeModal();
 
-    // Refresh card
-    const content = document.getElementById('train-content');
-    if (content) content.innerHTML = _renderDay(plan, _activeDayIdx);
+    const contentEl = document.getElementById('train-content');
+    if (contentEl) contentEl.innerHTML = _renderDay(plan, _activeDayIdx);
     _wireContentEvents();
     showToast(`${ex.name} complete ✓`, 'success');
   });
@@ -332,8 +424,7 @@ function _renderExSheetContent(dayIdx, exIdx) {
     const lastSet = plan[dayIdx].exercises[exIdx].sets.slice(-1)[0] || { weight: 0, targetReps: 10 };
     plan[dayIdx].exercises[exIdx].sets.push({ ...lastSet, done: false, difficulty: null });
     setState('workout.generatedPlan', plan);
-    _renderExSheetContent(dayIdx, exIdx);
-    _wireSetEvents(dayIdx, exIdx);
+    _openExSheet(dayIdx, exIdx);
   });
 
   _wireSetEvents(dayIdx, exIdx);
@@ -402,49 +493,43 @@ function _wireSetEvents(dayIdx, exIdx) {
 
 // ── Rest Timer ──
 function _openRestSheet() {
-  document.getElementById('rest-overlay')?.classList.add('open');
-  document.getElementById('rest-sheet')?.classList.add('open');
   _restSeconds = 60;
-  _renderRestContent();
-}
-
-function _closeRestSheet() {
-  if (_restInterval) { clearInterval(_restInterval); _restInterval = null; }
-  document.getElementById('rest-overlay')?.classList.remove('open');
-  document.getElementById('rest-sheet')?.classList.remove('open');
-}
-
-function _renderRestContent() {
-  const content = document.getElementById('rest-content');
-  if (!content) return;
-  content.innerHTML = `
-    <h3 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;margin-bottom:16px;text-align:center">Rest Timer</h3>
-    <div class="rest-duration-btns">
-      ${[30, 60, 90, 120].map(s => `
-        <button class="rest-dur-btn ${_restSeconds === s ? 'active' : ''}" data-secs="${s}">${s}s</button>
-      `).join('')}
-    </div>
-    <div class="rest-display" id="rest-display">
-      <svg width="120" height="120" viewBox="0 0 120 120">
-        <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
-        <circle cx="60" cy="60" r="52" fill="none" stroke="url(#restGrad)" stroke-width="6"
-          stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="0"
-          transform="rotate(-90 60 60)" id="rest-ring"/>
-        <defs><linearGradient id="restGrad"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
-      </svg>
-      <div class="rest-time" id="rest-time">${_restSeconds}s</div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:16px">
-      <button class="btn btn-primary btn-full" id="rest-start-btn">Start</button>
-      <button class="btn btn-ghost btn-sm" id="rest-close-btn">Close</button>
+  const content = `
+    <div id="rest-content">
+      <div class="rest-duration-btns">
+        ${[30, 60, 90, 120].map(s => `
+          <button class="rest-dur-btn ${_restSeconds === s ? 'active' : ''}" data-secs="${s}">${s}s</button>
+        `).join('')}
+      </div>
+      <div class="rest-display" id="rest-display">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+          <circle cx="60" cy="60" r="52" fill="none" stroke="url(#restGrad)" stroke-width="6"
+            stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="0"
+            transform="rotate(-90 60 60)" id="rest-ring"/>
+          <defs><linearGradient id="restGrad"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
+        </svg>
+        <div class="rest-time" id="rest-time">${_restSeconds}s</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-primary btn-full" id="rest-start-btn">Start</button>
+        <button class="btn btn-ghost btn-sm" id="rest-close-btn">Close</button>
+      </div>
     </div>
   `;
 
-  content.querySelectorAll('.rest-dur-btn').forEach(btn => {
+  showModal({
+    title: 'Rest Timer',
+    content: content,
+    onClose: () => { if (_restInterval) { clearInterval(_restInterval); _restInterval = null; } }
+  });
+
+  const modal = document.getElementById('modal-sheet');
+  modal.querySelectorAll('.rest-dur-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       if (_restInterval) { clearInterval(_restInterval); _restInterval = null; }
       _restSeconds = Number(btn.dataset.secs);
-      content.querySelectorAll('.rest-dur-btn').forEach(b => b.classList.remove('active'));
+      modal.querySelectorAll('.rest-dur-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const timeEl = document.getElementById('rest-time');
       if (timeEl) timeEl.textContent = `${_restSeconds}s`;
@@ -467,23 +552,19 @@ function _renderRestContent() {
         clearInterval(_restInterval);
         _restInterval = null;
         showToast('Rest complete! Back to work 💪', 'violet');
-        _closeRestSheet();
+        closeModal();
       }
     }, 1000);
   });
 
-  document.getElementById('rest-close-btn')?.addEventListener('click', _closeRestSheet);
+  document.getElementById('rest-close-btn')?.addEventListener('click', closeModal);
 }
 
 // ── History ──
 function _openHistSheet() {
-  document.getElementById('hist-overlay')?.classList.add('open');
-  document.getElementById('hist-sheet')?.classList.add('open');
-  const content = document.getElementById('hist-content');
   const history = getState().workout?.history || [];
-  if (content) {
-    content.innerHTML = `
-      <h3 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;margin-bottom:16px">Workout History</h3>
+  const content = `
+    <div id="hist-content">
       ${!history.length ? '<p style="color:var(--text-muted);text-align:center;padding:24px">No workouts logged yet</p>' :
         history.slice(0, 20).map(h => `
           <div class="hist-row">
@@ -496,14 +577,247 @@ function _openHistSheet() {
         `).join('')
       }
       <button class="btn btn-ghost btn-sm btn-full" id="close-hist-btn" style="margin-top:16px">Close</button>
-    `;
-    document.getElementById('close-hist-btn')?.addEventListener('click', _closeHistSheet);
-  }
+    </div>
+  `;
+
+  showModal({
+    title: 'Workout History',
+    content: content
+  });
+
+  document.getElementById('close-hist-btn')?.addEventListener('click', closeModal);
 }
 
-function _closeHistSheet() {
-  document.getElementById('hist-overlay')?.classList.remove('open');
-  document.getElementById('hist-sheet')?.classList.remove('open');
+// ── Add Extra Exercise Modal ──
+function _openAddExerciseModal(dayIdx) {
+  const categories = [
+    { id: 'chest', label: 'Chest 🏋️‍♂️' },
+    { id: 'back', label: 'Back 🦅' },
+    { id: 'shoulders', label: 'Shoulders 🔱' },
+    { id: 'arms', label: 'Arms 💪' },
+    { id: 'legs', label: 'Legs 🦵' },
+    { id: 'core', label: 'Core ⚡' },
+    { id: 'abs', label: 'Abs 🍫' },
+    { id: 'glutes', label: 'Glutes 🍑' },
+    { id: 'forearms', label: 'Forearms ✊' },
+    { id: 'calves', label: 'Calves 🦵' },
+    { id: 'cardio', label: 'Cardio 🏃' }
+  ];
+
+  const content = `
+    <div class="add-ex-flow">
+      <p class="section-label" style="margin-bottom:12px">Select Muscle Group</p>
+      <div class="selector-grid selector-grid-2" style="max-height: 250px; overflow-y: auto;">
+        ${categories.map(c => `
+          <button class="selector-card add-ex-cat-btn" data-cat="${c.id}" style="padding:12px; font-size:13px;">
+            ${c.label}
+          </button>
+        `).join('')}
+      </div>
+      <div id="add-ex-list-container" style="margin-top:16px;"></div>
+    </div>
+  `;
+
+  showModal({
+    title: 'Add Extra Exercise',
+    content: content
+  });
+
+  const modal = document.getElementById('modal-sheet');
+  modal.querySelectorAll('.add-ex-cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cat = btn.dataset.cat;
+      modal.querySelectorAll('.add-ex-cat-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+
+      const listContainer = document.getElementById('add-ex-list-container');
+      if (!listContainer) return;
+
+      const exercises = EXTRA_EXERCISES_DB[cat] || [];
+      listContainer.innerHTML = `
+        <p class="section-label" style="margin-bottom:8px">Select Exercise</p>
+        <div style="display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto;">
+          ${exercises.map(ex => `
+            <button class="btn btn-secondary btn-sm select-add-ex-btn" data-name="${ex.name}" data-muscle="${ex.muscle}" data-type="${ex.type}" style="justify-content:flex-start; text-align:left; font-size:12px;">
+              ✦ ${ex.name}
+            </button>
+          `).join('')}
+        </div>
+      `;
+
+      listContainer.querySelectorAll('.select-add-ex-btn').forEach(exBtn => {
+        exBtn.addEventListener('click', () => {
+          const exName = exBtn.dataset.name;
+          const exMuscle = exBtn.dataset.muscle;
+          const exType = exBtn.dataset.type;
+
+          const state = getState();
+          const plan = [...(state.workout?.generatedPlan || [])];
+          if (!plan[dayIdx]) return;
+
+          plan[dayIdx].exercises.push({
+            name: exName,
+            muscle: exMuscle,
+            type: exType,
+            done: false,
+            sets: [
+              { weight: 10, targetReps: 10, difficulty: null, done: false }
+            ]
+          });
+
+          setState('workout.generatedPlan', plan);
+          closeModal();
+          showToast(`${exName} added!`, 'success');
+
+          const trainContainer = document.getElementById('train-content');
+          if (trainContainer) trainContainer.innerHTML = _renderDay(plan, dayIdx);
+          _wireContentEvents();
+        });
+      });
+    });
+  });
+}
+
+// ── Custom External Exercise Log Modal ──
+function _openCustomLogModal() {
+  const content = `
+    <div class="custom-log-form" style="display:flex; flex-direction:column; gap:12px;">
+      <div class="field-group">
+        <label class="field-label">Exercise Name</label>
+        <input class="input" id="cust-log-name" placeholder="e.g. Morning Run, Pushups..." />
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <div class="field-group">
+          <label class="field-label">Sets</label>
+          <input class="input" id="cust-log-sets" type="number" value="3" min="1" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Reps per set</label>
+          <input class="input" id="cust-log-reps" type="number" value="10" min="1" />
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <div class="field-group">
+          <label class="field-label">Weight (kg)</label>
+          <input class="input" id="cust-log-weight" type="number" value="0" min="0" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Duration (min)</label>
+          <input class="input" id="cust-log-duration" type="number" value="15" min="1" />
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" id="cust-log-save-btn" style="margin-top:8px">Log Workout ✓</button>
+    </div>
+  `;
+
+  showModal({
+    title: 'Log External Exercise',
+    content: content
+  });
+
+  document.getElementById('cust-log-save-btn')?.addEventListener('click', () => {
+    const name = document.getElementById('cust-log-name')?.value?.trim();
+    const sets = Number(document.getElementById('cust-log-sets')?.value || 1);
+    const reps = Number(document.getElementById('cust-log-reps')?.value || 10);
+    const weight = Number(document.getElementById('cust-log-weight')?.value || 0);
+    const duration = Number(document.getElementById('cust-log-duration')?.value || 15);
+
+    if (!name) {
+      showToast('Please enter an exercise name', 'error');
+      return;
+    }
+
+    const state = getState();
+    const sessionData = {
+      day: 'External Session',
+      date: getTodayDateString(),
+      exercises: [
+        {
+          name: name,
+          sets: Array.from({ length: sets }, () => ({ weight, targetReps: reps, done: true, difficulty: 5 })),
+          volume: weight * reps * sets,
+          done: true
+        }
+      ],
+      totalVolume: weight * reps * sets,
+      duration: duration,
+      readinessAtTime: state.checkIn?.readinessScore || 65,
+      notes: 'Logged outside weekly plan.'
+    };
+    logWorkoutSession(sessionData);
+    closeModal();
+    showToast(`Logged external session: ${name} ✓`, 'success');
+  });
+}
+
+function _downloadShareCardImage(workoutName, totalVolume, exercisesCount, duration) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 400;
+  canvas.height = 400;
+  const ctx = canvas.getContext('2d');
+
+  const grad = ctx.createLinearGradient(0, 0, 0, 400);
+  grad.addColorStop(0, '#131324');
+  grad.addColorStop(1, '#080810');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 400, 400);
+
+  ctx.strokeStyle = '#7c3aed';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(10, 10, 380, 380);
+
+  ctx.fillStyle = '#a78bfa';
+  ctx.font = 'bold 20px sans-serif';
+  ctx.fillText('✦ AURA', 30, 45);
+
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '14px sans-serif';
+  const dateStr = new Date().toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
+  ctx.fillText(dateStr, 280, 45);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 24px sans-serif';
+  ctx.fillText(workoutName, 30, 100);
+
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '14px sans-serif';
+  ctx.fillText('Session Summary', 30, 125);
+
+  ctx.fillStyle = '#a78bfa';
+  ctx.font = 'bold 32px sans-serif';
+  ctx.fillText(`${totalVolume}kg`, 30, 200);
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '12px sans-serif';
+  ctx.fillText('Total Volume', 30, 220);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 32px sans-serif';
+  ctx.fillText(`${exercisesCount}`, 170, 200);
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '12px sans-serif';
+  ctx.fillText('Exercises', 170, 220);
+
+  ctx.fillStyle = '#34d399';
+  ctx.font = 'bold 32px sans-serif';
+  ctx.fillText(`${duration}m`, 290, 200);
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '12px sans-serif';
+  ctx.fillText('Duration', 290, 220);
+
+  ctx.fillStyle = '#475569';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.fillText('AURA — ADAPTIVE FITNESS OS', 30, 360);
+
+  try {
+    const dataURL = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = dataURL;
+    a.download = `aura-workout-${Date.now()}.png`;
+    a.click();
+    showToast('Downloaded Performance Card image ✓', 'success');
+  } catch (e) {
+    showToast('Download not supported in this browser', 'error');
+  }
 }
 
 // ── Finish Session ──
@@ -526,16 +840,47 @@ function _finishSession() {
 
   const overlay = document.getElementById('celebration-overlay');
   const statsEl = document.getElementById('celebration-stats');
-  if (overlay && statsEl) {
-    statsEl.innerHTML = `
-      <div class="cel-stat"><span>${totalVolume}kg</span><label>Total Volume</label></div>
+  const workoutNameEl = document.getElementById('share-card-workout-name');
+  const shareStatsEl = document.getElementById('share-card-stats');
+
+  if (workoutNameEl) workoutNameEl.textContent = day.label;
+  if (shareStatsEl) {
+    shareStatsEl.innerHTML = `
+      <div class="cel-stat"><span>${totalVolume}kg</span><label>Volume</label></div>
       <div class="cel-stat"><span>${day.exercises?.length || 0}</span><label>Exercises</label></div>
       <div class="cel-stat"><span>${duration}min</span><label>Duration</label></div>
     `;
+  }
+
+  if (overlay) {
     overlay.classList.remove('hidden');
+    
+    // Wire sharing actions
+    document.getElementById('share-whatsapp')?.addEventListener('click', () => {
+      const text = encodeURIComponent(`✦ AURA Workout Complete: Completed ${day.label} workout! Stats: Volume: ${totalVolume}kg, Exercises: ${day.exercises?.length || 0}, Duration: ${duration}min. Keep grinding! 💪`);
+      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    });
+
+    document.getElementById('share-instagram')?.addEventListener('click', () => {
+      try {
+        navigator.clipboard.writeText(`AURA Workout Complete! Volume: ${totalVolume}kg | Exercises: ${day.exercises?.length || 0} | Duration: ${duration}min`);
+        showToast('✦ Copy template to clipboard! Open Instagram to share.', 'violet');
+      } catch (e) {
+        showToast('Instagram template copied', 'success');
+      }
+    });
+
+    document.getElementById('share-download')?.addEventListener('click', () => {
+      _downloadShareCardImage(day.label, totalVolume, day.exercises?.length || 0, duration);
+    });
+
     document.getElementById('celebration-close')?.addEventListener('click', () => {
       overlay.classList.add('hidden');
       showToast(`Session logged! +${totalVolume}kg volume 🔥`, 'violet');
+      
+      // Navigate home
+      navigate('/home');
     });
   }
 }
+

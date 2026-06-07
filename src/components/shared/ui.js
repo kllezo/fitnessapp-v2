@@ -30,14 +30,18 @@ export function showToast(message, type = 'default', duration = 2500) {
 // ==========================================
 
 let _activeModal = null;
+let _onCloseCallback = null;
 
-export function showModal({ title, content, actions = [], onClose }) {
+export function showModal({ title, content, actions = [], onClose, className = '' }) {
   const container = document.getElementById('modal-container');
   if (!container) return;
 
   closeModal();
 
+  _onCloseCallback = onClose;
+
   const modal = document.createElement('div');
+  modal.className = `modal-wrapper ${className}`;
   modal.innerHTML = `
     <div class="modal-backdrop" id="modal-backdrop"></div>
     <div class="modal-sheet" id="modal-sheet">
@@ -55,6 +59,7 @@ export function showModal({ title, content, actions = [], onClose }) {
   `;
 
   container.style.pointerEvents = 'auto';
+  container.innerHTML = '';
   container.appendChild(modal);
   _activeModal = modal;
 
@@ -68,14 +73,12 @@ export function showModal({ title, content, actions = [], onClose }) {
 
   // Close on backdrop
   document.getElementById('modal-backdrop')?.addEventListener('click', () => {
-    if (onClose) onClose();
     closeModal();
   });
 
   // Close on ESC
   const onEsc = (e) => {
     if (e.key === 'Escape') {
-      if (onClose) onClose();
       closeModal();
       document.removeEventListener('keydown', onEsc);
     }
@@ -95,9 +98,15 @@ export function closeModal() {
     container.innerHTML = '';
     container.style.pointerEvents = 'none';
   }
+  if (_onCloseCallback) {
+    const cb = _onCloseCallback;
+    _onCloseCallback = null;
+    try { cb(); } catch (e) { console.error(e); }
+  }
 }
 
 export function updateModalBody(html) {
   const body = document.getElementById('modal-body');
   if (body) body.innerHTML = html;
 }
+

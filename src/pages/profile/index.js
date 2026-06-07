@@ -17,7 +17,12 @@ export function render() {
   const discipline = getDisciplineScore(state);
   const streak = state.workout?.streakDays || 0;
   const workouts = state.workout?.history?.length || 0;
-  const goalLabel = { build_muscle: 'Build Muscle 💪', lose_fat: 'Lose Fat 🔥', maintain: 'Maintain ⚖️', endurance: 'Endurance 🏃', flexibility: 'Flexibility 🧘' }[ob?.goal] || 'Training';
+  const getGoalLabel = (gVal) => {
+    const map = { build_muscle: 'Build Muscle 💪', lose_fat: 'Lose Fat 🔥', maintain: 'Maintain ⚖️', endurance: 'Endurance 🏃', flexibility: 'Flexibility 🧘' };
+    if (Array.isArray(gVal)) return gVal.map(g => map[g]).filter(Boolean).join(' + ') || 'Training';
+    return map[gVal] || 'Training';
+  };
+  const goalLabel = getGoalLabel(ob?.goal);
 
   return `
     <div class="profile-page">

@@ -209,29 +209,124 @@ export function generateConversationStarters(state = getState()) {
 }
 
 // ── Accountability Engine ──
-export function generateMatchCandidate(state = getState()) {
-  const ob = state.onboarding;
+export function generateMatchCandidate(state = getState(), filters = {}) {
+  const ob = state.onboarding || {};
   const names = ['Arjun K.', 'Priya S.', 'Rohan M.', 'Ananya T.', 'Karthik V.', 'Divya R.', 'Vivek N.', 'Sneha P.'];
   const cities = ['Mumbai', 'Bangalore', 'Delhi', 'Hyderabad', 'Chennai', 'Pune'];
-  const styles = ['Strength', 'Hypertrophy', 'Fat Loss', 'Endurance', 'Calisthenics'];
-
+  const countries = ['India', 'United Kingdom', 'United States', 'Singapore', 'Canada'];
+  const languages = ['English', 'Hindi', 'Tamil', 'Bengali', 'Marathi'];
+  
   const nameIdx = Math.floor(Math.random() * names.length);
   const cityIdx = Math.floor(Math.random() * cities.length);
-  const styleIdx = Math.floor(Math.random() * styles.length);
-  const score = 75 + Math.floor(Math.random() * 22);
-  const streak = 5 + Math.floor(Math.random() * 30);
+  
+  // Base attributes
+  let candAge = ob.age ? ob.age + (Math.floor(Math.random() * 7) - 3) : 25;
+  if (candAge < 16) candAge = 18;
+  
+  let candGender = ob.gender || 'male';
+  if (filters.gender === 'any' || !filters.gender) {
+    candGender = Math.random() > 0.5 ? 'male' : 'female';
+  }
+  
+  let candGoal = Array.isArray(ob.goal) ? ob.goal[0] : (ob.goal || 'build_muscle');
+  if (filters.goal === 'any') {
+    const goals = ['build_muscle', 'lose_fat', 'maintain', 'endurance', 'flexibility'];
+    candGoal = goals[Math.floor(Math.random() * goals.length)];
+  }
+  
+  let candExperience = ob.experience || 'intermediate';
+  if (filters.experience === 'any') {
+    const levels = ['beginner', 'returning', 'experienced'];
+    candExperience = levels[Math.floor(Math.random() * levels.length)];
+  }
+  
+  let candCountry = 'India';
+  if (filters.country === 'any') {
+    candCountry = countries[Math.floor(Math.random() * countries.length)];
+  }
+  
+  let candLanguage = 'English';
+  if (filters.language && filters.language !== 'any') {
+    candLanguage = filters.language;
+  } else {
+    candLanguage = languages[Math.floor(Math.random() * languages.length)];
+  }
+  
+  let candFrequency = ob.trainingDays || 4;
+  if (filters.frequency === 'any') {
+    candFrequency = 2 + Math.floor(Math.random() * 5);
+  }
+  
+  let candWakeTime = ob.wakeTime || '07:00';
+  if (filters.wakeTime === 'early') candWakeTime = '05:30';
+  else if (filters.wakeTime === 'late') candWakeTime = '09:30';
+  
+  let candTimezone = 'GMT+5:30';
+  if (filters.timezone === 'any') {
+    const zones = ['GMT+5:30', 'GMT-5:00', 'GMT+0:00', 'GMT+8:00'];
+    candTimezone = zones[Math.floor(Math.random() * zones.length)];
+  }
+  
+  let candDiscipline = 60 + Math.floor(Math.random() * 35);
+  if (filters.discipline === 'high') {
+    candDiscipline = 80 + Math.floor(Math.random() * 18);
+  } else if (filters.discipline === 'medium') {
+    candDiscipline = 55 + Math.floor(Math.random() * 25);
+  }
 
+  // Calculate compatibility score based on filters matching
+  let matches = 0;
+  let totalFilters = 0;
+  
+  if (filters.gender && filters.gender !== 'any') { totalFilters++; if (candGender === ob.gender) matches++; }
+  if (filters.goal && filters.goal !== 'any') { totalFilters++; if (candGoal === (Array.isArray(ob.goal) ? ob.goal[0] : ob.goal)) matches++; }
+  if (filters.experience && filters.experience !== 'any') { totalFilters++; if (candExperience === ob.experience) matches++; }
+  if (filters.country && filters.country !== 'any') { totalFilters++; if (candCountry === 'India') matches++; }
+  if (filters.frequency && filters.frequency !== 'any') { totalFilters++; if (candFrequency === ob.trainingDays) matches++; }
+  if (filters.timezone && filters.timezone !== 'any') { totalFilters++; if (candTimezone === 'GMT+5:30') matches++; }
+  if (filters.discipline && filters.discipline !== 'any') {
+    totalFilters++;
+    if (filters.discipline === 'high' && candDiscipline >= 80) matches++;
+    else if (filters.discipline === 'medium' && candDiscipline >= 50) matches++;
+  }
+  
+  let compatibility = 70 + Math.floor(Math.random() * 15);
+  if (totalFilters > 0) {
+    const ratio = matches / totalFilters;
+    compatibility = Math.round(75 + ratio * 23);
+  }
+  compatibility = Math.min(100, Math.max(65, compatibility));
+  
+  const streak = 5 + Math.floor(Math.random() * 30);
+  const stylesMap = {
+    build_muscle: 'Hypertrophy 🏋️',
+    lose_fat: 'Fat Loss 🔥',
+    maintain: 'Balance ⚖️',
+    endurance: 'Stamina 🏃',
+    flexibility: 'Mobility 🧘'
+  };
+  
   return {
     id: Date.now().toString(),
     name: names[nameIdx],
-    city: cities[cityIdx],
-    country: 'India',
-    trainingStyle: styles[styleIdx],
-    goal: ob?.goal || 'build_muscle',
-    compatibility: score,
+    age: candAge,
+    gender: candGender,
+    city: candCountry === 'India' ? cities[cityIdx] : 'Metro Area',
+    country: candCountry,
+    language: candLanguage,
+    trainingStyle: stylesMap[candGoal] || 'All-round ⚡',
+    trainingDays: candFrequency,
+    wakeTime: candWakeTime,
+    timezone: candTimezone,
+    goal: candGoal,
+    compatibility: compatibility,
     streakDays: streak,
-    disciplineScore: 60 + Math.floor(Math.random() * 35),
-    experience: ob?.experience || 'returning',
-    ambition: ob?.ambitionLevel || 'serious',
+    disciplineScore: candDiscipline,
+    experience: candExperience,
+    recentActivity: [
+      `Logged a ${stylesMap[candGoal]?.split(' ')[0] || 'Training'} session yesterday`,
+      `Completed day ${streak} streak check-in`,
+      `Reached hydration target (${(2.5 + Math.random()).toFixed(1)}L)`
+    ]
   };
 }

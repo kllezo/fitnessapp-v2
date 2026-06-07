@@ -4,11 +4,9 @@
 // ==========================================
 
 import { getState, updateState, setState } from '../../state/index.js';
-import { showToast } from '../../components/shared/ui.js';
+import { showToast, showModal, closeModal } from '../../components/shared/ui.js';
 import { getFilteredMeals, calculateMacros, getDailyMealPlan, quickLogFood } from '../../services/nutrition-engine.js';
 import './diet.css';
-
-let _activeMealSheet = null;
 
 export function render() {
   const state = getState();
@@ -65,6 +63,19 @@ export function render() {
         </div>
       </div>
 
+      <!-- Custom Food Logger Card -->
+      <div class="diet-section">
+        <div class="custom-food-card card card-glow" style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <p style="font-size:var(--text-sm); font-weight:var(--fw-bold); color:var(--text-primary);">🍳 Log Custom Meal</p>
+              <p style="font-size:10px; color:var(--text-muted); margin-top:2px;">Track foods outside the catalog</p>
+            </div>
+            <button class="btn btn-sm btn-primary" id="custom-food-card-btn">Quick Log</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Today's Meals -->
       <div class="diet-section">
         <div class="section-label">Today's Meal Plan</div>
@@ -73,6 +84,7 @@ export function render() {
           ${_renderMealCard('☀️ Lunch', plan.lunch)}
           ${_renderMealCard('🌙 Dinner', plan.dinner)}
           ${_renderMealCard('🍎 Snack', plan.snack)}
+          ${plan.preWorkout ? _renderMealCard('⚡ Pre Workout', plan.preWorkout) : ''}
         </div>
       </div>
 
@@ -83,7 +95,7 @@ export function render() {
           ${getFilteredMeals(state).map((meal, i) => `
             <div class="meal-list-row" data-meal="${i}" id="meal-row-${i}">
               <span class="meal-emoji">${meal.emoji}</span>
-              <div class="meal-row-info">
+              <div class="meal-row-info" style="cursor: pointer;" data-idx="${i}">
                 <p class="meal-row-name">${meal.name}</p>
                 <p class="meal-row-meta">${meal.protein}g protein · ${meal.calories} kcal</p>
               </div>
@@ -92,30 +104,6 @@ export function render() {
           `).join('')}
         </div>
       </div>
-    </div>
-
-    <!-- Quick Log Sheet -->
-    <div class="bottom-sheet-overlay" id="log-overlay"></div>
-    <div class="bottom-sheet" id="log-sheet">
-      <div class="modal-handle"></div>
-      <h3 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;margin-bottom:16px">Quick Log Food</h3>
-      <div class="field-group">
-        <label class="field-label">Food name</label>
-        <input class="input" id="food-input" placeholder="e.g. eggs, chicken, paneer, dal..." />
-      </div>
-      <p class="log-hint">Recognised: eggs, chicken, paneer, dal, rice, oats, milk, whey, roti, tuna, peanut, curd, soy, fish, banana</p>
-      <div id="log-preview" class="log-preview hidden"></div>
-      <div style="display:flex;gap:10px;margin-top:16px">
-        <button class="btn btn-primary btn-full" id="log-submit-btn">Log Food</button>
-        <button class="btn btn-ghost btn-sm" id="log-close-btn">Cancel</button>
-      </div>
-    </div>
-
-    <!-- Meal Detail Sheet -->
-    <div class="bottom-sheet-overlay" id="meal-detail-overlay"></div>
-    <div class="bottom-sheet" id="meal-detail-sheet">
-      <div class="modal-handle"></div>
-      <div id="meal-detail-content"></div>
     </div>
   `;
 }
@@ -148,7 +136,7 @@ function _macroRing(label, consumed, target, unit, color, pct) {
 function _renderMealCard(timeLabel, meal) {
   if (!meal) return '';
   return `
-    <div class="today-meal-card card" data-meal-name="${meal.name}">
+    <div class="today-meal-card card" data-meal-name="${meal.name}" style="cursor: pointer; margin-bottom: 10px;">
       <div class="today-meal-header">
         <div style="display:flex;align-items:center;gap:10px">
           <span style="font-size:28px">${meal.emoji}</span>
@@ -170,10 +158,7 @@ export function onEnter() {
   _wireEvents();
 }
 
-export function onLeave() {
-  _closeLogSheet();
-  _closeMealDetail();
-}
+export function onLeave() {}
 
 function _wireEvents() {
   // Water buttons
@@ -196,40 +181,9 @@ function _wireEvents() {
     _refreshWater();
   });
 
-  // Log food
+  // Custom logger buttons
   document.getElementById('log-food-btn')?.addEventListener('click', _openLogSheet);
-  document.getElementById('log-overlay')?.addEventListener('click', _closeLogSheet);
-  document.getElementById('log-close-btn')?.addEventListener('click', _closeLogSheet);
-
-  document.getElementById('food-input')?.addEventListener('input', (e) => {
-    const val = e.target.value.trim();
-    if (val.length < 2) { document.getElementById('log-preview')?.classList.add('hidden'); return; }
-    const data = quickLogFood(val);
-    const preview = document.getElementById('log-preview');
-    if (preview) {
-      preview.classList.remove('hidden');
-      preview.innerHTML = `<div class="log-preview-row">
-        <span>${data.emoji} ${val}</span>
-        <span>${data.protein}g protein · ${data.calories} kcal</span>
-      </div>`;
-    }
-  });
-
-  document.getElementById('log-submit-btn')?.addEventListener('click', () => {
-    const val = document.getElementById('food-input')?.value?.trim();
-    if (!val) { showToast('Enter a food name', 'error'); return; }
-    const data = quickLogFood(val);
-    const state = getState();
-    const cal = state.nutrition?.calories || { consumed: 0, target: 2000 };
-    const prot = state.nutrition?.protein || { consumed: 0, target: 150 };
-    updateState('nutrition', {
-      calories: { ...cal, consumed: cal.consumed + data.calories },
-      protein: { ...prot, consumed: prot.consumed + data.protein },
-    });
-    showToast(`${data.emoji} ${val} logged! +${data.protein}g protein`, 'success');
-    _closeLogSheet();
-    _refreshMacros();
-  });
+  document.getElementById('custom-food-card-btn')?.addEventListener('click', _openLogSheet);
 
   // Meal log buttons
   document.querySelectorAll('.meal-log-btn').forEach(btn => {
@@ -250,17 +204,35 @@ function _wireEvents() {
     });
   });
 
-  // Meal detail sheet
-  document.querySelectorAll('.today-meal-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const name = card.dataset.mealName;
+  // Browse meals info click
+  document.querySelectorAll('.meal-row-info').forEach(row => {
+    row.addEventListener('click', () => {
       const meals = getFilteredMeals(getState());
-      const meal = meals.find(m => m.name === name);
+      const idx = Number(row.dataset.idx);
+      const meal = meals[idx];
       if (meal) _openMealDetail(meal);
     });
   });
 
-  document.getElementById('meal-detail-overlay')?.addEventListener('click', _closeMealDetail);
+  // Meal detail card click
+  document.querySelectorAll('.today-meal-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const name = card.dataset.mealName;
+      const state = getState();
+      const meals = getFilteredMeals(state);
+      
+      // Check first in database
+      let meal = meals.find(m => m.name === name);
+      
+      // If it is the default pre-workout
+      if (!meal && name === 'Peanut Butter Toast') {
+        const plan = getDailyMealPlan(state);
+        meal = plan.preWorkout;
+      }
+      
+      if (meal) _openMealDetail(meal);
+    });
+  });
 }
 
 function _refreshWater() {
@@ -289,42 +261,119 @@ function _refreshMacros() {
   }
 }
 
+// ── Quick Log Food Modal ──
 function _openLogSheet() {
-  document.getElementById('log-overlay')?.classList.add('open');
-  document.getElementById('log-sheet')?.classList.add('open');
-  setTimeout(() => document.getElementById('food-input')?.focus(), 300);
+  const content = `
+    <div class="quick-log-form">
+      <div class="field-group">
+        <label class="field-label">Food name</label>
+        <input class="input" id="food-input" placeholder="e.g. eggs, chicken, paneer, dal..." />
+      </div>
+      <p class="log-hint" style="font-size:10px; color:var(--text-muted); margin-top:4px;">
+        Recognised: eggs, chicken, paneer, dal, rice, oats, milk, whey, roti, tuna, peanut, curd, soy, fish, banana
+      </p>
+      <div id="log-preview" class="log-preview hidden" style="margin-top:12px; padding:10px; background:rgba(255,255,255,0.03); border-radius:var(--radius-md);"></div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-primary btn-full" id="log-submit-btn">Log Food</button>
+        <button class="btn btn-ghost btn-sm" id="log-close-btn">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  showModal({
+    title: 'Quick Log Food',
+    content: content
+  });
+
+  const foodInput = document.getElementById('food-input');
+  setTimeout(() => foodInput?.focus(), 150);
+
+  foodInput?.addEventListener('input', (e) => {
+    const val = e.target.value.trim();
+    const preview = document.getElementById('log-preview');
+    if (val.length < 2) {
+      preview?.classList.add('hidden');
+      return;
+    }
+    const data = quickLogFood(val);
+    if (preview) {
+      preview.classList.remove('hidden');
+      preview.innerHTML = `
+        <div style="display:flex; justify-content:space-between; font-size:12px;">
+          <span>${data.emoji} ${val}</span>
+          <span style="font-weight:var(--fw-bold); color:var(--aura-violet-light);">${data.protein}g protein · ${data.calories} kcal</span>
+        </div>
+      `;
+    }
+  });
+
+  document.getElementById('log-submit-btn')?.addEventListener('click', () => {
+    const val = foodInput?.value?.trim();
+    if (!val) { showToast('Enter a food name', 'error'); return; }
+    const data = quickLogFood(val);
+    const state = getState();
+    const cal = state.nutrition?.calories || { consumed: 0, target: 2000 };
+    const prot = state.nutrition?.protein || { consumed: 0, target: 150 };
+    updateState('nutrition', {
+      calories: { ...cal, consumed: cal.consumed + data.calories },
+      protein: { ...prot, consumed: prot.consumed + data.protein },
+    });
+    showToast(`${data.emoji} ${val} logged! +${data.protein}g protein`, 'success');
+    closeModal();
+    _refreshMacros();
+  });
+
+  document.getElementById('log-close-btn')?.addEventListener('click', closeModal);
 }
 
-function _closeLogSheet() {
-  document.getElementById('log-overlay')?.classList.remove('open');
-  document.getElementById('log-sheet')?.classList.remove('open');
-}
-
+// ── Meal Detail Modal ──
 function _openMealDetail(meal) {
-  const overlay = document.getElementById('meal-detail-overlay');
-  const sheet = document.getElementById('meal-detail-sheet');
-  const content = document.getElementById('meal-detail-content');
-  if (!overlay || !sheet || !content) return;
-  overlay.classList.add('open');
-  sheet.classList.add('open');
-  content.innerHTML = `
+  const budget = getState().onboarding?.budget || 'medium';
+  const cost = meal.cost?.[budget] || meal.cost?.medium || 50;
+  
+  const content = `
     <div style="text-align:center;margin-bottom:16px">
       <span style="font-size:48px">${meal.emoji}</span>
       <h3 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;margin-top:8px">${meal.name}</h3>
-      <p style="color:var(--text-muted);font-size:var(--text-sm)">${meal.prepTime}</p>
+      <p style="color:var(--text-muted);font-size:var(--text-sm)">⏱ ${meal.prepTime}</p>
     </div>
     <div class="stat-grid stat-grid-3" style="margin-bottom:16px">
       <div class="stat-cell"><div class="stat-value" style="color:var(--aura-violet-light)">${meal.calories}</div><div class="stat-label">kcal</div></div>
       <div class="stat-cell"><div class="stat-value gradient-text-mint">${meal.protein}g</div><div class="stat-label">Protein</div></div>
-      <div class="stat-cell"><div class="stat-value">${meal.carbs}g</div><div class="stat-label">Carbs</div></div>
+      <div class="stat-cell"><div class="stat-value">${meal.carbs || 30}g</div><div class="stat-label">Carbs</div></div>
     </div>
-    <div class="card" style="margin-bottom:12px">
-      <p class="section-label">Recipe</p>
-      <p style="font-size:var(--text-sm);color:var(--text-secondary);line-height:1.7">${meal.recipe}</p>
+    
+    <div class="card" style="margin-bottom:12px; background:rgba(255,255,255,0.02)">
+      <p class="section-label">📋 Ingredients</p>
+      <p style="font-size:var(--text-sm);color:var(--text-secondary);line-height:1.6;margin-bottom:12px;">
+        ${meal.ingredients || '150g raw materials, spices, water, tempering herbs.'}
+      </p>
+      <p class="section-label">🍳 Recipe Steps</p>
+      <p style="font-size:var(--text-sm);color:var(--text-secondary);line-height:1.6">${meal.recipe}</p>
     </div>
+
+    <div class="card" style="margin-bottom:12px; background:rgba(255,255,255,0.02)">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="section-label" style="margin-bottom:0;">Estimated Cost</span>
+        <span style="font-weight:var(--fw-bold); color:var(--aura-amber-light);">₹${cost}</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px; background:rgba(255,255,255,0.02); text-align:center;">
+      <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(meal.name + ' recipe step by step')}" target="_blank" style="color:var(--aura-violet-light); font-weight:var(--fw-semibold); text-decoration:none; font-size:var(--text-sm); display: inline-block;">
+        🎥 Watch YouTube Recipe Tutorial →
+      </a>
+    </div>
+
     <button class="btn btn-primary btn-full" id="meal-detail-log">Log This Meal</button>
     <button class="btn btn-ghost btn-sm btn-full" id="meal-detail-close" style="margin-top:8px">Close</button>
   `;
+
+  showModal({
+    title: meal.name,
+    content: content
+  });
+
   document.getElementById('meal-detail-log')?.addEventListener('click', () => {
     const state = getState();
     const cal = state.nutrition?.calories || { consumed: 0, target: 2000 };
@@ -334,13 +383,8 @@ function _openMealDetail(meal) {
       protein: { ...prot, consumed: prot.consumed + meal.protein },
     });
     showToast(`${meal.emoji} ${meal.name} logged!`, 'success');
-    _closeMealDetail();
+    closeModal();
     _refreshMacros();
   });
-  document.getElementById('meal-detail-close')?.addEventListener('click', _closeMealDetail);
-}
-
-function _closeMealDetail() {
-  document.getElementById('meal-detail-overlay')?.classList.remove('open');
-  document.getElementById('meal-detail-sheet')?.classList.remove('open');
+  document.getElementById('meal-detail-close')?.addEventListener('click', closeModal);
 }

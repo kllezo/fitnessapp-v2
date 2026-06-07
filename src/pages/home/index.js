@@ -32,7 +32,12 @@ export function render() {
   const streak = state.workout?.streakDays || 0;
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-  const goalLabel = { build_muscle: 'Build Muscle', lose_fat: 'Lose Fat', maintain: 'Maintain', endurance: 'Endurance', flexibility: 'Flexibility' }[ob?.goal] || 'Training';
+  const getGoalLabel = (gVal) => {
+    const map = { build_muscle: 'Build Muscle', lose_fat: 'Lose Fat', maintain: 'Maintain', endurance: 'Endurance', flexibility: 'Flexibility' };
+    if (Array.isArray(gVal)) return gVal.map(g => map[g]).filter(Boolean).join(' + ') || 'Training';
+    return map[gVal] || 'Training';
+  };
+  const goalLabel = getGoalLabel(ob?.goal);
 
   return `
     <div class="home-page">
@@ -279,8 +284,11 @@ function _loadAIData() {
 
 function _checkDailySync() {
   const state = getState();
-  const todayDone = state.checkIn?.todayDone && state.checkIn?.lastDate === getTodayDateString();
-  if (!todayDone && state.onboarding?.completed) {
+  const today = getTodayDateString();
+  const todayDone = state.checkIn?.todayDone && state.checkIn?.lastDate === today;
+  const alreadyPrompted = state.app?.lastSyncPrompt === today;
+  if (!todayDone && !alreadyPrompted && state.onboarding?.completed) {
+    setState('app.lastSyncPrompt', today);
     setTimeout(() => _openSyncSheet(), 1500);
   }
 }
@@ -403,10 +411,10 @@ function _completeSyncFlow() {
   document.getElementById('sync-done-btn')?.addEventListener('click', () => {
     _closeSyncSheet();
     showToast(`Readiness: ${score} — ${label}`, 'violet');
-    // Refresh the banner
-    const banner = document.getElementById('readiness-banner');
-    if (banner) {
-      banner.querySelector('.readiness-num').textContent = score;
+    const container = document.getElementById('page-content');
+    if (container) {
+      container.innerHTML = render();
+      onEnter();
     }
   });
 }
