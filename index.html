@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="AURA — Your Adaptive Fitness Operating System. AI-powered workouts, nutrition, and accountability." />
+  <meta name="theme-color" content="#0a0a0f" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>AURA — Adaptive Fitness OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/assets/styles/tokens.css" />
+  <link rel="stylesheet" href="/src/assets/styles/global.css" />
+  <link rel="stylesheet" href="/src/assets/styles/animations.css" />
+</head>
+<body>
+  <div id="aura-root">
+    <!-- Mobile Phone Shell -->
+    <div id="phone-shell">
+      <!-- Status Bar -->
+      <div id="status-bar">
+        <span id="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+            <rect x="0" y="3" width="3" height="9" rx="1" fill="currentColor" opacity="0.4"/>
+            <rect x="4.5" y="2" width="3" height="10" rx="1" fill="currentColor" opacity="0.6"/>
+            <rect x="9" y="0" width="3" height="12" rx="1" fill="currentColor"/>
+            <rect x="13.5" y="1" width="2" height="10" rx="1" fill="currentColor"/>
+          </svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+            <path d="M8 2.5C10.5 2.5 12.7 3.6 14.2 5.3L15.5 4C13.6 1.9 11 0.5 8 0.5C5 0.5 2.4 1.9 0.5 4L1.8 5.3C3.3 3.6 5.5 2.5 8 2.5Z" fill="currentColor" opacity="0.4"/>
+            <path d="M8 5.5C9.8 5.5 11.4 6.3 12.5 7.5L13.8 6.2C12.4 4.7 10.3 3.8 8 3.8C5.7 3.8 3.6 4.7 2.2 6.2L3.5 7.5C4.6 6.3 6.2 5.5 8 5.5Z" fill="currentColor" opacity="0.7"/>
+            <circle cx="8" cy="10.5" r="1.5" fill="currentColor"/>
+          </svg>
+          <div class="battery-icon">
+            <div class="battery-body">
+              <div class="battery-fill" style="width: 82%"></div>
+            </div>
+            <div class="battery-cap"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notch -->
+      <div id="notch">
+        <div id="notch-inner"></div>
+      </div>
+
+      <!-- Page Container — router renders pages here -->
+      <div id="page-container">
+        <div id="page-content"></div>
+      </div>
+
+      <!-- Bottom Navigation — always mounted, never in pages -->
+      <div id="bottom-nav-mount"></div>
+
+      <!-- Home Indicator -->
+      <div id="home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- Global overlays rendered outside phone shell -->
+  <div id="toast-container"></div>
+  <div id="modal-container"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

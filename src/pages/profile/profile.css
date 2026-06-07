@@ -1,0 +1,100 @@
+/* ==========================================
+   AURA V2 — Profile Page Styles
+   ========================================== */
+
+.profile-page { padding-bottom: 20px; }
+.profile-section { padding: 0 16px 16px; }
+
+/* Hero */
+.profile-hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 0 16px 20px;
+}
+
+.profile-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profile-avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--grad-violet);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: var(--fw-bold);
+  color: #fff;
+  box-shadow: var(--shadow-violet);
+}
+
+.profile-avatar-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(124,58,237,0.4);
+}
+
+.avatar-edit-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-card);
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-identity { flex: 1; min-width: 0; }
+.profile-name {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+.profile-username { font-size: var(--text-sm); color: var(--aura-violet-light); margin: 2px 0 6px; }
+.profile-bio { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.5; }
+
+/* Discipline Card */
+.discipline-card {}
+.discipline-header { display: flex; align-items: center; justify-content: space-between; }
+.discipline-score {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: var(--fw-black);
+  letter-spacing: -2px;
+  line-height: 1;
+  margin: 4px 0;
+}
+.discipline-status { font-size: var(--text-sm); color: var(--text-secondary); }
+
+/* Info Grid */
+.profile-info-grid { padding: 4px 0; }
+.profile-info-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.profile-info-row:last-child { border-bottom: none; }
+.info-icon { font-size: 16px; width: 24px; text-align: center; flex-shrink: 0; }
+.info-label { font-size: var(--text-sm); color: var(--text-muted); flex: 1; }
+.info-value { font-size: var(--text-sm); font-weight: var(--fw-medium); color: var(--text-primary); text-align: right; }
+
+/* Edit Sheet */
+.edit-fields { display: flex; flex-direction: column; gap: 12px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
