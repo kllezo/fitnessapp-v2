@@ -227,3 +227,26 @@
 .phase-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-card); transition: all var(--dur-normal) ease; }
 .phase-dot.active { background: #a78bfa; box-shadow: 0 0 8px rgba(167,139,250,0.5); }
 
+/* Guided Mindfulness and Walk Reset Rework Keyframes */
+@keyframes breatheAnimation {
+  0% { transform: scale(0.9); opacity: 0.55; }
+  50% { transform: scale(1.35); opacity: 1; box-shadow: 0 0 30px var(--aura-violet-light); }
+  100% { transform: scale(0.9); opacity: 0.55; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+.spotify-player {
+  background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.18) 0%, transparent 65%), #0d0d15 !important;
+  border-color: rgba(124, 58, 237, 0.35) !important;
+}
+
+.player-progress-bar-bg:hover .player-progress-fill {
+  background: var(--aura-violet) !important;
+}
+
+

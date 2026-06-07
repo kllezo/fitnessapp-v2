@@ -2,43 +2,30 @@
 
 ## Phase UX Polish & Bug Fixes
 
-### 1. Onboarding Improvements
-- [ ] Goal multi-select options (e.g. Build Muscle + Lose Fat).
-- [ ] Equipment catalog expansion (Gym, Dumbbell, Barbell, Yoga Mat, Bodyweight, etc.) with multi-select support.
-- [ ] Focus muscle expansion (Abs, Forearms, Glutes, Calves).
-- [ ] Auto-advance on single-selection steps.
-- [ ] Fix back button logic (ensure previous step navigation, not reset to step 1).
+### 1. Completed Tasks (V2 Polish Pass)
+- [x] Reworked Training Page: Removed default week chip strip. Integrated expandable dropdown weekly planner (D1-D7).
+- [x] Training Calendar: Interactive Week / Month calendar switcher, navigation controls, horizontal swipe gestures, detailed daily cell metrics (workout completed, calories consumed/burned, protein target hit/missed, sleep/readiness, water).
+- [x] Clickable cells opening high-fidelity Daily Summary Modal sheets.
+- [x] Exercise Card Polish: Made entire exercise card clickable to log sets.
+- [x] Muscle categories illustrations updated: Chest, Back, Shoulders, Arms, Legs, Core, Abs, Glutes, Forearms, Calves, Cardio.
+- [x] Custom Food Logger Rework: Removed hardcoded "Recognised foods" text. Expanded parser with quantities and units (g, ml, cup, scoop, bar, piece) with full Indian food support (Roti, Dal, Paneer, Rice, Curd, eggs, etc.).
+- [x] Nutrition Portions Scaling: Calculated MSJ targets and dynamically scaled macros across 4-5 meals (Breakfast, Lunch, Snacks, Dinner, Pre-workout) to hit goals.
+- [x] Deleted floating "+" button from Diet screen.
+- [x] Moved Recovery Tools (Box Breathing, Walk Reset, Mindfulness) above Advanced Diagnostics.
+- [x] Walk Reset upgrade: Stopwatch tracker with steps goal, progress rings, and calories burned estimation.
+- [x] Mindfulness upgrade: 1, 2, and 5-min guided sessions with somatic breathing animations and text prompt cycles.
+- [x] Spotify-style Brown Noise player: full-width card with play, pause, volume range, and elapsed/remaining duration countdown slider.
+- [x] Squad Add Friend modal sheet: replaced browser alert/prompts with full search preview, invite checks, and requests logs.
+- [x] Custom groups section on Friends tab: replaced DMs/Friends lists with custom group switcher, group chats, group leaderboards, and comparative Excel grids (Friend, Workout, Protein, Water, Sleep, Recovery, Discipline).
+- [x] Moved Profile icon from Squad header to Home Page header (Notification left, Profile right).
+- [x] Squad header updated to square [+ Add Friend] and [Inbox] icon buttons. Removed giant Add Friend button from content body.
+- [x] Partner Page Quick Actions: Reworked into 2x2 grid of Partner profile, Train, Diet, and Friends chat shortcut cards.
+- [x] Fixed duplicate overlays: All page overlays now clean up and close via Global Modal Manager sheet handlers.
 
-### 2. Home Screen Refinements
-- [ ] Fix readiness score modal check-in loop (auto-close, do not repeat same day, save state).
-- [ ] Automatically display session summaries after workout completions.
-- [ ] Add share widgets (Share card, download images, WhatsApp/Instagram story mock integration).
-
-### 3. Training Page Polish
-- [ ] "Add Exercise" button with categories & anatomical muscle illustrations.
-- [ ] Detailed exercise sections: Animated demonstration, text instructions, common mistakes, YouTube link.
-- [ ] Fix workout history modal ghost overlays.
-- [ ] Add custom exercise logger for external workouts.
-
-### 4. Diet Page Reordering
-- [ ] Place custom food logger: Hydration Tracker -> Custom Logger -> Meal Suggestions.
-- [ ] Clean up suggestions to Breakfast, Lunch, Dinner, Snack (Max 4-5 suggestions).
-- [ ] Detailed food card: Ingredients, steps, estimated cost, YouTube recipe search.
-- [ ] Fix duplicate modal overlays.
-
-### 5. Recovery Page Refactoring
-- [x] Clean up empty/unused placeholder cards.
-- [x] Spotify-style horizontal Brown Noise player (play, pause, timer, volume) below tools.
-- [x] recovery indicators expansion (Mental load, recovery streak, mood check) using real user data.
-
-### 6. Accountability & Leaderboard
-- [x] Partner matching filters (Age, Goal, Country, Frequency, Discipline).
-- [x] Squad friends options: Message, View Profile, Invite as Partner.
-- [x] Detailed friend profiles displaying compatibility, streaking, recovery levels.
-- [x] Comparison layout: You vs Partner metrics.
-- [x] Replace placeholders with quick action alerts (workout/hydration check-in triggers).
-- [x] Direct accountability invites to friends (skip stranger search).
-- [x] Interactive leaderboard rows linking to profile & message center.
-
-### 7. Global Modal System
-- [x] Implement `GlobalModalManager` to guarantee a single modal instance is mounted and completely destroyed on close, preventing overlays leakage.
+### 2. Next Priorities & Unresolved
+- [ ] Onboarding goals multi-select checks (e.g. Build Muscle + Lose Fat).
+- [ ] Equipment selection expansion to support Bench, Smith Machine, bands, mat, weight options.
+- [ ] Auto-advance on single-selection questionnaire steps.
+- [ ] Back button navigation logic fixes for onboarding steps.
+- [ ] Share workout cards download options.
+- [ ] Readiness syncing checks logic loop check.

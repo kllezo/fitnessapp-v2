@@ -3,9 +3,9 @@
 // Route: /train
 // ==========================================
 
-import { getState, setState, updateState } from '../../state/index.js';
+import { getState, setState, updateState, getTodayDateString } from '../../state/index.js';
 import { navigate } from '../../router.js';
-import { showToast } from '../../components/shared/ui.js';
+import { showToast, showModal, closeModal } from '../../components/shared/ui.js';
 import { generateWeeklyPlan, checkForPR, logWorkoutSession } from '../../services/workout-engine.js';
 import './train.css';
 
@@ -16,6 +16,11 @@ let _restSeconds = 0;
 let _restInterval = null;
 let _sessionStartTime = null;
 let _celebrationShown = false;
+
+// Calendar State
+let _currentCalendarView = 'workout'; // 'workout' | 'calendar'
+let _calendarZoomMode = 'week'; // 'week' | 'month'
+let _calendarDate = new Date();
 
 // Extra Exercises Database
 const EXTRA_EXERCISES_DB = {
@@ -129,6 +134,126 @@ function _getExerciseDetailHTML(name) {
   `;
 }
 
+// ── Calendar Helpers ──
+function _formatDateKey(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function _getWeekRangeLabel(date) {
+  const temp = new Date(date);
+  const day = temp.getDay();
+  const diff = temp.getDate() - day + (day === 0 ? -6 : 1); // Monday
+  const monday = new Date(temp.setDate(diff));
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  
+  const options = { month: 'short', day: 'numeric' };
+  return `${monday.toLocaleDateString(undefined, options)} - ${sunday.toLocaleDateString(undefined, options)}`;
+}
+
+function _getDayMetrics(dateStr) {
+  const state = getState();
+  const todayStr = getTodayDateString();
+
+  if (dateStr === todayStr) {
+    const workoutDone = state.workout?.generatedPlan?.[_activeDayIdx]?.exercises?.every(e => e.done) || false;
+    const workoutName = state.workout?.generatedPlan?.[_activeDayIdx]?.dayName || 'Rest Day';
+    const caloriesConsumed = state.nutrition?.calories?.consumed || 0;
+    const caloriesTarget = state.nutrition?.calories?.target || 2000;
+    const proteinConsumed = state.nutrition?.protein?.consumed || 0;
+    const proteinTarget = state.nutrition?.protein?.target || 140;
+    const waterIntake = state.nutrition?.water?.consumed || 0;
+    const recoveryScore = state.checkIn?.readinessScore || 75;
+
+    return {
+      date: dateStr,
+      workout: {
+        completed: workoutDone,
+        name: workoutName,
+        volume: 3800,
+        duration: 45
+      },
+      caloriesConsumed,
+      caloriesTarget,
+      caloriesBurned: workoutDone ? 380 : 80,
+      proteinConsumed,
+      proteinTarget,
+      proteinHit: proteinConsumed >= proteinTarget,
+      recoveryScore,
+      waterIntake
+    };
+  }
+
+  const historyWorkout = state.workout?.history?.find(h => h.date === dateStr);
+  const checkInEntry = state.checkIn?.history?.find(h => h.date === dateStr);
+  const nutritionEntry = state.nutrition?.history?.find(h => h.date === dateStr);
+
+  if (historyWorkout || checkInEntry || nutritionEntry) {
+    const workoutDone = !!historyWorkout;
+    const caloriesConsumed = nutritionEntry?.caloriesConsumed || (workoutDone ? 2100 : 1800);
+    const caloriesTarget = state.nutrition?.calories?.target || 2000;
+    const proteinConsumed = nutritionEntry?.proteinConsumed || (workoutDone ? 145 : 120);
+    const proteinTarget = state.nutrition?.protein?.target || 140;
+    const waterIntake = nutritionEntry?.waterIntake || (workoutDone ? 3.0 : 2.0);
+    const recoveryScore = checkInEntry?.readinessScore || 70;
+
+    return {
+      date: dateStr,
+      workout: {
+        completed: workoutDone,
+        name: historyWorkout?.day || 'Workout',
+        volume: historyWorkout?.totalVolume || 0,
+        duration: historyWorkout?.duration || 0
+      },
+      caloriesConsumed,
+      caloriesTarget,
+      caloriesBurned: workoutDone ? (historyWorkout?.duration * 8 || 350) : 80,
+      proteinConsumed,
+      proteinTarget,
+      proteinHit: proteinConsumed >= proteinTarget,
+      recoveryScore,
+      waterIntake
+    };
+  }
+
+  // Deterministic mock generator for scrolling past days
+  let hash = 0;
+  for (let i = 0; i < dateStr.length; i++) {
+    hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const workoutDone = (hash % 3) !== 0;
+  const workoutNames = ['Push', 'Pull', 'Legs', 'Cardio'];
+  const workoutName = workoutDone ? workoutNames[Math.abs(hash) % workoutNames.length] : 'Rest Day';
+  
+  const recoveryScore = 60 + (Math.abs(hash) % 35);
+  const waterIntake = (2.0 + (Math.abs(hash * 3) % 20) / 10);
+  const caloriesConsumed = 1800 + (Math.abs(hash * 7) % 600);
+  const caloriesTarget = state.nutrition?.calories?.target || 2000;
+  const proteinTarget = state.nutrition?.protein?.target || 140;
+  const proteinConsumed = Math.round(proteinTarget * (0.8 + (Math.abs(hash * 9) % 40) / 100));
+  
+  return {
+    date: dateStr,
+    workout: {
+      completed: workoutDone,
+      name: workoutName,
+      volume: workoutDone ? 2800 + (Math.abs(hash) % 2000) : 0,
+      duration: workoutDone ? 30 + (Math.abs(hash) % 30) : 0
+    },
+    caloriesConsumed,
+    caloriesTarget,
+    caloriesBurned: workoutDone ? 300 + (Math.abs(hash) % 200) : 75,
+    proteinConsumed,
+    proteinTarget,
+    proteinHit: proteinConsumed >= proteinTarget,
+    recoveryScore,
+    waterIntake: Number(waterIntake.toFixed(1))
+  };
+}
+
 export function render() {
   const state = getState();
   let plan = state.workout?.generatedPlan;
@@ -136,13 +261,26 @@ export function render() {
     plan = generateWeeklyPlan(state);
   }
   const today = new Date().getDay();
-  _activeDayIdx = today % (plan?.length || 1);
+  
+  // Use active day or fallback to today
+  if (_activeDayIdx === undefined || _activeDayIdx >= plan.length) {
+    _activeDayIdx = today % (plan?.length || 1);
+  }
+
+  if (_currentCalendarView === 'calendar') {
+    return _renderCalendarView(plan);
+  }
 
   return `
     <div class="train-page">
       <div class="page-header">
         <h1 class="page-title">Train</h1>
         <div style="display:flex;gap:8px">
+          <button class="icon-btn" id="calendar-toggle-btn" aria-label="Workout Calendar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </button>
           <button class="icon-btn" id="history-btn" aria-label="Workout History">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/>
@@ -156,14 +294,27 @@ export function render() {
         </div>
       </div>
 
-      <!-- Day Selector -->
-      <div class="train-day-scroll" id="day-scroll">
-        ${(plan || []).map((day, i) => `
-          <button class="day-chip ${i === _activeDayIdx ? 'active' : ''}" data-day="${i}">
-            <span class="day-chip-label">D${i + 1}</span>
-            <span class="day-chip-name">${day.dayName}</span>
-          </button>
-        `).join('')}
+      <!-- Expandable Weekly Planner Dropdown -->
+      <div class="weekly-planner-container" style="padding: 0 16px 12px; position: relative; z-index: 10;">
+        <div class="weekly-planner-header card" id="weekly-planner-toggle" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--bg-card); border: 1.5px solid var(--border-card); border-radius: var(--radius-xl); transition: all var(--dur-fast) ease;">
+          <div>
+            <span class="planner-day-name" style="font-family: var(--font-display); font-size: 14px; font-weight: var(--fw-bold); color: var(--text-primary); display: block;">Day ${_activeDayIdx + 1} — ${plan[_activeDayIdx]?.dayName || ''}</span>
+            <span class="planner-day-summary" style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px;">
+              ${plan[_activeDayIdx]?.exercises?.length || 0} Exercises • ${plan[_activeDayIdx]?.estimatedDuration || 0} min
+            </span>
+          </div>
+          <svg class="chevron-icon" id="planner-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transition: transform var(--dur-fast) ease; color: var(--text-secondary);">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </div>
+        <div class="weekly-planner-dropdown hidden" id="weekly-planner-dropdown" style="display: none; flex-direction: column; gap: 6px; background: rgba(15, 15, 27, 0.96); backdrop-filter: blur(15px); border: 1.5px solid var(--border-card); border-radius: var(--radius-xl); padding: 8px; margin-top: 6px; position: absolute; left: 16px; right: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index: 100;">
+          ${(plan || []).map((day, i) => `
+            <div class="planner-dropdown-item ${i === _activeDayIdx ? 'active' : ''}" data-day="${i}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: var(--radius-lg); cursor: pointer; transition: all var(--dur-fast) ease; background: ${i === _activeDayIdx ? 'rgba(124,58,237,0.1)' : 'transparent'}; border: 1px solid ${i === _activeDayIdx ? 'var(--aura-violet)' : 'transparent'};">
+              <span class="item-label" style="font-size: 13px; font-weight: 600; color: ${i === _activeDayIdx ? 'var(--aura-violet-light)' : 'var(--text-secondary)'};">D${i + 1} — ${day.dayName}</span>
+              <span class="item-meta" style="font-size: 11px; color: var(--text-muted);">${day.exercises?.length || 0} Ex · ${day.estimatedDuration} min</span>
+            </div>
+          `).join('')}
+        </div>
       </div>
 
       <!-- Active Day Card -->
@@ -199,6 +350,214 @@ export function render() {
       </div>
     </div>
   `;
+}
+
+function _renderCalendarView(plan) {
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const title = _calendarZoomMode === 'month' 
+    ? `${monthNames[_calendarDate.getMonth()]} ${_calendarDate.getFullYear()}`
+    : `Week of ${_getWeekRangeLabel(_calendarDate)}`;
+
+  return `
+    <div class="train-page">
+      <div class="page-header">
+        <h1 class="page-title">Train Calendar</h1>
+        <div style="display:flex;gap:8px">
+          <button class="icon-btn active" id="calendar-toggle-btn" aria-label="Toggle Calendar View" style="background:rgba(124,58,237,0.15); border-color:var(--aura-violet); color:var(--aura-violet-light)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </button>
+          <button class="icon-btn" id="history-btn" aria-label="Workout History">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Calendar Container -->
+      <div class="calendar-view-container" style="padding: 0 16px;">
+        <!-- Controls -->
+        <div class="calendar-controls" style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); border:1px solid var(--border-card); border-radius:var(--radius-xl); padding:12px; margin-bottom:14px;">
+          <div class="calendar-nav" style="display:flex; align-items:center; gap:12px;">
+            <button class="calendar-nav-btn" id="cal-prev-btn" style="background:var(--bg-elevated); border:1px solid var(--border-card); color:var(--text-primary); width:30px; height:30px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;">◀</button>
+            <span class="calendar-title-text" id="cal-month-title" style="font-size:13px; font-weight:700; color:var(--text-primary); min-width:110px; text-align:center;">${title}</span>
+            <button class="calendar-nav-btn" id="cal-next-btn" style="background:var(--bg-elevated); border:1px solid var(--border-card); color:var(--text-primary); width:30px; height:30px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;">▶</button>
+          </div>
+          <div class="calendar-toggle-mode" style="display:flex; background:var(--bg-elevated); padding:2px; border-radius:var(--radius-lg); border:1px solid var(--border-card);">
+            <button class="calendar-mode-btn ${_calendarZoomMode === 'week' ? 'active' : ''}" id="cal-mode-week" style="background:${_calendarZoomMode === 'week' ? 'var(--aura-violet)' : 'transparent'}; border:none; color:${_calendarZoomMode === 'week' ? '#fff' : 'var(--text-secondary)'}; padding:4px 12px; font-size:11px; font-weight:600; border-radius:var(--radius-md); cursor:pointer;">Week</button>
+            <button class="calendar-mode-btn ${_calendarZoomMode === 'month' ? 'active' : ''}" id="cal-mode-month" style="background:${_calendarZoomMode === 'month' ? 'var(--aura-violet)' : 'transparent'}; border:none; color:${_calendarZoomMode === 'month' ? '#fff' : 'var(--text-secondary)'}; padding:4px 12px; font-size:11px; font-weight:600; border-radius:var(--radius-md); cursor:pointer;">Month</button>
+          </div>
+        </div>
+
+        <!-- Swipeable/Navigable Grid wrapper -->
+        <div class="calendar-grid-wrapper" id="calendar-swipe-zone" style="overflow:hidden; border-radius:var(--radius-xl); border:1.5px solid var(--border-card); padding:10px; background:var(--bg-card);">
+          <div class="calendar-grid" style="display:grid; grid-template-columns: repeat(7, 1fr); gap: 6px;">
+            <div class="calendar-day-header" style="text-align:center; font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">M</div>
+            <div class="calendar-day-header" style="text-align:center; font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">T</div>
+            <div class="calendar-day-header" style="text-align:center; font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">W</div>
+            <div class="calendar-day-header" style="text-align:center; font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">T</div>
+            <div class="calendar-day-header" style="text-align:center; font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">F</div>
+            <div class="calendar-day-header" style="text-align:center; font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">S</div>
+            <div class="calendar-day-header" style="text-align:center; font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">S</div>
+
+            ${_generateCalendarGridHTML()}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function _generateCalendarGridHTML() {
+  const cells = [];
+  const todayStr = getTodayDateString();
+  const tempDate = new Date(_calendarDate);
+
+  if (_calendarZoomMode === 'month') {
+    const year = tempDate.getFullYear();
+    const month = tempDate.getMonth();
+    
+    // First day of month
+    const firstDay = new Date(year, month, 1);
+    let startDayOfWeek = firstDay.getDay(); // 0 is Sunday
+    // Adjust to Mon=0, Sun=6
+    startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
+    
+    // Total days in month
+    const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+    
+    // Previous month days
+    const lastDayOfPrevMonth = new Date(year, month, 0).getDate();
+    for (let i = startDayOfWeek - 1; i >= 0; i--) {
+      const d = new Date(year, month - 1, lastDayOfPrevMonth - i);
+      cells.push({ date: d, isCurrentMonth: false });
+    }
+    
+    // Current month days
+    for (let i = 1; i <= lastDayOfMonth; i++) {
+      const d = new Date(year, month, i);
+      cells.push({ date: d, isCurrentMonth: true });
+    }
+    
+    // Next month padding to fill rows of 7
+    const totalCells = cells.length > 35 ? 42 : 35;
+    const nextDaysNeeded = totalCells - cells.length;
+    for (let i = 1; i <= nextDaysNeeded; i++) {
+      const d = new Date(year, month + 1, i);
+      cells.push({ date: d, isCurrentMonth: false });
+    }
+  } else {
+    // Week Mode: 7 cells starting from Monday
+    const day = tempDate.getDay();
+    const diff = tempDate.getDate() - day + (day === 0 ? -6 : 1); // Monday
+    const monday = new Date(tempDate.setDate(diff));
+    
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      cells.push({ date: d, isCurrentMonth: true });
+    }
+  }
+
+  return cells.map(cell => {
+    const dateStr = _formatDateKey(cell.date);
+    const metrics = _getDayMetrics(dateStr);
+    const isTodayCell = dateStr === todayStr;
+    const dayNum = cell.date.getDate();
+
+    return `
+      <div class="calendar-day-cell ${cell.isCurrentMonth ? '' : 'other-month'} ${isTodayCell ? 'today' : ''}" data-date="${dateStr}" style="background:var(--bg-elevated); border:1px solid ${isTodayCell ? 'var(--aura-violet)' : 'var(--border-card)'}; border-radius:var(--radius-lg); padding:4px 2px; min-height:80px; display:flex; flex-direction:column; justify-content:space-between; cursor:pointer; transition:all var(--dur-fast) ease; opacity: ${cell.isCurrentMonth ? 1 : 0.35};">
+        <span class="calendar-day-num" style="font-size:10px; font-weight:700; color:${isTodayCell ? 'var(--aura-violet-light)' : 'var(--text-secondary)'}; padding-left:4px; margin-bottom:2px;">${dayNum}</span>
+        
+        <div class="calendar-cell-metrics" style="display:flex; flex-direction:column; gap:2px;">
+          <!-- Workout Indicator -->
+          <div class="cell-metric-row" style="display:flex; align-items:center; gap:2px; font-size:7px; color:var(--text-muted); white-space:nowrap; overflow:hidden;">
+            <span class="cell-metric-icon" style="font-size:8px;">${metrics.workout.completed ? '🏋️' : '🛋️'}</span>
+          </div>
+          <!-- Calories -->
+          <div class="cell-metric-row" style="display:flex; align-items:center; gap:2px; font-size:7px; color:var(--text-muted); white-space:nowrap; overflow:hidden;">
+            <span class="cell-metric-icon" style="font-size:8px;">🔥</span>
+            <span style="font-size: 6.5px;">${metrics.caloriesConsumed}</span>
+          </div>
+          <!-- Protein -->
+          <div class="cell-metric-row" style="display:flex; align-items:center; gap:2px; font-size:7px; color:${metrics.proteinHit ? 'var(--aura-mint-light)' : 'var(--text-muted)'}; white-space:nowrap; overflow:hidden;">
+            <span class="cell-metric-icon" style="font-size:8px;">🥩</span>
+            <span style="font-size: 6.5px; font-weight:${metrics.proteinHit ? 'bold' : 'normal'}">${metrics.proteinConsumed}g</span>
+          </div>
+          <!-- Recovery -->
+          <div class="cell-metric-row" style="display:flex; align-items:center; gap:2px; font-size:7px; color:var(--text-muted); white-space:nowrap; overflow:hidden;">
+            <span class="cell-metric-icon" style="font-size:8px;">💤</span>
+            <span style="font-size: 6.5px;">${metrics.recoveryScore}</span>
+          </div>
+          <!-- Water -->
+          <div class="cell-metric-row" style="display:flex; align-items:center; gap:2px; font-size:7px; color:var(--text-muted); white-space:nowrap; overflow:hidden;">
+            <span class="cell-metric-icon" style="font-size:8px;">💧</span>
+            <span style="font-size: 6.5px;">${metrics.waterIntake}L</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function _openDailySummaryModal(dateStr) {
+  const metrics = _getDayMetrics(dateStr);
+  const formattedDate = new Date(dateStr).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  
+  const content = `
+    <div class="daily-summary-modal" style="display:flex; flex-direction:column; gap:14px;">
+      <div class="card card-glow" style="background:linear-gradient(135deg, rgba(124,58,237,0.1), rgba(16,185,129,0.05));">
+        <p class="section-label" style="margin-bottom:6px;">Workout Details</p>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-size:32px;">${metrics.workout.completed ? '🏋️' : '🛋️'}</span>
+          <div>
+            <p style="font-size:14px; font-weight:700; color:var(--text-primary); margin:0;">${metrics.workout.completed ? metrics.workout.name : 'Rest Day'}</p>
+            <p style="font-size:11px; color:var(--text-muted); margin:4px 0 0 0;">${metrics.workout.completed ? `${metrics.workout.duration} min session · ${metrics.workout.volume} kg total volume` : 'Optimal muscle recovery and hydration day'}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-grid stat-grid-2" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <div class="stat-cell card" style="display:flex; flex-direction:column; align-items:center; padding:10px;">
+          <span class="stat-label" style="font-size:10px; color:var(--text-muted);">Readiness Score</span>
+          <span class="stat-value" style="color:var(--aura-violet-light); font-size:22px; font-weight:bold; margin-top:4px;">${metrics.recoveryScore}</span>
+          <span style="font-size:9px; color:var(--text-muted); margin-top:2px;">Somatic Readiness</span>
+        </div>
+        <div class="stat-cell card" style="display:flex; flex-direction:column; align-items:center; padding:10px;">
+          <span class="stat-label" style="font-size:10px; color:var(--text-muted);">Water Intake</span>
+          <span class="stat-value" style="color:var(--aura-blue-light); font-size:22px; font-weight:bold; margin-top:4px;">${metrics.waterIntake} L</span>
+          <span style="font-size:9px; color:var(--text-muted); margin-top:2px;">Goal: ${getState().nutrition?.water?.target || 3.5}L</span>
+        </div>
+      </div>
+
+      <div class="card" style="background:rgba(255,255,255,0.015); padding:12px;">
+        <p class="section-label" style="margin-bottom:10px;">Nutrition & Macros</p>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12px;">
+          <span style="color:var(--text-secondary);">Calories Consumed:</span>
+          <strong style="color:var(--text-primary);">${metrics.caloriesConsumed} kcal / ${metrics.caloriesTarget} kcal</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12px;">
+          <span style="color:var(--text-secondary);">Estimated Calories Burned:</span>
+          <strong style="color:var(--aura-rose-light);">${metrics.caloriesBurned} kcal</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:12px;">
+          <span style="color:var(--text-secondary);">Protein Logged:</span>
+          <strong style="color: ${metrics.proteinHit ? 'var(--aura-mint-light)' : 'var(--aura-rose-light)'};">${metrics.proteinConsumed}g / ${metrics.proteinTarget}g ${metrics.proteinHit ? '✓' : '✗'}</strong>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-full" id="close-summary-btn">Close Summary</button>
+    </div>
+  `;
+
+  showModal({
+    title: `Day Summary: ${formattedDate.split(',')[1]?.trim() || formattedDate}`,
+    content: content
+  });
+
+  document.getElementById('close-summary-btn')?.addEventListener('click', closeModal);
 }
 
 function _renderDay(plan, dayIdx) {
@@ -256,18 +615,18 @@ function _renderExerciseCard(ex, exIdx, dayIdx) {
   const totalSets = ex.sets?.length || 0;
 
   return `
-    <div class="exercise-card ${done ? 'done' : ''}" data-ex="${exIdx}" id="ex-card-${exIdx}">
+    <div class="exercise-card ${done ? 'done' : ''}" data-ex="${exIdx}" id="ex-card-${exIdx}" style="cursor: pointer;">
       <div class="ex-card-main">
         <div class="ex-info">
           <div class="ex-status-dot ${done ? 'done' : ''}"></div>
           <div>
-            <p class="ex-name">${ex.name}</p>
-            <p class="ex-meta">${totalSets} sets · ${ex.sets?.[0]?.targetReps || 10} reps · ${ex.muscle}</p>
+            <p class="ex-name" style="margin:0;">${ex.name}</p>
+            <p class="ex-meta" style="margin:2px 0 0 0;">${totalSets} sets · ${ex.sets?.[0]?.targetReps || 10} reps · ${ex.muscle}</p>
           </div>
         </div>
         <div class="ex-right">
           <span class="ex-sets-badge">${setsCompleted}/${totalSets}</span>
-          <button class="btn btn-sm btn-secondary ex-open-btn" data-ex="${exIdx}" data-day="${dayIdx}">
+          <button class="btn btn-sm btn-secondary ex-open-btn" data-ex="${exIdx}" data-day="${dayIdx}" style="pointer-events: none;">
             ${done ? '✓ Done' : 'Log →'}
           </button>
         </div>
@@ -297,6 +656,7 @@ function _renderMiniRing(exercises) {
 
 export function onEnter() {
   _sessionStartTime = _sessionStartTime || Date.now();
+  _currentCalendarView = 'workout'; // Default back to workout view on enter
   _wireEvents();
 }
 
@@ -305,20 +665,16 @@ export function onLeave() {
 }
 
 function _wireEvents() {
-  // Day chips
-  document.querySelectorAll('.day-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      _activeDayIdx = Number(chip.dataset.day);
-      document.querySelectorAll('.day-chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      const state = getState();
-      const content = document.getElementById('train-content');
-      if (content) content.innerHTML = _renderDay(state.workout?.generatedPlan, _activeDayIdx);
-      _wireContentEvents();
-    });
-  });
-
   _wireContentEvents();
+
+  document.getElementById('calendar-toggle-btn')?.addEventListener('click', () => {
+    _currentCalendarView = _currentCalendarView === 'workout' ? 'calendar' : 'workout';
+    const container = document.getElementById('page-content');
+    if (container) {
+      container.innerHTML = render();
+      _wireEvents();
+    }
+  });
 
   document.getElementById('regen-btn')?.addEventListener('click', () => {
     const plan = generateWeeklyPlan(getState());
@@ -329,14 +685,124 @@ function _wireEvents() {
   });
 
   document.getElementById('history-btn')?.addEventListener('click', _openHistSheet);
+
+  // Weekly Dropdown Toggle
+  document.getElementById('weekly-planner-toggle')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const dropdown = document.getElementById('weekly-planner-dropdown');
+    const chevron = document.getElementById('planner-chevron');
+    if (dropdown) {
+      const isHidden = dropdown.style.display === 'none' || dropdown.classList.contains('hidden');
+      if (isHidden) {
+        dropdown.style.display = 'flex';
+        dropdown.classList.remove('hidden');
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+      } else {
+        dropdown.style.display = 'none';
+        dropdown.classList.add('hidden');
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+      }
+    }
+  });
+
+  // Close dropdown on click outside
+  document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('weekly-planner-dropdown');
+    const toggle = document.getElementById('weekly-planner-toggle');
+    const chevron = document.getElementById('planner-chevron');
+    if (dropdown && !dropdown.contains(e.target) && toggle && !toggle.contains(e.target)) {
+      dropdown.style.display = 'none';
+      dropdown.classList.add('hidden');
+      if (chevron) chevron.style.transform = 'rotate(0deg)';
+    }
+  });
+
+  // Dropdown Items click
+  document.querySelectorAll('.planner-dropdown-item').forEach(item => {
+    item.addEventListener('click', () => {
+      _activeDayIdx = Number(item.dataset.day);
+      
+      const dropdown = document.getElementById('weekly-planner-dropdown');
+      const chevron = document.getElementById('planner-chevron');
+      if (dropdown) {
+        dropdown.style.display = 'none';
+        dropdown.classList.add('hidden');
+      }
+      if (chevron) chevron.style.transform = 'rotate(0deg)';
+
+      const container = document.getElementById('page-content');
+      if (container) {
+        container.innerHTML = render();
+        _wireEvents();
+      }
+    });
+  });
+
+  // Calendar Controls Events
+  if (_currentCalendarView === 'calendar') {
+    document.getElementById('cal-prev-btn')?.addEventListener('click', () => {
+      _navigateCalendar(-1);
+    });
+    document.getElementById('cal-next-btn')?.addEventListener('click', () => {
+      _navigateCalendar(1);
+    });
+    document.getElementById('cal-mode-week')?.addEventListener('click', () => {
+      _calendarZoomMode = 'week';
+      _refreshCalendarScreen();
+    });
+    document.getElementById('cal-mode-month')?.addEventListener('click', () => {
+      _calendarZoomMode = 'month';
+      _refreshCalendarScreen();
+    });
+
+    // Calendar Day Cell Clicks
+    document.querySelectorAll('.calendar-day-cell').forEach(cell => {
+      cell.addEventListener('click', () => {
+        const dateStr = cell.dataset.date;
+        _openDailySummaryModal(dateStr);
+      });
+    });
+
+    // Calendar Swipe Gestures
+    const zone = document.getElementById('calendar-swipe-zone');
+    let touchStartX = 0;
+    let touchEndX = 0;
+    zone?.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    zone?.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      const diff = touchEndX - touchStartX;
+      if (Math.abs(diff) > 50) {
+        _navigateCalendar(diff > 0 ? -1 : 1);
+      }
+    }, { passive: true });
+  }
+}
+
+function _navigateCalendar(dir) {
+  if (_calendarZoomMode === 'month') {
+    _calendarDate.setMonth(_calendarDate.getMonth() + dir);
+  } else {
+    _calendarDate.setDate(_calendarDate.getDate() + (dir * 7));
+  }
+  _refreshCalendarScreen();
+}
+
+function _refreshCalendarScreen() {
+  const container = document.getElementById('page-content');
+  if (container) {
+    container.innerHTML = render();
+    _wireEvents();
+  }
 }
 
 function _wireContentEvents() {
-  document.querySelectorAll('.ex-open-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const exIdx = Number(btn.dataset.ex);
-      const dayIdx = Number(btn.dataset.day);
-      _openExSheet(dayIdx, exIdx);
+  // Make entire exercise cards clickable
+  document.querySelectorAll('.exercise-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const exIdx = Number(card.dataset.ex);
+      _openExSheet(_activeDayIdx, exIdx);
     });
   });
 
@@ -474,7 +940,8 @@ function _wireSetEvents(dayIdx, exIdx) {
   });
 
   document.querySelectorAll('.set-check').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Stop clicking check button from bubbling to modal body closes
       const idx = Number(btn.dataset.idx);
       const state = getState();
       const plan = [...(state.workout?.generatedPlan || [])];
@@ -839,7 +1306,6 @@ function _finishSession() {
   _sessionStartTime = null;
 
   const overlay = document.getElementById('celebration-overlay');
-  const statsEl = document.getElementById('celebration-stats');
   const workoutNameEl = document.getElementById('share-card-workout-name');
   const shareStatsEl = document.getElementById('share-card-stats');
 
@@ -877,10 +1343,7 @@ function _finishSession() {
     document.getElementById('celebration-close')?.addEventListener('click', () => {
       overlay.classList.add('hidden');
       showToast(`Session logged! +${totalVolume}kg volume 🔥`, 'violet');
-      
-      // Navigate home
       navigate('/home');
     });
   }
 }
-

@@ -42,18 +42,25 @@ export function render() {
   return `
     <div class="home-page">
       <!-- Header -->
-      <div class="home-header">
+      <div class="home-header" style="display:flex; justify-content:space-between; align-items:center;">
         <div>
           <p class="home-greeting">${greeting}</p>
           <h1 class="home-name">${auth?.profileName?.split(' ')[0] || 'Athlete'}</h1>
         </div>
-        <button class="notif-btn" id="notif-btn" aria-label="Notifications">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          ${(state.socials?.notifications?.length || 0) > 0 ? '<span class="notif-dot"></span>' : ''}
-        </button>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="notif-btn" id="notif-btn" aria-label="Notifications" style="background:var(--bg-card); border:1px solid var(--border-card); border-radius:var(--radius-md); width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-secondary); position:relative;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            ${(state.socials?.notifications?.length || 0) > 0 ? '<span class="notif-dot" style="position:absolute; top:6px; right:6px; width:6px; height:6px; background:var(--aura-rose); border-radius:50%"></span>' : ''}
+          </button>
+          <button class="icon-btn" id="profile-btn" aria-label="Profile">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <!-- Readiness Banner -->
@@ -429,4 +436,5 @@ function _wireEvents() {
   document.getElementById('qn-recovery')?.addEventListener('click', () => navigate('/recovery'));
   document.getElementById('qn-socials')?.addEventListener('click', () => navigate('/socials'));
   document.getElementById('notif-btn')?.addEventListener('click', () => showToast('No new notifications', 'default'));
+  document.getElementById('profile-btn')?.addEventListener('click', () => navigate('/profile'));
 }

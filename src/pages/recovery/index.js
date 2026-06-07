@@ -3,18 +3,47 @@
 // Route: /recovery
 // ==========================================
 
-import { getState, setState } from '../../state/index.js';
+import { getState, setState, updateState } from '../../state/index.js';
 import { showToast, showModal, closeModal, updateModalBody } from '../../components/shared/ui.js';
 import { calculateRecoveryScore, calculateRecoveryStreak, calculateSleepDebt, getReadinessTrend } from '../../services/ai-engine.js';
 import './recovery.css';
 
-let _breatheInterval = null;
-let _breathePhase = 0; // 0=inhale 1=hold 2=exhale 3=hold
+// Audio Context State
 let _noiseCtx = null;
 let _noiseSource = null;
 let _noiseGain = null;
 let _noiseTimerInterval = null;
+let _noiseDuration = 600; // 10 minutes total
 let _noiseSeconds = 0;
+
+// Box Breathing State
+let _breatheInterval = null;
+let _breathePhase = 0; // 0=inhale 1=hold 2=exhale 3=hold
+
+// Walk Reset State
+let _walkInterval = null;
+let _walkActive = false;
+let _walkSeconds = 0;
+let _walkSteps = 0;
+let _walkGoal = 1000;
+
+// Mindfulness State
+let _mindInterval = null;
+let _mindActive = false;
+let _mindDuration = 120; // 2 minutes default
+let _mindSecondsLeft = 120;
+let _mindPromptIndex = 0;
+
+const MIND_GUIDED_PROMPTS = [
+  "Inhale slowly. Feel the cool air filling your lungs...",
+  "Exhale gently. Let your shoulders drop and relax...",
+  "Inhale deeply. Notice the feeling of being present...",
+  "Exhale slowly. Let go of any physical tightness...",
+  "Inhale calmness. Observe the rise of your chest...",
+  "Exhale completely. Release the busy thoughts...",
+  "Inhale energy. Feel the breath nourish your body...",
+  "Exhale tension. Relax your face, jaw, and eyes..."
+];
 
 export function render() {
   const state = getState();
@@ -55,8 +84,10 @@ export function render() {
 
   const isPlaying = _noiseSource !== null;
   const playIcon = isPlaying ? '❚❚' : '▶';
-  const timerText = isPlaying ? _getTimerText() : '00:00';
+  const timeElapsed = _getTimerText(_noiseSeconds);
+  const timeRemaining = _getTimerText(Math.max(0, _noiseDuration - _noiseSeconds));
   const volumeVal = _noiseGain ? _noiseGain.gain.value : 0.4;
+  const progressPct = Math.min(100, (_noiseSeconds / _noiseDuration) * 100);
 
   return `
     <div class="recovery-page">
@@ -130,6 +161,28 @@ export function render() {
         </div>
       </div>
 
+      <!-- Quick Actions / Recovery Tools (Moved ABOVE Diagnostics) -->
+      <div class="rec-section">
+        <div class="section-label">Recovery Tools</div>
+        <div class="rec-tools-grid">
+          <button class="rec-tool-btn" id="breathe-btn">
+            <span class="rec-tool-icon">🫁</span>
+            <span class="rec-tool-label">Box Breathing</span>
+            <span class="rec-tool-sub">4-4-4-4</span>
+          </button>
+          <button class="rec-tool-btn" id="walk-btn">
+            <span class="rec-tool-icon">🚶</span>
+            <span class="rec-tool-label">Walk Reset</span>
+            <span class="rec-tool-sub">Stopwatch</span>
+          </button>
+          <button class="rec-tool-btn" id="mind-btn">
+            <span class="rec-tool-icon">🧘</span>
+            <span class="rec-tool-label">Mindfulness</span>
+            <span class="rec-tool-sub">Guided</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Advanced Diagnostics -->
       <div class="rec-section">
         <div class="section-label">Advanced Diagnostics</div>
@@ -193,45 +246,36 @@ export function render() {
         </div>
       </div>
 
-      <!-- Quick Actions / Recovery Tools -->
-      <div class="rec-section">
-        <div class="section-label">Recovery Tools</div>
-        <div class="rec-tools-grid">
-          <button class="rec-tool-btn" id="breathe-btn">
-            <span class="rec-tool-icon">🫁</span>
-            <span class="rec-tool-label">Box Breathing</span>
-            <span class="rec-tool-sub">4-4-4-4</span>
-          </button>
-          <button class="rec-tool-btn" id="walk-btn">
-            <span class="rec-tool-icon">🚶</span>
-            <span class="rec-tool-label">Walk Reset</span>
-            <span class="rec-tool-sub">10 min</span>
-          </button>
-          <button class="rec-tool-btn" id="mind-btn">
-            <span class="rec-tool-icon">🧘</span>
-            <span class="rec-tool-label">Mindfulness</span>
-            <span class="rec-tool-sub">2 min</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Spotify-style Brown Noise Player -->
+      <!-- Spotify-style Brown Noise Player (Full-Width card rework) -->
       <div class="rec-section">
         <div class="section-label">Rest Audio</div>
-        <div class="brown-noise-player card">
-          <div class="player-left">
-            <span class="player-icon">🌊</span>
-            <div class="player-details">
-              <span class="player-title">Deep Space Brown Noise</span>
-              <span class="player-sub" id="noise-timer">${timerText}</span>
+        <div class="spotify-player card card-glow" style="display:flex; flex-direction:column; padding:16px; gap:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-size:36px; animation: pulse 2s infinite;">🌊</span>
+              <div>
+                <p style="font-size:14px; font-weight:700; color:var(--text-primary); margin:0;">Deep Space Brown Noise</p>
+                <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0;">AURA Calming Resonance Block</p>
+              </div>
+            </div>
+            <button class="player-play-btn ${isPlaying ? 'playing' : ''}" id="noise-play-btn" style="width:40px; height:40px; border-radius:50%; background:var(--aura-violet); border:none; color:#fff; font-size:16px; display:flex; align-items:center; justify-content:center; cursor:pointer;">${playIcon}</button>
+          </div>
+          
+          <!-- Progress Slider (Remaining vs Elapsed) -->
+          <div style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
+            <div class="player-progress-bar-bg" style="height:4px; background:var(--border-subtle); border-radius:2px; position:relative; overflow:hidden; cursor:pointer;" id="audio-progress-bar">
+              <div class="player-progress-fill" id="audio-progress-fill" style="width:${progressPct}%; height:100%; background:var(--aura-violet-light); transition: width 0.3s ease;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted);">
+              <span id="audio-elapsed">${timeElapsed}</span>
+              <span id="audio-remaining">-${timeRemaining}</span>
             </div>
           </div>
-          <div class="player-center">
-            <button class="player-play-btn ${isPlaying ? 'playing' : ''}" id="noise-play-btn">${playIcon}</button>
-          </div>
-          <div class="player-right">
-            <span class="volume-icon">🔊</span>
-            <input type="range" class="volume-slider" id="noise-volume" min="0" max="1" step="0.05" value="${volumeVal}" aria-label="Volume">
+
+          <!-- Volume Control -->
+          <div style="display:flex; align-items:center; gap:10px; justify-content:flex-end;">
+            <span style="font-size:12px; color:var(--text-muted);">🔊</span>
+            <input type="range" class="volume-slider" id="noise-volume" min="0" max="1" step="0.05" value="${volumeVal}" aria-label="Volume" style="width:100px; accent-color:var(--aura-violet-light);">
           </div>
         </div>
       </div>
@@ -240,7 +284,7 @@ export function render() {
       <div class="rec-section">
         <div class="section-label">Recovery Insights</div>
         <div class="card" style="background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(8,145,178,0.04))">
-          <p style="font-size:var(--text-sm);color:var(--text-secondary);line-height:1.7">
+          <p style="font-size:var(--text-sm);color:var(--text-secondary);line-height:1.7;margin:0;">
             ${_getRecoveryInsight(score, sleepDebt, answers)}
           </p>
         </div>
@@ -249,9 +293,9 @@ export function render() {
   `;
 }
 
-function _getTimerText() {
-  const mins = Math.floor(_noiseSeconds / 60).toString().padStart(2, '0');
-  const secs = (_noiseSeconds % 60).toString().padStart(2, '0');
+function _getTimerText(totalSecs) {
+  const mins = Math.floor(totalSecs / 60).toString().padStart(2, '0');
+  const secs = (totalSecs % 60).toString().padStart(2, '0');
   return `${mins}:${secs}`;
 }
 
@@ -270,10 +314,14 @@ export function onEnter() {
 export function onLeave() {
   _stopBreathe();
   _stopNoise();
+  _stopWalk();
+  _stopMindfulness();
 }
 
 function _wireEvents() {
   document.getElementById('breathe-btn')?.addEventListener('click', _openBreathe);
+  document.getElementById('walk-btn')?.addEventListener('click', _openWalkReset);
+  document.getElementById('mind-btn')?.addEventListener('click', _openMindfulness);
   
   // Brown Noise triggers
   const playBtn = document.getElementById('noise-play-btn');
@@ -285,15 +333,9 @@ function _wireEvents() {
       _noiseGain.gain.setValueAtTime(vol, _noiseCtx.currentTime);
     }
   });
-
-  document.getElementById('walk-btn')?.addEventListener('click', () => {
-    showToast('🚶 Walk reminder set — 10 min break incoming', 'mint');
-  });
-
-  document.getElementById('mind-btn')?.addEventListener('click', _openMindfulness);
 }
 
-// ── Box Breathing ──
+// ── Box Breathing (4-4-4-4) ──
 const PHASES = [
   { label: 'Inhale', secs: 4, color: '#a78bfa' },
   { label: 'Hold', secs: 4, color: '#fcd34d' },
@@ -318,20 +360,20 @@ function _openBreathe() {
 function _getBreatheContentHtml() {
   const ph = PHASES[_breathePhase];
   return `
-    <div class="breathe-content">
-      <p class="breathe-sub">4–4–4–4 pattern for nervous system regulation</p>
-      <div class="breathe-ring-wrap">
-        <div class="breathe-ring" id="breathe-ring" style="border-color:${ph.color}; box-shadow: 0 0 15px ${ph.color}30">
-          <div class="breathe-ring-inner" id="breathe-ring-inner" style="background:${ph.color}15">
-            <span class="breathe-phase" id="breathe-phase">${ph.label}</span>
-            <span class="breathe-count" id="breathe-count">${ph.secs}</span>
+    <div class="breathe-content" style="text-align:center;">
+      <p class="breathe-sub" style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">4–4–4–4 pattern for nervous system regulation</p>
+      <div class="breathe-ring-wrap" style="display:flex; justify-content:center; margin-bottom:20px;">
+        <div class="breathe-ring" id="breathe-ring" style="width:140px; height:140px; border-radius:50%; border:4px solid ${ph.color}; box-shadow: 0 0 20px ${ph.color}40; display:flex; align-items:center; justify-content:center; transition: all 1s ease;">
+          <div class="breathe-ring-inner" id="breathe-ring-inner" style="width:110px; height:110px; border-radius:50%; background:${ph.color}15; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <span class="breathe-phase" id="breathe-phase" style="font-size:16px; font-weight:bold; color:var(--text-primary);">${ph.label}</span>
+            <span class="breathe-count" id="breathe-count" style="font-size:24px; font-weight:800; color:var(--text-primary); margin-top:4px;">${ph.secs}</span>
           </div>
         </div>
       </div>
-      <div class="breathe-phase-dots">
-        ${PHASES.map((p, i) => `<div class="phase-dot ${i === _breathePhase ? 'active' : ''}" style="${i === _breathePhase ? `background:${p.color}; box-shadow: 0 0 8px ${p.color}` : ''}"></div>`).join('')}
+      <div class="breathe-phase-dots" style="display:flex; justify-content:center; gap:8px; margin-bottom:20px;">
+        ${PHASES.map((p, i) => `<div class="phase-dot ${i === _breathePhase ? 'active' : ''}" style="width:8px; height:8px; border-radius:50%; background:${i === _breathePhase ? p.color : 'rgba(255,255,255,0.1)'}; box-shadow:${i === _breathePhase ? `0 0 8px ${p.color}` : 'none'}"></div>`).join('')}
       </div>
-      <button class="btn btn-ghost btn-sm btn-full" id="stop-breathe-btn" style="margin-top:20px">Stop & Close</button>
+      <button class="btn btn-ghost btn-sm btn-full" id="stop-breathe-btn">Stop & Close</button>
     </div>
   `;
 }
@@ -361,6 +403,237 @@ function _stopBreathe() {
   if (_breatheInterval) { clearInterval(_breatheInterval); _breatheInterval = null; }
 }
 
+// ── Walk Reset Rework (Stopwatch Tracker) ──
+function _openWalkReset() {
+  _walkActive = false;
+  _walkSeconds = 0;
+  _walkSteps = 0;
+  _walkGoal = 1000;
+
+  const content = `
+    <div class="walk-reset-modal" style="text-align:center; display:flex; flex-direction:column; gap:16px;">
+      <p style="font-size:12px; color:var(--text-muted); margin:0;">Clear your mind with active movement</p>
+      
+      <!-- Visual Steps Progress Ring -->
+      <div style="position:relative; width:140px; height:140px; margin:0 auto;">
+        <svg width="140" height="140" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--aura-violet-light)" stroke-width="6"
+            stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"
+            transform="rotate(-90 60 60)" id="walk-progress-ring"/>
+        </svg>
+        <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+          <span id="walk-steps-val" style="font-size:24px; font-weight:800; color:var(--text-primary);">0</span>
+          <span style="font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">steps</span>
+        </div>
+      </div>
+
+      <div class="stat-grid stat-grid-2" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <div class="card" style="padding:10px;">
+          <span style="font-size:10px; color:var(--text-muted); display:block;">Time Elapsed</span>
+          <strong id="walk-time-val" style="font-size:18px; color:var(--text-primary); display:block; margin-top:4px;">00:00</strong>
+        </div>
+        <div class="card" style="padding:10px;">
+          <span style="font-size:10px; color:var(--text-muted); display:block;">Est. Calories</span>
+          <strong id="walk-cal-val" style="font-size:18px; color:var(--aura-rose-light); display:block; margin-top:4px;">0 kcal</strong>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:8px;">
+        <button class="btn btn-primary btn-full" id="walk-start-btn">Start Walk</button>
+        <button class="btn btn-ghost btn-sm" id="walk-finish-btn" style="display:none;">Finish & Log</button>
+        <button class="btn btn-ghost btn-sm" id="walk-close-btn">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  showModal({
+    title: 'Walk Reset Active',
+    content: content,
+    onClose: () => {
+      _stopWalk();
+    }
+  });
+
+  document.getElementById('walk-start-btn')?.addEventListener('click', _toggleWalk);
+  document.getElementById('walk-finish-btn')?.addEventListener('click', _finishWalk);
+  document.getElementById('walk-close-btn')?.addEventListener('click', closeModal);
+}
+
+function _toggleWalk() {
+  const startBtn = document.getElementById('walk-start-btn');
+  const finishBtn = document.getElementById('walk-finish-btn');
+
+  if (_walkActive) {
+    // Pause walk
+    _walkActive = false;
+    if (_walkInterval) clearInterval(_walkInterval);
+    if (startBtn) startBtn.textContent = 'Resume Walk';
+    showToast('Walk paused', 'default');
+  } else {
+    // Start/Resume walk
+    _walkActive = true;
+    if (startBtn) startBtn.textContent = 'Pause Walk';
+    if (finishBtn) finishBtn.style.display = 'block';
+    
+    _walkInterval = setInterval(() => {
+      _walkSeconds++;
+      
+      // Simulate steps tick: ~1.6 steps per second
+      _walkSteps += Math.floor(Math.random() * 2) + 1;
+      
+      // Calories tick: ~0.05 kcal per step
+      const estCals = Math.round(_walkSteps * 0.05);
+
+      const stepsEl = document.getElementById('walk-steps-val');
+      const timeEl = document.getElementById('walk-time-val');
+      const calEl = document.getElementById('walk-cal-val');
+      const ring = document.getElementById('walk-progress-ring');
+
+      if (stepsEl) stepsEl.textContent = _walkSteps;
+      if (timeEl) timeEl.textContent = _getTimerText(_walkSeconds);
+      if (calEl) calEl.textContent = `${estCals} kcal`;
+      
+      if (ring) {
+        const circ = 326.7;
+        const pct = Math.min(1, _walkSteps / _walkGoal);
+        ring.style.strokeDashoffset = circ - circ * pct;
+      }
+    }, 1000);
+    showToast('Walk reset started! Stay active 🚶', 'success');
+  }
+}
+
+function _finishWalk() {
+  _stopWalk();
+  const state = getState();
+  const loggedCals = Math.round(_walkSteps * 0.05);
+  
+  // Add walk data to diagnostics / logs in state
+  const checklist = state.checkIn || {};
+  showToast(`Walk completed! +${_walkSteps} steps | +${loggedCals} kcal burned!`, 'success');
+  closeModal();
+}
+
+function _stopWalk() {
+  if (_walkInterval) {
+    clearInterval(_walkInterval);
+    _walkInterval = null;
+  }
+  _walkActive = false;
+}
+
+// ── Mindfulness Rework (1, 2, 5 Min Guided Meditation) ──
+function _openMindfulness() {
+  _mindActive = false;
+  _stopMindfulness();
+
+  const content = `
+    <div class="mindfulness-modal" style="text-align:center; display:flex; flex-direction:column; gap:16px;">
+      <p style="font-size:12px; color:var(--text-muted); margin:0;">Reset your focus with guided breathing</p>
+      
+      <div class="field-group" style="text-align:left;">
+        <label class="field-label">Select Session Length</label>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:6px;">
+          <button class="btn btn-secondary mind-dur-select active" data-dur="60">1 Min</button>
+          <button class="btn btn-secondary mind-dur-select" data-dur="120">2 Min</button>
+          <button class="btn btn-secondary mind-dur-select" data-dur="300">5 Min</button>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button class="btn btn-primary btn-full" id="mind-start-btn">Start Guided Session</button>
+        <button class="btn btn-ghost btn-sm" id="mind-close-btn">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  showModal({
+    title: 'Mindfulness Space',
+    content: content,
+    onClose: () => {
+      _stopMindfulness();
+    }
+  });
+
+  const durationBtns = document.querySelectorAll('.mind-dur-select');
+  durationBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      durationBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      _mindDuration = Number(btn.dataset.dur);
+    });
+  });
+
+  document.getElementById('mind-start-btn')?.addEventListener('click', _startMindfulnessSession);
+  document.getElementById('mind-close-btn')?.addEventListener('click', closeModal);
+}
+
+function _startMindfulnessSession() {
+  _mindActive = true;
+  _mindSecondsLeft = _mindDuration;
+  _mindPromptIndex = 0;
+
+  _updateMindfulnessUI();
+
+  _mindInterval = setInterval(() => {
+    _mindSecondsLeft--;
+    
+    // Cycle guided prompts every 8 seconds
+    if (_mindSecondsLeft % 8 === 0) {
+      _mindPromptIndex = (_mindPromptIndex + 1) % MIND_GUIDED_PROMPTS.length;
+    }
+
+    const timerEl = document.getElementById('mind-timer-val');
+    const promptEl = document.getElementById('mind-prompt-val');
+    
+    if (timerEl) timerEl.textContent = _getTimerText(_mindSecondsLeft);
+    if (promptEl) promptEl.textContent = MIND_GUIDED_PROMPTS[_mindPromptIndex];
+
+    if (_mindSecondsLeft <= 0) {
+      _completeMindfulnessSession();
+    }
+  }, 1000);
+}
+
+function _updateMindfulnessUI() {
+  const content = `
+    <div class="mind-session-active" style="text-align:center; display:flex; flex-direction:column; gap:20px; padding:10px 0;">
+      <p id="mind-timer-val" style="font-size:24px; font-weight:800; color:var(--text-primary); margin:0;">${_getTimerText(_mindSecondsLeft)}</p>
+      
+      <!-- Breathing Circle Animation -->
+      <div style="display:flex; justify-content:center; margin:10px 0;">
+        <div class="breathing-circle-outer" style="width:140px; height:140px; border-radius:50%; background:rgba(124,58,237,0.06); display:flex; align-items:center; justify-content:center; border: 2px dashed rgba(124,58,237,0.2);">
+          <div class="breathing-circle-inner" style="width:80px; height:80px; border-radius:50%; background:var(--aura-violet); box-shadow:0 0 25px var(--aura-violet-light); animation: breatheAnimation 8s infinite ease-in-out;"></div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px; background:rgba(124,58,237,0.06); border-color:rgba(124,58,237,0.15); min-height:80px; display:flex; align-items:center; justify-content:center;">
+        <p id="mind-prompt-val" style="font-size:13px; color:var(--text-primary); line-height:1.6; font-style:italic; margin:0;">${MIND_GUIDED_PROMPTS[_mindPromptIndex]}</p>
+      </div>
+
+      <button class="btn btn-ghost btn-sm btn-full" id="mind-stop-btn">End Session</button>
+    </div>
+  `;
+
+  updateModalBody(content);
+  document.getElementById('mind-stop-btn')?.addEventListener('click', closeModal);
+}
+
+function _completeMindfulnessSession() {
+  _stopMindfulness();
+  showToast('🧘 Reset complete! Feel the clarity.', 'success');
+  closeModal();
+}
+
+function _stopMindfulness() {
+  if (_mindInterval) {
+    clearInterval(_mindInterval);
+    _mindInterval = null;
+  }
+  _mindActive = false;
+}
+
 // ── Brown Noise (Spotify-style player) ──
 function _toggleNoise() {
   const playBtn = document.getElementById('noise-play-btn');
@@ -368,14 +641,12 @@ function _toggleNoise() {
     _stopNoise();
     if (playBtn) {
       playBtn.textContent = '▶';
-      playBtn.classList.remove('playing');
     }
     showToast('🌊 Brown noise paused', 'default');
   } else {
     _startNoise();
     if (playBtn) {
       playBtn.textContent = '❚❚';
-      playBtn.classList.add('playing');
     }
   }
 }
@@ -416,10 +687,28 @@ function _startNoise() {
 
 function _startNoiseTimer() {
   _stopNoiseTimer();
-  const timerEl = document.getElementById('noise-timer');
+  
+  const elapsedEl = document.getElementById('audio-elapsed');
+  const remainingEl = document.getElementById('audio-remaining');
+  const fillEl = document.getElementById('audio-progress-fill');
+
   _noiseTimerInterval = setInterval(() => {
     _noiseSeconds++;
-    if (timerEl) timerEl.textContent = _getTimerText();
+    
+    if (elapsedEl) elapsedEl.textContent = _getTimerText(_noiseSeconds);
+    if (remainingEl) remainingEl.textContent = `-${_getTimerText(Math.max(0, _noiseDuration - _noiseSeconds))}`;
+    
+    if (fillEl) {
+      const pct = Math.min(100, (_noiseSeconds / _noiseDuration) * 100);
+      fillEl.style.width = `${pct}%`;
+    }
+
+    if (_noiseSeconds >= _noiseDuration) {
+      _stopNoise();
+      const playBtn = document.getElementById('noise-play-btn');
+      if (playBtn) playBtn.textContent = '▶';
+      showToast('🌊 Noise playback ended', 'default');
+    }
   }, 1000);
 }
 
@@ -442,36 +731,3 @@ function _stopNoise() {
   }
   _noiseGain = null;
 }
-
-// ── Mindfulness ──
-const MIND_PROMPTS = [
-  'Notice 5 things you can see right now.',
-  'Take 3 slow, deep breaths. Feel your feet on the ground.',
-  'Name one thing you\'re grateful for today.',
-  'Relax your jaw, shoulders, and hands — right now.',
-  'You are not your thoughts. Observe them passing by.',
-];
-
-function _openMindfulness() {
-  const prompt = MIND_PROMPTS[Math.floor(Math.random() * MIND_PROMPTS.length)];
-  showModal({
-    title: '2-Minute Reset',
-    content: `
-      <div style="text-align:center;padding:8px 0">
-        <span style="font-size:48px;display:block;margin-bottom:12px">🧘</span>
-        <div class="card" style="margin:16px 0;background:rgba(124,58,237,0.08);border-color:rgba(124,58,237,0.2);padding:16px;border-radius:var(--radius-lg)">
-          <p style="font-size:var(--text-base);color:var(--text-primary);line-height:1.8;font-style:italic">"${prompt}"</p>
-        </div>
-        <button class="btn btn-primary btn-full" id="close-mind-btn">Done ✓</button>
-      </div>
-    `,
-    className: 'mind-modal',
-    onClose: () => {
-      showToast('🧘 Reset complete', 'success');
-    }
-  });
-  document.getElementById('close-mind-btn')?.addEventListener('click', () => {
-    closeModal();
-  });
-}
-

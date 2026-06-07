@@ -5,7 +5,7 @@
 
 import { getState, updateState, setState } from '../../state/index.js';
 import { showToast, showModal, closeModal } from '../../components/shared/ui.js';
-import { getFilteredMeals, calculateMacros, getDailyMealPlan, quickLogFood } from '../../services/nutrition-engine.js';
+import { getFilteredMeals, calculateMacros, getDailyMealPlan, calculateCustomMacros } from '../../services/nutrition-engine.js';
 import './diet.css';
 
 export function render() {
@@ -26,11 +26,6 @@ export function render() {
     <div class="diet-page">
       <div class="page-header">
         <h1 class="page-title">Diet</h1>
-        <button class="icon-btn" id="log-food-btn" aria-label="Log Food">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-        </button>
       </div>
 
       <!-- Macro Trackers -->
@@ -78,12 +73,12 @@ export function render() {
 
       <!-- Today's Meals -->
       <div class="diet-section">
-        <div class="section-label">Today's Meal Plan</div>
+        <div class="section-label">Today's Protein-Scaled Plan</div>
         <div class="meals-list">
           ${_renderMealCard('🌅 Breakfast', plan.breakfast)}
           ${_renderMealCard('☀️ Lunch', plan.lunch)}
+          ${_renderMealCard('🍿 Snacks', plan.snack)}
           ${_renderMealCard('🌙 Dinner', plan.dinner)}
-          ${_renderMealCard('🍎 Snack', plan.snack)}
           ${plan.preWorkout ? _renderMealCard('⚡ Pre Workout', plan.preWorkout) : ''}
         </div>
       </div>
@@ -146,7 +141,7 @@ function _renderMealCard(timeLabel, meal) {
           </div>
         </div>
         <div class="today-meal-macros">
-          <span class="pill pill-violet">${meal.protein}g</span>
+          <span class="pill pill-violet">${meal.protein}g Target</span>
         </div>
       </div>
       <p class="today-meal-meta">${meal.calories} kcal · ${meal.prepTime}</p>
@@ -181,8 +176,7 @@ function _wireEvents() {
     _refreshWater();
   });
 
-  // Custom logger buttons
-  document.getElementById('log-food-btn')?.addEventListener('click', _openLogSheet);
+  // Custom logger triggers
   document.getElementById('custom-food-card-btn')?.addEventListener('click', _openLogSheet);
 
   // Meal log buttons
@@ -225,7 +219,7 @@ function _wireEvents() {
       let meal = meals.find(m => m.name === name);
       
       // If it is the default pre-workout
-      if (!meal && name === 'Peanut Butter Toast') {
+      if (!meal && (name === 'Peanut Butter Toast' || name === 'Whey Shake & Almonds')) {
         const plan = getDailyMealPlan(state);
         meal = plan.preWorkout;
       }
@@ -261,20 +255,27 @@ function _refreshMacros() {
   }
 }
 
-// ── Quick Log Food Modal ──
+// ── Custom Food Logger Modal (Quantity & Units) ──
 function _openLogSheet() {
   const content = `
-    <div class="quick-log-form">
+    <div class="quick-log-form" style="display:flex; flex-direction:column; gap:12px;">
       <div class="field-group">
         <label class="field-label">Food name</label>
-        <input class="input" id="food-input" placeholder="e.g. eggs, chicken, paneer, dal..." />
+        <input class="input" id="food-input-name" placeholder="e.g. Rice, Chicken, Dal..." />
       </div>
-      <p class="log-hint" style="font-size:10px; color:var(--text-muted); margin-top:4px;">
-        Recognised: eggs, chicken, paneer, dal, rice, oats, milk, whey, roti, tuna, peanut, curd, soy, fish, banana
-      </p>
-      <div id="log-preview" class="log-preview hidden" style="margin-top:12px; padding:10px; background:rgba(255,255,255,0.03); border-radius:var(--radius-md);"></div>
-      <div style="display:flex;gap:10px;margin-top:16px">
-        <button class="btn btn-primary btn-full" id="log-submit-btn">Log Food</button>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+        <div class="field-group">
+          <label class="field-label">Quantity</label>
+          <input class="input" id="food-input-qty" type="number" value="100" min="1" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Unit</label>
+          <input class="input" id="food-input-unit" placeholder="e.g. g, ml, cup, scoop..." value="g" />
+        </div>
+      </div>
+      <div id="log-preview" class="log-preview hidden" style="margin-top:4px; padding:10px; background:rgba(255,255,255,0.03); border-radius:var(--radius-md);"></div>
+      <div style="display:flex; gap:10px; margin-top:8px">
+        <button class="btn btn-primary btn-full" id="log-submit-btn">Log Food ✓</button>
         <button class="btn btn-ghost btn-sm" id="log-close-btn">Cancel</button>
       </div>
     </div>
@@ -285,32 +286,46 @@ function _openLogSheet() {
     content: content
   });
 
-  const foodInput = document.getElementById('food-input');
-  setTimeout(() => foodInput?.focus(), 150);
+  const nameInput = document.getElementById('food-input-name');
+  const qtyInput = document.getElementById('food-input-qty');
+  const unitInput = document.getElementById('food-input-unit');
+  const preview = document.getElementById('log-preview');
 
-  foodInput?.addEventListener('input', (e) => {
-    const val = e.target.value.trim();
-    const preview = document.getElementById('log-preview');
-    if (val.length < 2) {
+  setTimeout(() => nameInput?.focus(), 150);
+
+  const updatePreview = () => {
+    const name = nameInput?.value?.trim();
+    const qty = parseFloat(qtyInput?.value) || 0;
+    const unit = unitInput?.value?.trim();
+    if (!name || name.length < 2 || qty <= 0) {
       preview?.classList.add('hidden');
       return;
     }
-    const data = quickLogFood(val);
+    const data = calculateCustomMacros(name, qty, unit);
     if (preview) {
       preview.classList.remove('hidden');
       preview.innerHTML = `
-        <div style="display:flex; justify-content:space-between; font-size:12px;">
-          <span>${data.emoji} ${val}</span>
+        <div style="display:flex; justify-content:space-between; font-size:12px; align-items:center;">
+          <span>${data.emoji} ${name} (${qty}${unit})</span>
           <span style="font-weight:var(--fw-bold); color:var(--aura-violet-light);">${data.protein}g protein · ${data.calories} kcal</span>
         </div>
       `;
     }
-  });
+  };
+
+  nameInput?.addEventListener('input', updatePreview);
+  qtyInput?.addEventListener('input', updatePreview);
+  unitInput?.addEventListener('input', updatePreview);
 
   document.getElementById('log-submit-btn')?.addEventListener('click', () => {
-    const val = foodInput?.value?.trim();
-    if (!val) { showToast('Enter a food name', 'error'); return; }
-    const data = quickLogFood(val);
+    const name = nameInput?.value?.trim();
+    const qty = parseFloat(qtyInput?.value) || 0;
+    const unit = unitInput?.value?.trim();
+
+    if (!name) { showToast('Enter a food name', 'error'); return; }
+    if (qty <= 0) { showToast('Enter a valid quantity', 'error'); return; }
+
+    const data = calculateCustomMacros(name, qty, unit);
     const state = getState();
     const cal = state.nutrition?.calories || { consumed: 0, target: 2000 };
     const prot = state.nutrition?.protein || { consumed: 0, target: 150 };
@@ -318,7 +333,7 @@ function _openLogSheet() {
       calories: { ...cal, consumed: cal.consumed + data.calories },
       protein: { ...prot, consumed: prot.consumed + data.protein },
     });
-    showToast(`${data.emoji} ${val} logged! +${data.protein}g protein`, 'success');
+    showToast(`${data.emoji} ${name} logged! +${data.protein}g protein`, 'success');
     closeModal();
     _refreshMacros();
   });

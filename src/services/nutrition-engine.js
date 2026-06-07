@@ -227,42 +227,136 @@ export function getFilteredMeals(state = getState()) {
 // ── Daily meal plan ──
 export function getDailyMealPlan(state = getState()) {
   const meals = getFilteredMeals(state);
-  const macros = calculateMacros(state);
+  const targets = calculateMacros(state);
+  const protTarget = targets.protein;
 
-  const breakfast = meals.filter(m => m.mealType?.includes('breakfast'))[0];
-  const lunch = meals.filter(m => m.mealType?.includes('lunch'))[1] || meals[1];
-  const dinner = meals.filter(m => m.mealType?.includes('dinner'))[2] || meals[2];
-  const snack = meals.filter(m => m.mealType?.includes('snack'))[0] || meals[3];
+  // Let's include Pre Workout by default to make it 5 meals max
+  const hasPreWorkout = true; 
+
+  // Partition targets
+  let breakfastTarget, lunchTarget, snacksTarget, dinnerTarget, preWorkoutTarget;
+  if (hasPreWorkout) {
+    preWorkoutTarget = Math.round(protTarget * 0.1);
+    breakfastTarget = Math.round(protTarget * 0.25);
+    lunchTarget = Math.round(protTarget * 0.25);
+    snacksTarget = Math.round(protTarget * 0.15);
+    dinnerTarget = protTarget - (preWorkoutTarget + breakfastTarget + lunchTarget + snacksTarget);
+  } else {
+    breakfastTarget = Math.round(protTarget * 0.25);
+    lunchTarget = Math.round(protTarget * 0.3);
+    snacksTarget = Math.round(protTarget * 0.15);
+    dinnerTarget = protTarget - (breakfastTarget + lunchTarget + snacksTarget);
+  }
+
+  const rawBreakfast = meals.find(m => m.mealType?.includes('breakfast')) || { name: 'Oats Protein Bowl', emoji: '🥣', prepTime: '10 min', calories: 350, protein: 20, recipe: 'Cook oats with milk.' };
+  const rawLunch = meals.find(m => m.mealType?.includes('lunch')) || { name: 'Dal Chawal & Curry', emoji: '🍛', prepTime: '20 min', calories: 420, protein: 18, recipe: 'Standard Dal Chawal.' };
+  const rawDinner = meals.find(m => m.mealType?.includes('dinner')) || { name: 'Chicken Breast Bowl', emoji: '🍗', prepTime: '25 min', calories: 380, protein: 45, recipe: 'Grilled chicken.' };
+  const rawSnack = meals.find(m => m.mealType?.includes('snack')) || { name: 'Peanut Butter Banana', emoji: '🥜', prepTime: '5 min', calories: 340, protein: 14, recipe: 'PB on bread.' };
+  const rawPre = { name: 'Whey Shake & Almonds', emoji: '🥤', prepTime: '2 min', calories: 150, protein: 25, recipe: 'Whey scoop in water + 10 almonds' };
+
+  // Scale macros to hit targets
+  const breakfast = {
+    ...rawBreakfast,
+    protein: breakfastTarget,
+    calories: Math.round(rawBreakfast.calories * (breakfastTarget / (rawBreakfast.protein || 20)))
+  };
+  const lunch = {
+    ...rawLunch,
+    protein: lunchTarget,
+    calories: Math.round(rawLunch.calories * (lunchTarget / (rawLunch.protein || 20)))
+  };
+  const dinner = {
+    ...rawDinner,
+    protein: dinnerTarget,
+    calories: Math.round(rawDinner.calories * (dinnerTarget / (rawDinner.protein || 40)))
+  };
+  const snack = {
+    ...rawSnack,
+    protein: snacksTarget,
+    calories: Math.round(rawSnack.calories * (snacksTarget / (rawSnack.protein || 14)))
+  };
+  const preWorkout = hasPreWorkout ? {
+    ...rawPre,
+    protein: preWorkoutTarget,
+    calories: Math.round(rawPre.calories * (preWorkoutTarget / (rawPre.protein || 25)))
+  } : null;
 
   return {
     breakfast,
     lunch,
     dinner,
     snack,
-    targets: macros,
+    preWorkout,
+    targets,
   };
+}
+
+// Food metrics scaling database
+const FOOD_METRIC_DB = {
+  rice: { unit: 'g', caloriesPerUnit: 1.3, proteinPerUnit: 0.027, emoji: '🍚' },
+  chicken: { unit: 'g', caloriesPerUnit: 1.65, proteinPerUnit: 0.31, emoji: '🍗' },
+  milk: { unit: 'ml', caloriesPerUnit: 0.6, proteinPerUnit: 0.032, emoji: '🥛' },
+  tea: { unit: 'cup', caloriesPerUnit: 40, proteinPerUnit: 1, emoji: '☕' },
+  coffee: { unit: 'cup', caloriesPerUnit: 30, proteinPerUnit: 0.5, emoji: '☕' },
+  curd: { unit: 'g', caloriesPerUnit: 0.98, proteinPerUnit: 0.043, emoji: '🥛' },
+  buttermilk: { unit: 'ml', caloriesPerUnit: 0.4, proteinPerUnit: 0.03, emoji: '🥛' },
+  roti: { unit: 'piece', caloriesPerUnit: 80, proteinPerUnit: 3, emoji: '🫓' },
+  dal: { unit: 'g', caloriesPerUnit: 1.2, proteinPerUnit: 0.08, emoji: '🫘' },
+  paneer: { unit: 'g', caloriesPerUnit: 2.65, proteinPerUnit: 0.18, emoji: '🧀' },
+  eggs: { unit: 'piece', caloriesPerUnit: 70, proteinPerUnit: 6, emoji: '🥚' },
+  egg: { unit: 'piece', caloriesPerUnit: 70, proteinPerUnit: 6, emoji: '🥚' },
+  fish: { unit: 'g', caloriesPerUnit: 1.2, proteinPerUnit: 0.2, emoji: '🐟' },
+  'peanut butter': { unit: 'g', caloriesPerUnit: 5.88, proteinPerUnit: 0.25, emoji: '🥜' },
+  oats: { unit: 'g', caloriesPerUnit: 3.89, proteinPerUnit: 0.169, emoji: '🥣' },
+  banana: { unit: 'piece', caloriesPerUnit: 90, proteinPerUnit: 1.1, emoji: '🍌' },
+  fruit: { unit: 'g', caloriesPerUnit: 0.52, proteinPerUnit: 0.003, emoji: '🍎' },
+  fruits: { unit: 'g', caloriesPerUnit: 0.52, proteinPerUnit: 0.003, emoji: '🍎' },
+  'protein powder': { unit: 'scoop', caloriesPerUnit: 120, proteinPerUnit: 25, emoji: '🥤' },
+  'protein bar': { unit: 'bar', caloriesPerUnit: 200, proteinPerUnit: 20, emoji: '🍫' }
+};
+
+export function calculateCustomMacros(foodName, quantity, unit) {
+  const name = foodName.toLowerCase().trim();
+  let match = null;
+  
+  for (const [key, val] of Object.entries(FOOD_METRIC_DB)) {
+    if (name.includes(key)) {
+      match = val;
+      break;
+    }
+  }
+  
+  const qty = parseFloat(quantity) || 100;
+  
+  if (match) {
+    return {
+      protein: Math.round(match.proteinPerUnit * qty),
+      calories: Math.round(match.caloriesPerUnit * qty),
+      emoji: match.emoji
+    };
+  }
+  
+  // Custom unit fallbacks
+  const u = (unit || 'g').toLowerCase().trim();
+  if (u === 'g') {
+    return { protein: Math.round(0.08 * qty), calories: Math.round(1.2 * qty), emoji: '🍽️' };
+  } else if (u === 'ml') {
+    return { protein: Math.round(0.03 * qty), calories: Math.round(0.6 * qty), emoji: '🥛' };
+  } else if (u === 'scoop' || u === 'scoops') {
+    return { protein: Math.round(25 * qty), calories: Math.round(120 * qty), emoji: '🥤' };
+  } else if (u === 'bar' || u === 'bars') {
+    return { protein: Math.round(15 * qty), calories: Math.round(180 * qty), emoji: '🍫' };
+  } else if (u === 'cup' || u === 'cups') {
+    return { protein: Math.round(1 * qty), calories: Math.round(40 * qty), emoji: '☕' };
+  } else {
+    // default piece
+    return { protein: Math.round(2 * qty), calories: Math.round(80 * qty), emoji: '🍽️' };
+  }
 }
 
 // ── Log food ──
 export function quickLogFood(keyword, state = getState()) {
-  const QUICK = {
-    egg: { protein: 6, calories: 70, emoji: '🥚' },
-    eggs: { protein: 18, calories: 210, emoji: '🥚' },
-    chicken: { protein: 30, calories: 180, emoji: '🍗' },
-    paneer: { protein: 18, calories: 265, emoji: '🧀' },
-    dal: { protein: 9, calories: 150, emoji: '🫘' },
-    rice: { protein: 4, calories: 200, emoji: '🍚' },
-    banana: { protein: 1, calories: 90, emoji: '🍌' },
-    milk: { protein: 8, calories: 120, emoji: '🥛' },
-    whey: { protein: 25, calories: 120, emoji: '💊' },
-    oats: { protein: 10, calories: 300, emoji: '🥣' },
-    roti: { protein: 4, calories: 120, emoji: '🫓' },
-    fish: { protein: 22, calories: 150, emoji: '🐟' },
-    tuna: { protein: 30, calories: 130, emoji: '🐟' },
-    peanut: { protein: 8, calories: 190, emoji: '🥜' },
-    curd: { protein: 10, calories: 100, emoji: '🥛' },
-    soy: { protein: 20, calories: 120, emoji: '🫘' },
-  };
-  const key = keyword.toLowerCase().trim();
-  return QUICK[key] || { protein: 5, calories: 100, emoji: '🍽️' };
+  const name = keyword.toLowerCase().trim();
+  const res = calculateCustomMacros(name, 100, 'g');
+  return res;
 }

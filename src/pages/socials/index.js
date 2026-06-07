@@ -3,15 +3,15 @@
 // Route: /socials (Partner | Friends | Find Partner)
 // ==========================================
 
-import { getState, setState, updateState } from '../../state/index.js';
+import { getState, setState, updateState, getDisciplineScore } from '../../state/index.js';
 import { showToast, showModal, closeModal } from '../../components/shared/ui.js';
 import { navigate } from '../../router.js';
 import { generateMatchCandidate } from '../../services/ai-engine.js';
-import { getDisciplineScore } from '../../state/index.js';
 import './socials.css';
 
 let _activeTab = 'partner';
 let _activeChatUser = null;
+let _activeGroupChatId = 'g1';
 
 // Mock friends auto-initialization to ensure data richness
 function _initFriendsIfEmpty() {
@@ -84,17 +84,55 @@ function _initFriendsIfEmpty() {
   }
 }
 
+// Mock Custom Groups initialization
+function _initGroupsIfEmpty() {
+  const state = getState();
+  let groups = state.socials?.groups || [];
+  if (!groups.length) {
+    groups = [
+      {
+        id: 'g1',
+        name: 'Alpha Pack 🐺',
+        members: [
+          { id: 'me', name: 'You', workout: true, protein: true, water: true, sleep: 7.5, recovery: 82, discipline: 85 },
+          { id: 'f1', name: 'Arjun K.', workout: true, protein: true, water: false, sleep: 6.2, recovery: 78, discipline: 84 },
+          { id: 'f2', name: 'Priya S.', workout: true, protein: false, water: true, sleep: 8.0, recovery: 85, discipline: 76 },
+          { id: 'f4', name: 'Ananya T.', workout: false, protein: true, water: true, sleep: 7.2, recovery: 74, discipline: 93 }
+        ],
+        messages: [
+          { from: 'Arjun K.', text: "Who's hitting legs today? 🦵", time: '10:30' },
+          { from: 'Priya S.', text: "Already done! Smashed it early morning ☀️", time: '11:15' },
+          { from: 'Ananya T.', text: "Rest day for me, but protein goals are locked in! 🥩", time: '12:00' }
+        ]
+      }
+    ];
+    setState('socials.groups', groups);
+  }
+}
+
 export function render() {
   _initFriendsIfEmpty();
+  _initGroupsIfEmpty();
+  const state = getState();
+
+  // Top header icons: [ + Add Friend ] [ Inbox ]
   return `
     <div class="socials-page">
-      <div class="page-header">
+      <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
         <h1 class="page-title">Squad</h1>
-        <button class="icon-btn" id="profile-btn" aria-label="Profile">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-          </svg>
-        </button>
+        <div style="display:flex; gap:8px;">
+          <button class="icon-btn" id="add-friend-header-btn" aria-label="Add Friend" style="background:var(--bg-card); border:1px solid var(--border-card); border-radius:var(--radius-md); width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-secondary);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
+            </svg>
+          </button>
+          <button class="icon-btn" id="inbox-header-btn" aria-label="Inbox" style="background:var(--bg-card); border:1px solid var(--border-card); border-radius:var(--radius-md); width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-secondary); position:relative;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+            </svg>
+            ${(state.socials?.notifications?.length || 0) > 0 ? '<span class="notif-dot" style="position:absolute; top:6px; right:6px; width:6px; height:6px; background:var(--aura-rose); border-radius:50%"></span>' : ''}
+          </button>
+        </div>
       </div>
 
       <!-- Sub Tabs -->
@@ -134,11 +172,11 @@ function _renderPartnerTab() {
   if (!partner) {
     return `
       <div class="socials-section">
-        <div class="no-partner-card card text-center">
+        <div class="no-partner-card card text-center" style="padding:24px;">
           <span style="font-size:48px;display:block;margin-bottom:12px">🤝</span>
           <h3 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;margin-bottom:6px">No Partner Yet</h3>
           <p style="color:var(--text-muted);font-size:var(--text-sm);margin-bottom:16px;line-height:1.6">Find an accountability partner matched to your goals, schedule, and lifestyle.</p>
-          <button class="btn btn-primary btn-full" id="go-find-btn" style="margin-bottom:16px">Find My Match (Strangers) →</button>
+          <button class="btn btn-primary btn-full" id="go-find-btn" style="margin-bottom:16px">Find My Match →</button>
           
           ${friends.length ? `
             <div style="border-top:1px solid var(--border-subtle);padding-top:16px;margin-top:8px;text-align:left">
@@ -179,19 +217,22 @@ function _renderPartnerTab() {
   return `
     <div class="socials-section">
       <!-- Partner Card -->
-      <div class="partner-card card card-glow">
+      <div class="partner-card card card-glow" style="padding:16px;">
         <div class="partner-header">
           <div class="partner-avatar">${partner.name?.[0] || 'P'}</div>
           <div class="partner-info">
             <h3 class="partner-name">${partner.name}</h3>
-            <p class="partner-meta">${partner.city}, ${partner.country}</p>
-            <span class="pill pill-violet">${partner.compatibility}% Match</span>
+            <p class="partner-meta">${partner.city || 'India'}, ${partner.country || 'India'}</p>
+            <div style="display:flex; gap:6px;">
+              <span class="pill pill-violet">${partner.compatibility || 85}% Match</span>
+              <span class="pill pill-mint">${partner.streakDays || 5}d streak</span>
+            </div>
           </div>
           <button class="btn btn-sm btn-primary" id="chat-partner-btn">Chat</button>
         </div>
 
         <!-- Shared Stats -->
-        <div class="stat-grid stat-grid-3" style="margin-top:12px">
+        <div class="stat-grid stat-grid-3" style="margin-top:14px">
           <div class="stat-cell">
             <div class="stat-value">${partner.streakDays}</div>
             <div class="stat-label">Their Streak</div>
@@ -207,21 +248,39 @@ function _renderPartnerTab() {
         </div>
       </div>
 
-      <!-- Quick Accountability Actions -->
-      <div class="quick-actions-card card">
-        <p class="section-label" style="margin-bottom:8px">Quick Actions</p>
-        <div class="quick-actions-grid">
-          <button class="btn btn-xs btn-secondary quick-action-btn" data-action="workout">🏋️ Remind Workout</button>
-          <button class="btn btn-xs btn-secondary quick-action-btn" data-action="water">💧 Remind Water</button>
-          <button class="btn btn-xs btn-secondary quick-action-btn" data-action="protein">🍗 Remind Protein</button>
-          <button class="btn btn-xs btn-secondary quick-action-btn" data-action="motivation">🔥 Send Motivation</button>
-          <button class="btn btn-xs btn-secondary quick-action-btn" data-action="hi">👋 Quick Hi</button>
-          <button class="btn btn-xs btn-secondary quick-action-btn" data-action="checkin">🎯 Check In</button>
+      <!-- Partner Action Cards (2x2 grid replacing generic actions) -->
+      <div class="partner-actions-section" style="margin-top:4px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          
+          <div class="card partner-action-card" id="partner-card-action-profile" style="cursor:pointer; display:flex; flex-direction:column; gap:6px; padding:12px; background:var(--bg-card); border:1.5px solid var(--border-card); border-radius:var(--radius-xl); transition:all var(--dur-fast) ease;">
+            <span style="font-size:24px;">👤</span>
+            <strong style="font-size:12px; color:var(--text-primary);">Inspect Partner</strong>
+            <span style="font-size:10px; color:var(--text-muted); line-height:1.3;">View streaks, targets, splits and compatibility levels.</span>
+          </div>
+
+          <div class="card partner-action-card" id="partner-card-action-train" style="cursor:pointer; display:flex; flex-direction:column; gap:6px; padding:12px; background:var(--bg-card); border:1.5px solid var(--border-card); border-radius:var(--radius-xl); transition:all var(--dur-fast) ease;">
+            <span style="font-size:24px;">🏋️</span>
+            <strong style="font-size:12px; color:var(--text-primary);">Workout Sync</strong>
+            <span style="font-size:10px; color:var(--text-muted); line-height:1.3;">Compare workouts, completed volumes and exercises.</span>
+          </div>
+
+          <div class="card partner-action-card" id="partner-card-action-diet" style="cursor:pointer; display:flex; flex-direction:column; gap:6px; padding:12px; background:var(--bg-card); border:1.5px solid var(--border-card); border-radius:var(--radius-xl); transition:all var(--dur-fast) ease;">
+            <span style="font-size:24px;">🥗</span>
+            <strong style="font-size:12px; color:var(--text-primary);">Macro Co-Pilot</strong>
+            <span style="font-size:10px; color:var(--text-muted); line-height:1.3;">Track calorie counts and protein targets.</span>
+          </div>
+
+          <div class="card partner-action-card" id="partner-card-action-chat" style="cursor:pointer; display:flex; flex-direction:column; gap:6px; padding:12px; background:var(--bg-card); border:1.5px solid var(--border-card); border-radius:var(--radius-xl); transition:all var(--dur-fast) ease;">
+            <span style="font-size:24px;">💬</span>
+            <strong style="font-size:12px; color:var(--text-primary);">Inbox Portal</strong>
+            <span style="font-size:10px; color:var(--text-muted); line-height:1.3;">Open direct chat logs and quick ping alerts.</span>
+          </div>
+
         </div>
       </div>
 
       <!-- You vs Partner Dashboard -->
-      <div class="comparison-card card">
+      <div class="comparison-card card" style="margin-top:4px;">
         <p class="section-label" style="margin-bottom:12px">You vs Partner Metrics</p>
         <div class="comparison-grid">
           ${_renderComparisonRow('Weekly Workouts', workoutsMe, workoutsPartner, '🏋️', ' sessions')}
@@ -273,98 +332,106 @@ function _renderComparisonRow(label, valMe, valPartner, icon, unit) {
 
 function _renderFriendsTab() {
   const state = getState();
-  const friends = state.auth?.friends || [];
-  const myScore = getDisciplineScore(state);
-  
-  // Create clickable leaderboard sorted by discipline
-  const leaderboard = [...friends, { name: 'You', id: 'me', disciplineScore: myScore }]
-    .sort((a, b) => b.disciplineScore - a.disciplineScore);
+  const groups = state.socials?.groups || [];
+  const activeGroup = groups.find(g => g.id === _activeGroupChatId) || groups[0];
 
-  // Compute DM Conversations
-  const chatMessages = state.socials?.chatMessages || {};
-  const partner = state.auth?.partner;
-  const allUsers = [...friends];
-  if (partner && !friends.some(f => f.id === partner.id)) {
-    allUsers.push(partner);
+  // If no group selected but exist, fallback to first
+  if (!activeGroup) {
+    return `
+      <div class="socials-section">
+        <div class="card text-center" style="padding:24px;">
+          <span style="font-size:36px; display:block; margin-bottom:12px;">👥</span>
+          <p style="color:var(--text-muted); font-size:12px;">Create a group to compete with squad friends</p>
+          <button class="btn btn-primary btn-sm" id="create-group-btn" style="margin-top:12px;">+ Create Group</button>
+        </div>
+      </div>
+    `;
   }
-  
-  const recentChats = [];
-  for (const user of allUsers) {
-    const msgs = chatMessages[user.id] || [];
-    if (msgs.length > 0) {
-      const lastMsg = msgs[msgs.length - 1];
-      recentChats.push({
-        user,
-        lastMessage: lastMsg.text,
-        lastTime: lastMsg.time
-      });
-    }
-  }
+
+  // Sort members by discipline score to compute rankings
+  const leaderboard = [...activeGroup.members].sort((a, b) => b.discipline - a.discipline);
 
   return `
     <div class="socials-section">
-      <button class="btn btn-secondary btn-full" id="add-friend-btn" style="margin-bottom:16px">
-        👤 Add Friend
-      </button>
+      <!-- Custom Groups Title Header and switcher -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <span class="section-label" style="margin-bottom:0;">Custom Groups</span>
+        <button class="btn btn-xs btn-secondary" id="create-group-btn" style="padding:4px 10px;">+ Create Group</button>
+      </div>
 
-      <!-- Leaderboard -->
-      <div class="section-label">Interactive Leaderboard</div>
-      <div class="leaderboard-card card" style="margin-bottom:16px">
-        ${leaderboard.map((f, i) => `
-          <div class="leaderboard-row clickable-lb-row ${f.id === 'me' ? 'you' : ''}" data-friend-id="${f.id}">
+      <!-- Groups List Selector Tabs -->
+      <div class="groups-selector" style="display:flex; gap:6px; overflow-x:auto; padding-bottom:8px;">
+        ${groups.map(g => `
+          <button class="btn btn-xs ${g.id === _activeGroupChatId ? 'btn-primary' : 'btn-secondary'}" data-group-id="${g.id}" style="padding:6px 14px; white-space:nowrap;">
+            ${g.name}
+          </button>
+        `).join('')}
+      </div>
+
+      <!-- Active Group Leaderboard -->
+      <div class="section-label">Group Leaderboard: ${activeGroup.name}</div>
+      <div class="leaderboard-card card" style="margin-bottom:12px">
+        ${leaderboard.map((m, i) => `
+          <div class="leaderboard-row ${m.id === 'me' ? 'you' : ''}">
             <span class="lb-rank">${i + 1}</span>
-            <span class="lb-name">${f.name}</span>
+            <span class="lb-name">${m.name}</span>
             <div class="lb-bar-wrap">
-              <div class="lb-bar" style="width:${f.disciplineScore || 60}%;background:${f.id === 'me' ? 'var(--grad-violet)' : `linear-gradient(90deg,hsl(${200 + i * 30},70%,55%),hsl(${230 + i * 30},70%,45%))`}"></div>
+              <div class="lb-bar" style="width:${m.discipline}%; background:${m.id === 'me' ? 'var(--grad-violet)' : `linear-gradient(90deg,hsl(${200 + i * 30},70%,55%),hsl(${230 + i * 30},70%,45%))`}"></div>
             </div>
-            <span class="lb-score">${f.disciplineScore || 60}</span>
+            <span class="lb-score">${m.discipline}</span>
           </div>
         `).join('')}
       </div>
 
-      <!-- Friends List -->
-      <div class="section-label">Squad Friends</div>
-      <div class="friends-list" style="margin-bottom:16px">
-        ${friends.map(f => `
-          <div class="friend-row" data-friend-id="${f.id}">
-            <div class="friend-header-row" style="display:flex;align-items:center;width:100%;gap:12px">
-              <div class="friend-avatar">${f.name?.[0] || 'F'}</div>
-              <div class="friend-info" style="flex:1">
-                <p class="friend-name">${f.name}</p>
-                <p class="friend-meta">${f.trainingStyle || 'Training'} · ${f.streakDays || 0}d streak</p>
-              </div>
+      <!-- Group Chat Widget -->
+      <div class="section-label">Group Chat</div>
+      <div class="group-chat-card card" style="margin-bottom:12px;">
+        <div class="group-chat-messages" id="group-chat-messages">
+          ${activeGroup.messages.map(msg => `
+            <div class="group-chat-msg-row ${msg.from === 'You' ? 'mine' : 'theirs'}">
+              <span class="group-chat-msg-sender">${msg.from}</span>
+              <div class="group-chat-msg-bubble">${msg.text}</div>
+              <span class="group-chat-msg-time">${msg.time}</span>
             </div>
-            <div class="friend-actions">
-              <button class="btn btn-xs btn-primary friend-chat-btn" data-friend-id="${f.id}">💬 Chat</button>
-              <button class="btn btn-xs btn-secondary friend-profile-btn" data-friend-id="${f.id}">👤 Profile</button>
-              ${(!partner || partner.id !== f.id) ? `
-                <button class="btn btn-xs btn-accent friend-invite-btn" data-friend-id="${f.id}">🤝 Invite</button>
-              ` : ''}
-            </div>
-          </div>
-        `).join('')}
+          `).join('')}
+        </div>
+        <div style="display:flex; border-top:1px solid var(--border-subtle); padding:8px 12px; gap:8px; background:rgba(255,255,255,0.01);">
+          <input class="input" id="group-chat-input" placeholder="Message group..." style="flex:1; font-size:11px;" />
+          <button class="btn btn-primary btn-sm" id="send-group-chat-btn" style="padding:0 12px;">Send</button>
+        </div>
       </div>
 
-      <!-- Message Center -->
-      <div class="section-label">Direct Messages</div>
-      <div class="conversations-list">
-        ${recentChats.length ? recentChats.map(c => `
-          <div class="conversation-row clickable-chat-row" data-user-id="${c.user.id}">
-            <div class="friend-avatar">${c.user.name[0]}</div>
-            <div class="conv-details">
-              <div class="conv-header">
-                <span class="conv-name">${c.user.name}</span>
-                <span class="conv-time">${c.lastTime}</span>
-              </div>
-              <p class="conv-message">${c.lastMessage}</p>
-            </div>
-          </div>
-        `).join('') : `
-          <div class="card text-center" style="padding:16px">
-            <p style="color:var(--text-muted);font-size:var(--text-sm)">No active chats. Start one by clicking Chat on a friend!</p>
-          </div>
-        `}
+      <!-- Group Comparison Table View (Excel-like layout) -->
+      <div class="section-label">Squad Matrix Comparative Table</div>
+      <div class="group-table-container">
+        <table class="group-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding-left:10px;">Friend</th>
+              <th>Workout</th>
+              <th>Protein</th>
+              <th>Water</th>
+              <th>Sleep</th>
+              <th>Recovery</th>
+              <th>Discipline</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${activeGroup.members.map(m => `
+              <tr>
+                <td class="friend-cell" style="padding-left:10px;">${m.name}</td>
+                <td class="${m.workout ? 'cell-yes' : 'cell-no'}">${m.workout ? '✓' : '✗'}</td>
+                <td class="${m.protein ? 'cell-yes' : 'cell-no'}">${m.protein ? '✓' : '✗'}</td>
+                <td class="${m.water ? 'cell-yes' : 'cell-no'}">${m.water ? '✓' : '✗'}</td>
+                <td>${m.sleep}h</td>
+                <td style="color:var(--aura-violet-light); font-weight:bold;">${m.recovery}%</td>
+                <td style="color:var(--aura-amber-light); font-weight:bold;">${m.discipline}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
       </div>
+
     </div>
   `;
 }
@@ -387,7 +454,7 @@ function _renderFindTab() {
 
   if (matchState === 'idle') {
     return `<div class="socials-section">
-      <div class="find-hero card">
+      <div class="find-hero card" style="padding:16px;">
         <span style="font-size:48px;display:block;text-align:center;margin-bottom:12px">🔍</span>
         <h3 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;text-align:center;margin-bottom:8px">Find Your Match</h3>
         <p style="color:var(--text-muted);font-size:var(--text-sm);text-align:center;line-height:1.6;margin-bottom:20px">AURA analyses your goals, schedule, discipline, and lifestyle to find someone truly compatible.</p>
@@ -470,7 +537,7 @@ function _renderFindTab() {
             </div>
           </div>
         </div>
-        <button class="btn btn-primary btn-full" id="start-match-btn" style="margin-top:20px">Find My Accountability Partner →</button>
+        <button class="btn btn-primary btn-full" id="start-match-btn" style="margin-top:20px">Find My Match</button>
       </div>
     </div>`;
   }
@@ -494,7 +561,7 @@ function _renderFindTab() {
     if (!candidate) return '';
     return `<div class="socials-section">
       <div class="section-label">Your Match</div>
-      <div class="match-card card card-glow">
+      <div class="match-card card card-glow" style="padding:16px;">
         <div class="match-card-header">
           <div class="partner-avatar" style="width:56px;height:56px;font-size:22px">${candidate.name?.[0]}</div>
           <div>
@@ -544,12 +611,17 @@ function _wireEvents() {
     });
   });
 
-  document.getElementById('profile-btn')?.addEventListener('click', () => navigate('/profile'));
+  // Top right header buttons
+  document.getElementById('add-friend-header-btn')?.addEventListener('click', _openAddFriendModal);
+  document.getElementById('inbox-header-btn')?.addEventListener('click', () => {
+    showToast('Inbox is currently empty', 'default');
+  });
+
   _wireContentEvents();
 }
 
 function _wireContentEvents() {
-  // Partner tab
+  // Partner tab actions
   document.getElementById('go-find-btn')?.addEventListener('click', () => {
     _activeTab = 'find';
     document.querySelectorAll('.socials-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'find'));
@@ -572,104 +644,47 @@ function _wireContentEvents() {
     _wireContentEvents();
   });
 
-  // Quick Action DMs
-  document.querySelectorAll('.quick-action-btn').forEach(btn => {
+  // Partner Action Cards Clicks
+  const partner = getState().auth?.partner;
+  document.getElementById('partner-card-action-profile')?.addEventListener('click', () => {
+    if (partner) _openFriendProfile(partner);
+  });
+  document.getElementById('partner-card-action-train')?.addEventListener('click', () => {
+    showToast('Viewing Sync Workouts 🏋️', 'violet');
+    navigate('/train');
+  });
+  document.getElementById('partner-card-action-diet')?.addEventListener('click', () => {
+    showToast('Viewing Sync Nutrition 🥗', 'violet');
+    navigate('/diet');
+  });
+  document.getElementById('partner-card-action-chat')?.addEventListener('click', () => {
+    if (partner) _openChat(partner);
+  });
+
+  // Friends tab triggers
+  document.getElementById('create-group-btn')?.addEventListener('click', _openCreateGroupModal);
+
+  // Selector switcher for groups
+  document.querySelectorAll('.groups-selector button').forEach(btn => {
     btn.addEventListener('click', () => {
-      const action = btn.dataset.action;
-      _sendQuickAction(action);
+      _activeGroupChatId = btn.dataset.groupId;
+      const content = document.getElementById('socials-content');
+      if (content) content.innerHTML = _renderTab('friends');
+      _wireContentEvents();
     });
   });
 
-  // Invite Friend as Partner (Directly from Partner tab)
+  // Group chat messaging
+  document.getElementById('send-group-chat-btn')?.addEventListener('click', _sendGroupMessage);
+  document.getElementById('group-chat-input')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') _sendGroupMessage();
+  });
+
+  // Invite Friend as Partner
   document.querySelectorAll('.invite-friend-partner-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.friendId;
       _inviteFriendAsPartner(id);
-    });
-  });
-
-  // Friends tab triggers
-  document.getElementById('add-friend-btn')?.addEventListener('click', () => {
-    const name = prompt('Enter friend\'s name or username:');
-    if (!name?.trim()) return;
-    const state = getState();
-    const friends = [...(state.auth?.friends || [])];
-    const newFriend = {
-      id: Date.now().toString(),
-      name: name.trim(),
-      trainingStyle: 'Hypertrophy 🏋️',
-      streakDays: Math.floor(Math.random() * 20),
-      disciplineScore: 50 + Math.floor(Math.random() * 40),
-      compatibility: 70 + Math.floor(Math.random() * 25),
-      experience: 'experienced',
-      country: 'India',
-      language: 'English',
-      trainingDays: 4,
-      wakeTime: '06:30',
-      timezone: 'GMT+5:30',
-      recentActivity: [
-        'Logged a hypertrophy session yesterday',
-        'Hit 100% hydration target',
-        'Did Box Breathing reset'
-      ]
-    };
-    friends.push(newFriend);
-    setState('auth.friends', friends);
-    showToast(`${name} added to your squad ✓`, 'success');
-    const content = document.getElementById('socials-content');
-    if (content) content.innerHTML = _renderTab('friends');
-    _wireContentEvents();
-  });
-
-  // Chat button in friends list
-  document.querySelectorAll('.friend-chat-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const id = btn.dataset.friendId;
-      const friend = getState().auth?.friends?.find(f => f.id === id);
-      if (friend) _openChat(friend);
-    });
-  });
-
-  // Profile button in friends list
-  document.querySelectorAll('.friend-profile-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const id = btn.dataset.friendId;
-      const friend = getState().auth?.friends?.find(f => f.id === id);
-      if (friend) _openFriendProfile(friend);
-    });
-  });
-
-  // Invite button in friends list
-  document.querySelectorAll('.friend-invite-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const id = btn.dataset.friendId;
-      _inviteFriendAsPartner(id);
-    });
-  });
-
-  // Interactive Leaderboard clicks
-  document.querySelectorAll('.clickable-lb-row').forEach(row => {
-    row.addEventListener('click', () => {
-      const id = row.dataset.friendId;
-      if (id === 'me') {
-        navigate('/profile');
-      } else {
-        const friend = getState().auth?.friends?.find(f => f.id === id);
-        if (friend) _openFriendProfile(friend);
-      }
-    });
-  });
-
-  // Message Center conversations clicks
-  document.querySelectorAll('.clickable-chat-row').forEach(row => {
-    row.addEventListener('click', () => {
-      const id = row.dataset.userId;
-      const state = getState();
-      const friend = state.auth?.friends?.find(f => f.id === id) || (state.auth?.partner?.id === id ? state.auth?.partner : null);
-      if (friend) _openChat(friend);
     });
   });
 
@@ -700,6 +715,231 @@ function _wireContentEvents() {
     if (content) content.innerHTML = _renderTab('partner');
     _wireContentEvents();
   });
+}
+
+function _openAddFriendModal() {
+  const content = `
+    <div class="add-friend-form" style="display:flex; flex-direction:column; gap:12px;">
+      <div class="field-group">
+        <label class="field-label">Search by Username</label>
+        <div style="display:flex; gap:8px;">
+          <input class="input" id="search-friend-username" placeholder="e.g. arjun_fit, priya_99..." style="flex:1; font-size:12px;" />
+          <button class="btn btn-secondary" id="search-friend-btn" style="padding:0 16px;">Search</button>
+        </div>
+      </div>
+      
+      <!-- User Preview Box -->
+      <div id="friend-search-preview" class="friend-search-preview" style="min-height:80px; display:flex; align-items:center; justify-content:center; border:1.5px dashed var(--border-card); border-radius:var(--radius-lg); padding:12px; background:rgba(255,255,255,0.01);">
+        <p style="color:var(--text-muted); font-size:12px; text-align:center; margin:0;">Enter username above and tap Search</p>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:8px;">
+        <button class="btn btn-primary btn-full disabled" id="send-request-btn" disabled>Send Request</button>
+        <button class="btn btn-ghost btn-sm" id="cancel-add-friend-btn">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  showModal({
+    title: 'Add Friend',
+    content: content
+  });
+
+  const searchInput = document.getElementById('search-friend-username');
+  const searchBtn = document.getElementById('search-friend-btn');
+  const previewDiv = document.getElementById('friend-search-preview');
+  const sendRequestBtn = document.getElementById('send-request-btn');
+  const cancelBtn = document.getElementById('cancel-add-friend-btn');
+
+  let foundUser = null;
+
+  searchBtn?.addEventListener('click', () => {
+    const username = searchInput?.value?.trim().toLowerCase();
+    if (!username) {
+      showToast('Please enter a username', 'error');
+      return;
+    }
+
+    const usersDatabase = [
+      { username: 'vikram_s', name: 'Vikram Singh', style: 'Strength 🏋️', streak: 12, discipline: 88 },
+      { username: 'kavita_r', name: 'Kavita Rao', style: 'Yoga/Endurance 🧘', streak: 19, discipline: 91 },
+      { username: 'mohit_d', name: 'Mohit Dev', style: 'Bodyweight 🤸', streak: 4, discipline: 62 },
+      { username: 'tanvi_k', name: 'Tanvi Kapoor', style: 'Cardio/PPL ⚡', streak: 7, discipline: 74 }
+    ];
+
+    foundUser = usersDatabase.find(u => u.username === username || username.includes(u.username) || u.username.includes(username));
+
+    if (foundUser) {
+      previewDiv.innerHTML = `
+        <div style="display:flex; align-items:center; gap:12px; width:100%;">
+          <div class="partner-avatar" style="width:40px; height:40px; font-size:16px; background:var(--grad-violet); display:flex; align-items:center; justify-content:center; color:#fff; border-radius:50%">
+            ${foundUser.name[0]}
+          </div>
+          <div style="flex:1; text-align:left;">
+            <p style="font-size:13px; font-weight:700; color:var(--text-primary); margin:0;">${foundUser.name}</p>
+            <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0;">@${foundUser.username} · ${foundUser.style}</p>
+          </div>
+          <div style="text-align:right;">
+            <span class="pill pill-violet" style="font-size:10px;">${foundUser.discipline} Disc.</span>
+          </div>
+        </div>
+      `;
+      sendRequestBtn.classList.remove('disabled');
+      sendRequestBtn.removeAttribute('disabled');
+    } else {
+      const cleanUsername = username.replace(/[^a-z0-9]/g, '');
+      const seedName = cleanUsername.charAt(0).toUpperCase() + cleanUsername.slice(1, 6);
+      foundUser = {
+        username: cleanUsername || 'athlete_x',
+        name: `${seedName || 'Athlete'} Patel`,
+        style: 'General Fitness ⚡',
+        streak: Math.floor(Math.random() * 10) + 1,
+        discipline: 60 + Math.floor(Math.random() * 30)
+      };
+
+      previewDiv.innerHTML = `
+        <div style="display:flex; align-items:center; gap:12px; width:100%;">
+          <div class="partner-avatar" style="width:40px; height:40px; font-size:16px; background:var(--grad-violet); display:flex; align-items:center; justify-content:center; color:#fff; border-radius:50%">
+            ${foundUser.name[0]}
+          </div>
+          <div style="flex:1; text-align:left;">
+            <p style="font-size:13px; font-weight:700; color:var(--text-primary); margin:0;">${foundUser.name}</p>
+            <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0;">@${foundUser.username} · ${foundUser.style}</p>
+          </div>
+          <div style="text-align:right;">
+            <span class="pill pill-violet" style="font-size:10px;">${foundUser.discipline} Disc.</span>
+          </div>
+        </div>
+      `;
+      sendRequestBtn.classList.remove('disabled');
+      sendRequestBtn.removeAttribute('disabled');
+    }
+  });
+
+  sendRequestBtn?.addEventListener('click', () => {
+    if (!foundUser) return;
+    
+    const state = getState();
+    const friends = [...(state.auth?.friends || [])];
+    if (friends.some(f => f.name === foundUser.name)) {
+      showToast(`${foundUser.name} is already in your Squad!`, 'error');
+      closeModal();
+      return;
+    }
+
+    const newFriend = {
+      id: Date.now().toString(),
+      name: foundUser.name,
+      trainingStyle: foundUser.style,
+      streakDays: foundUser.streak,
+      disciplineScore: foundUser.discipline,
+      compatibility: 75 + Math.floor(Math.random() * 20),
+      experience: 'intermediate',
+      country: 'India',
+      language: 'English',
+      trainingDays: 4,
+      wakeTime: '07:00',
+      timezone: 'GMT+5:30',
+      recentActivity: ['Joined Squad', 'Ready to train!']
+    };
+
+    friends.push(newFriend);
+    setState('auth.friends', friends);
+    showToast(`Friend request sent! ${foundUser.name} accepted and joined your Squad ✓`, 'success');
+    closeModal();
+
+    const content = document.getElementById('socials-content');
+    if (content && _activeTab === 'friends') content.innerHTML = _renderTab('friends');
+    _wireContentEvents();
+  });
+
+  cancelBtn?.addEventListener('click', closeModal);
+}
+
+function _openCreateGroupModal() {
+  const state = getState();
+  const friends = state.auth?.friends || [];
+
+  const content = `
+    <div class="create-group-form" style="display:flex; flex-direction:column; gap:12px;">
+      <div class="field-group">
+        <label class="field-label">Group Name</label>
+        <input class="input" id="group-name-input" placeholder="e.g. Core Crusaders, Beast Crew..." style="font-size:12px;" />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Invite Friends</label>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:6px; max-height:150px; overflow-y:auto; padding:6px; border:1px solid var(--border-card); border-radius:var(--radius-md);">
+          ${friends.length ? friends.map(f => `
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-secondary); cursor:pointer;">
+              <input type="checkbox" class="group-invite-check" value="${f.id}" data-name="${f.name}" data-score="${f.disciplineScore}" style="accent-color:var(--aura-violet);" />
+              <span>${f.name} (Discipline: ${f.disciplineScore})</span>
+            </label>
+          `).join('') : '<p style="font-size:11px; color:var(--text-muted); text-align:center; margin:10px 0;">No friends in Squad yet. Add friends first!</p>'}
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:8px;">
+        <button class="btn btn-primary btn-full" id="group-submit-btn">Create Group</button>
+        <button class="btn btn-ghost btn-sm" id="group-cancel-btn">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  showModal({
+    title: 'Create Custom Group',
+    content: content
+  });
+
+  document.getElementById('group-submit-btn')?.addEventListener('click', () => {
+    const name = document.getElementById('group-name-input')?.value?.trim();
+    if (!name) {
+      showToast('Please enter a group name', 'error');
+      return;
+    }
+
+    const checked = document.querySelectorAll('.group-invite-check:checked');
+    const selectedMembers = [{ id: 'me', name: 'You', workout: true, protein: true, water: true, sleep: 7.5, recovery: 82, discipline: getDisciplineScore() }];
+
+    checked.forEach(chk => {
+      const fId = chk.value;
+      const fName = chk.dataset.name;
+      const fScore = Number(chk.dataset.score);
+      selectedMembers.push({
+        id: fId,
+        name: fName,
+        workout: Math.random() > 0.3,
+        protein: Math.random() > 0.4,
+        water: Math.random() > 0.25,
+        sleep: Number((6.0 + Math.random() * 2.5).toFixed(1)),
+        recovery: 65 + Math.floor(Math.random() * 30),
+        discipline: fScore
+      });
+    });
+
+    const newGroup = {
+      id: 'g_' + Date.now(),
+      name: name,
+      members: selectedMembers,
+      messages: [
+        { from: 'System', text: `Group "${name}" created. Invites accepted!`, time: 'Now' }
+      ]
+    };
+
+    const state = getState();
+    const groups = [...(state.socials?.groups || []), newGroup];
+    setState('socials.groups', groups);
+    _activeGroupChatId = newGroup.id;
+
+    showToast(`Custom Group "${name}" created successfully!`, 'success');
+    closeModal();
+
+    const contentEl = document.getElementById('socials-content');
+    if (contentEl && _activeTab === 'friends') contentEl.innerHTML = _renderTab('friends');
+    _wireContentEvents();
+  });
+
+  document.getElementById('group-cancel-btn')?.addEventListener('click', closeModal);
 }
 
 function _inviteFriendAsPartner(friendId) {
@@ -737,32 +977,6 @@ function _inviteFriendAsPartner(friendId) {
   }, 1800);
 }
 
-function _sendQuickAction(actionType) {
-  const partner = getState().auth?.partner;
-  if (!partner) return;
-
-  const messages = {
-    workout: "Hey! Don't forget to log your workout today! 🏋️",
-    water: "Friendly reminder to keep hydrated! Drink some water 💧",
-    protein: "Did you hit your protein goals yet today? 🍗",
-    motivation: "Keep pushing! You've got this! 🔥",
-    hi: "Hey! Just wanted to say hi! 👋",
-    checkin: "How's your recovery feeling today? 🎯"
-  };
-
-  const text = messages[actionType];
-  const state = getState();
-  const msgs = [...(state.socials?.chatMessages?.[partner.id] || [])];
-  const now = new Date();
-  const time = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
-  msgs.push({ from: 'me', text, time });
-
-  const chatMsgs = { ...(state.socials?.chatMessages || {}), [partner.id]: msgs };
-  setState('socials.chatMessages', chatMsgs);
-
-  showToast('Accountability ping sent!', 'success');
-}
-
 function _openFriendProfile(user) {
   const compat = user.compatibility || (75 + Math.floor(Math.random() * 20));
   const disc = user.disciplineScore || 60;
@@ -779,9 +993,9 @@ function _openFriendProfile(user) {
       <div class="friend-profile-modal">
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
           <div class="partner-avatar" style="width:64px;height:64px;font-size:24px;background:var(--grad-violet);display:flex;align-items:center;justify-content:center;color:#fff;border-radius:50%">${user.name[0]}</div>
-          <div>
-            <h4 style="font-size:var(--text-lg);font-weight:var(--fw-bold);color:var(--text-primary);margin-bottom:4px">${user.name}</h4>
-            <p style="font-size:var(--text-xs);color:var(--text-muted);margin-bottom:6px">${country} · ${user.trainingStyle || 'Training'}</p>
+          <div style="text-align:left;">
+            <h4 style="font-size:var(--text-lg);font-weight:var(--fw-bold);color:var(--text-primary);margin-bottom:4px;margin-top:0;">${user.name}</h4>
+            <p style="font-size:var(--text-xs);color:var(--text-muted);margin:0 0 6px 0;">${country} · ${user.trainingStyle || 'Training'}</p>
             <div style="display:flex;gap:6px">
               <span class="pill pill-violet" style="font-size:10px">${compat}% Match</span>
               <span class="pill pill-mint" style="font-size:10px">${streak}d streak</span>
@@ -806,7 +1020,7 @@ function _openFriendProfile(user) {
         </div>
         
         <!-- Recent Activity -->
-        <div style="margin-bottom:20px">
+        <div style="margin-bottom:20px; text-align:left;">
           <p class="section-label" style="font-size:var(--text-xs);text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted)">Recent Activity</p>
           <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
             ${recentAct.map(a => `
@@ -878,7 +1092,7 @@ function _startMatching() {
     if (c) c.innerHTML = _renderTab('find');
     _wireContentEvents();
     showToast('Compatible match found! ✦', 'violet');
-  }, 4800); // Polished matching speed: 4.8 seconds
+  }, 4800);
 }
 
 function _checkResumeSearch() {
@@ -950,13 +1164,11 @@ function _openChat(user, prefill = '') {
   document.getElementById('close-chat-btn')?.addEventListener('click', () => {
     overlay.classList.add('hidden');
     _activeChatUser = null;
-    // Refresh tab on chat close to update conversation times
     const content = document.getElementById('socials-content');
     if (content) content.innerHTML = _renderTab(_activeTab);
     _wireContentEvents();
   });
 
-  // Clicking username inside chats triggers the profile modal!
   document.getElementById('chat-header-user')?.addEventListener('click', () => {
     _openFriendProfile(user);
   });
@@ -995,3 +1207,38 @@ function _sendMessage() {
   }
 }
 
+function _sendGroupMessage() {
+  const input = document.getElementById('group-chat-input');
+  const text = input?.value?.trim();
+  if (!text) return;
+
+  const state = getState();
+  const groups = [...(state.socials?.groups || [])];
+  const groupIdx = groups.findIndex(g => g.id === _activeGroupChatId);
+  if (groupIdx === -1) return;
+
+  const now = new Date();
+  const time = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+  
+  groups[groupIdx].messages.push({
+    from: 'You',
+    text: text,
+    time: time
+  });
+
+  setState('socials.groups', groups);
+
+  if (input) input.value = '';
+
+  const container = document.getElementById('group-chat-messages');
+  if (container) {
+    container.innerHTML += `
+      <div class="group-chat-msg-row mine">
+        <span class="group-chat-msg-sender">You</span>
+        <div class="group-chat-msg-bubble">${text}</div>
+        <span class="group-chat-msg-time">${time}</span>
+      </div>
+    `;
+    container.scrollTop = container.scrollHeight;
+  }
+}

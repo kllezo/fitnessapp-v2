@@ -369,3 +369,50 @@
 .btn-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
 .btn-download { background: var(--bg-card); border: 1px solid var(--border-card); grid-column: span 2; }
 
+/* Calendar and Planner Dropdown styles */
+.weekly-planner-header:hover {
+  border-color: var(--aura-violet);
+  background: rgba(124,58,237,0.03);
+}
+
+.weekly-planner-dropdown {
+  animation: slideDown 0.2s ease-out forwards;
+}
+
+.planner-dropdown-item:hover {
+  background: rgba(255,255,255,0.03) !important;
+}
+
+.planner-dropdown-item.active {
+  background: rgba(124,58,237,0.12) !important;
+}
+
+.calendar-view-container {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.calendar-day-cell:hover {
+  border-color: var(--aura-violet) !important;
+  background: rgba(124,58,237,0.05) !important;
+  transform: translateY(-1px);
+}
+
+.calendar-day-cell.today {
+  border-color: var(--aura-violet) !important;
+  box-shadow: 0 0 10px rgba(124,58,237,0.25) !important;
+}
+
+.calendar-nav-btn:active {
+  transform: scale(0.9);
+}
+
+.calendar-mode-btn:not(.active):hover {
+  color: var(--text-primary);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
