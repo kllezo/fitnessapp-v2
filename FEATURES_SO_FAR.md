@@ -15,19 +15,12 @@
 - Dynamic neon glowing card aesthetic.
 
 ## 3. Onboarding Experience (`/onboarding`)
-- 12-step structured setup questionnaire:
-  1. Fitness goal (Build Muscle, Lose Fat, Maintain, Endurance, Flexibility).
-  2. Workout mode (Gym, Home).
-  3. Training frequency (2-6 days/week).
-  4. Experience level (Beginner, Intermediate, Advanced).
-  5. Equipment (Full Gym vs Bodyweight).
-  6. Split preference (Full Body, Upper/Lower, PPL).
-  7. Diet style (Vegetarian, Eggitarian, Non-Veg).
-  8. Budget (Low, Medium, Premium).
-  9. Focus muscles.
-  10. Body stats (Weight, Height, Age).
-  11. Sleep/Wake times.
-  12. Weekly schedule commitment.
+- 12-step structured setup questionnaire with smart step skipping (Gym mode auto-skips Equipment step).
+- Body Fat % optional field (preset buttons 10–30% + custom input) on the Personal step.
+- BMI (Mifflin-St Jeor), BMR, and Maintenance Calories (TDEE) calculated on completion and displayed on the final step.
+- Back navigation correctly skips equipment step when in gym mode.
+- Auto-advance on single-select steps including gym/home mode detection.
+- Calculated metrics (BMI, BMR, TDEE, Lean Mass, Protein Target, Water Target) saved to `profile` state on completion.
 
 ## 4. Home Dashboard (`/home`)
 - Home header layout presenting notifications left and profile shortcuts right.
@@ -52,9 +45,10 @@
 ## 6. Diet & Nutrition (`/diet`)
 - Circular macro progress indicators for Calories and Protein.
 - Hydration tracker with quick-add (+250ml, +500ml, +1L) and reset options.
-- Recipe search and ingredients view modal.
+- Recipe search and ingredients view modal with cooking steps.
 - Today's breakfast, lunch, dinner, snack suggestions.
-- Meal catalog and custom food logging overlay supporting Indian foods (Tea, Coffee, Curd, Rice, Dal, Paneer, eggs, etc.) with custom quantities and units.
+- Meal catalog and custom food logging overlay supporting Indian foods with custom quantities and units.
+- All estimated nutrition values labelled with `*Approx.` — custom logger preview, meal stats, recipe footer, and cost card.
 
 ## 7. Recovery (`/recovery`)
 - Recovery Summary Card (score ring + 7-day sparkline) is the top element. Clickable to open Detailed Recovery Diagnostics modal showing Sleep Duration, Energy, Stress, Motivation, Hydration, Soreness, and 7-Day Readiness Trend SVG chart. Today's Vitals removed from main screen.
@@ -80,6 +74,7 @@
 ## 9. Profile & Settings (`/profile`, `/settings`)
 - Photo file upload integration.
 - Goal list, training split, diet preference updates.
+- **Body Metrics section**: BMI, BMR, Maintenance Calories, Protein Target, Water Target, Lean Mass — all populated from onboarding calculations.
 - Export all data to JSON format.
 - Reset/Delete account modal confirmation.
 - Interactive toggle settings.

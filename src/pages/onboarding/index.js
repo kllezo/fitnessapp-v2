@@ -9,6 +9,56 @@ import { generateWeeklyPlan } from '../../services/workout-engine.js';
 import { calculateMacros } from '../../services/nutrition-engine.js';
 import './onboarding.css';
 
+// ── Calculation Helpers ──
+function _calcBMIBMR(ob) {
+  const weight = Number(ob?.weight) || 70;
+  const height = Number(ob?.height) || 170;
+  const age    = Number(ob?.age) || 25;
+  const gender = ob?.gender || 'male';
+  const activity = ob?.activityLevel || 'active';
+  const bodyFatPct = Number(ob?.bodyFatPct) || null;
+
+  const hM = height / 100;
+  const bmiRaw = weight / (hM * hM);
+  const bmi = Math.round(bmiRaw * 10) / 10;
+  let bmiCat = 'Healthy';
+  if (bmi < 18.5) bmiCat = 'Underweight';
+  else if (bmi >= 25 && bmi < 30) bmiCat = 'Overweight';
+  else if (bmi >= 30) bmiCat = 'Obese';
+
+  let bmr;
+  if (gender === 'female') {
+    bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+  } else {
+    bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+  }
+  bmr = Math.round(bmr);
+
+  const mults = { sedentary: 1.2, light: 1.375, active: 1.55, very_active: 1.725 };
+  const tdee = Math.round(bmr * (mults[activity] || 1.55));
+
+  let leanMass = null;
+  if (bodyFatPct) {
+    leanMass = Math.round(weight * (1 - bodyFatPct / 100));
+  }
+
+  return { bmi, bmiCat, bmr, tdee, leanMass };
+}
+
+function _getNextStep(from) {
+  // Skip equipment step (4) if gym mode
+  const ob = getState().onboarding;
+  if (from === 3 && ob?.workoutMode === 'gym') return 5;
+  return from + 1;
+}
+
+function _getPrevStep(from) {
+  // Skip equipment step (4) going back if gym mode
+  const ob = getState().onboarding;
+  if (from === 5 && ob?.workoutMode === 'gym') return 3;
+  return from - 1;
+}
+
 let _step = 0;
 const TOTAL_STEPS = 12;
 
@@ -110,6 +160,15 @@ function _stepPersonal() {
             <option value="active" ${s.activityLevel === 'active' ? 'selected' : ''}>Active (regular exercise)</option>
             <option value="very_active" ${s.activityLevel === 'very_active' ? 'selected' : ''}>Very active (athlete / field work)</option>
           </select>
+        </div>
+        <div class="ob-field" style="margin-top:10px;">
+          <label class="field-label">Body Fat % <span style="color:var(--text-muted);font-weight:normal;">(Optional)</span></label>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+            ${[10,15,20,25,30].map(pct => `
+              <button class="btn btn-sm btn-secondary ob-bf-btn ${Number(s.bodyFatPct) === pct ? 'active' : ''}" data-pct="${pct}" style="flex:1; min-width:40px; padding:6px 4px; font-size:12px; ${Number(s.bodyFatPct) === pct ? 'background:rgba(124,58,237,0.2);border-color:var(--aura-violet);color:var(--aura-violet-light);' : ''}">${pct}%</button>
+            `).join('')}
+            <input class="input" id="ob-bf-custom" type="number" placeholder="Custom" min="3" max="50" value="${s.bodyFatPct && ![10,15,20,25,30].includes(Number(s.bodyFatPct)) ? s.bodyFatPct : ''}" style="flex:1; min-width:60px; font-size:12px; padding:6px 8px; height:auto;" />
+          </div>
         </div>
       </div>
     </div>
@@ -418,6 +477,8 @@ function _stepAccountability() {
 function _stepComplete() {
   const s = getState().onboarding;
   const macros = calculateMacros(getState());
+  const { bmi, bmiCat, bmr, tdee, leanMass } = _calcBMIBMR(s);
+  const bmiColor = bmiCat === 'Healthy' ? 'var(--aura-mint-light)' : bmiCat === 'Underweight' ? 'var(--aura-violet-light)' : 'var(--aura-rose-light)';
   return `
     <div class="ob-step ob-complete anim-scale-in">
       <div class="complete-emblem">
@@ -442,7 +503,34 @@ function _stepComplete() {
         </div>
       </div>
 
-      <div class="complete-items">
+      <!-- Body Metrics Card -->
+      <div class="card" style="margin-top:16px; padding:14px; background:rgba(124,58,237,0.06); border-color:rgba(124,58,237,0.2); text-align:left;">
+        <p style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">Body Metrics</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div style="display:flex; flex-direction:column;">
+            <span style="font-size:9px; color:var(--text-muted);">BMI</span>
+            <strong style="font-size:18px; color:${bmiColor};">${bmi}</strong>
+            <span style="font-size:10px; color:${bmiColor};">${bmiCat}</span>
+          </div>
+          <div style="display:flex; flex-direction:column;">
+            <span style="font-size:9px; color:var(--text-muted);">BMR</span>
+            <strong style="font-size:18px; color:var(--text-primary);">${bmr}</strong>
+            <span style="font-size:10px; color:var(--text-muted);">kcal / day</span>
+          </div>
+          <div style="display:flex; flex-direction:column;">
+            <span style="font-size:9px; color:var(--text-muted);">Maintenance</span>
+            <strong style="font-size:18px; color:var(--aura-amber-light);">${tdee}</strong>
+            <span style="font-size:10px; color:var(--text-muted);">kcal / day</span>
+          </div>
+          ${leanMass ? `<div style="display:flex; flex-direction:column;">
+            <span style="font-size:9px; color:var(--text-muted);">Lean Mass</span>
+            <strong style="font-size:18px; color:var(--aura-violet-light);">${leanMass}kg</strong>
+            <span style="font-size:10px; color:var(--text-muted);">Est.</span>
+          </div>` : ''}
+        </div>
+      </div>
+
+      <div class="complete-items" style="margin-top:14px;">
         <div class="complete-item">✓ Personalised workout split generated</div>
         <div class="complete-item">✓ Nutrition targets calculated</div>
         <div class="complete-item">✓ AI coaching system ready</div>
@@ -507,7 +595,7 @@ function _wireEvents() {
       const autoAdvanceSteps = [2, 3, 5, 6, 7, 10];
       if (autoAdvanceSteps.includes(_step)) {
         setTimeout(() => {
-          _goToStep(_step + 1);
+          _goToStep(_getNextStep(_step));
         }, 300);
       }
     });
@@ -526,7 +614,32 @@ function _wireEvents() {
 
   // Navigation
   document.getElementById('ob-next')?.addEventListener('click', _handleNext);
-  document.getElementById('ob-back')?.addEventListener('click', () => _goToStep(_step - 1));
+  document.getElementById('ob-back')?.addEventListener('click', () => _goToStep(_getPrevStep(_step)));
+
+  // Body fat preset buttons
+  document.querySelectorAll('.ob-bf-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.ob-bf-btn').forEach(b => {
+        b.style.background = ''; b.style.borderColor = ''; b.style.color = '';
+        b.classList.remove('active');
+      });
+      btn.style.background = 'rgba(124,58,237,0.2)';
+      btn.style.borderColor = 'var(--aura-violet)';
+      btn.style.color = 'var(--aura-violet-light)';
+      btn.classList.add('active');
+      const customInput = document.getElementById('ob-bf-custom');
+      if (customInput) customInput.value = '';
+      setState('onboarding.bodyFatPct', Number(btn.dataset.pct));
+    });
+  });
+  document.getElementById('ob-bf-custom')?.addEventListener('input', (e) => {
+    document.querySelectorAll('.ob-bf-btn').forEach(b => {
+      b.style.background = ''; b.style.borderColor = ''; b.style.color = '';
+      b.classList.remove('active');
+    });
+    const v = Number(e.target.value);
+    if (v > 0) setState('onboarding.bodyFatPct', v);
+  });
 }
 
 function _handleNext() {
@@ -544,8 +657,12 @@ function _handleNext() {
       showToast('Please fill all fields', 'error');
       return;
     }
+    const bfInput = document.getElementById('ob-bf-custom');
+    const bfCustom = bfInput?.value ? Number(bfInput.value) : null;
+    const existingBf = getState().onboarding?.bodyFatPct || null;
     updateState('onboarding', {
-      age: Number(age), weight: Number(weight), height: Number(height), gender, activityLevel: activity
+      age: Number(age), weight: Number(weight), height: Number(height), gender, activityLevel: activity,
+      ...(bfCustom ? { bodyFatPct: bfCustom } : (existingBf ? {} : {}))
     });
   }
 
@@ -554,7 +671,7 @@ function _handleNext() {
     return;
   }
 
-  _goToStep(_step + 1);
+  _goToStep(_getNextStep(_step));
 }
 
 function _completeOnboarding() {
@@ -572,6 +689,10 @@ function _completeOnboarding() {
     protein: { target: macros.protein, consumed: 0 },
     water: { target: macros.water, consumed: 0 },
   });
+
+  // Calculate and save BMI/BMR/TDEE to profile state
+  const { bmi, bmiCat, bmr, tdee, leanMass } = _calcBMIBMR(state.onboarding);
+  updateState('profile', { bmi, bmiCat, bmr, tdee, leanMass, proteinTarget: macros.protein, waterTarget: macros.water, maintenanceCalories: tdee });
 
   setState('onboarding.completed', true);
   saveState();

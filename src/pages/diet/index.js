@@ -309,6 +309,7 @@ function _openLogSheet() {
           <span>${data.emoji} ${name} (${qty}${unit})</span>
           <span style="font-weight:var(--fw-bold); color:var(--aura-violet-light);">${data.protein}g protein · ${data.calories} kcal</span>
         </div>
+        <p style="font-size:10px; color:var(--text-muted); margin:4px 0 0; font-style:italic;">*Approx. values based on common nutrition data</p>
       `;
     }
   };
@@ -352,11 +353,12 @@ function _openMealDetail(meal) {
       <h3 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;margin-top:8px">${meal.name}</h3>
       <p style="color:var(--text-muted);font-size:var(--text-sm)">⏱ ${meal.prepTime}</p>
     </div>
-    <div class="stat-grid stat-grid-3" style="margin-bottom:16px">
+    <div class="stat-grid stat-grid-3" style="margin-bottom:4px">
       <div class="stat-cell"><div class="stat-value" style="color:var(--aura-violet-light)">${meal.calories}</div><div class="stat-label">kcal</div></div>
       <div class="stat-cell"><div class="stat-value gradient-text-mint">${meal.protein}g</div><div class="stat-label">Protein</div></div>
       <div class="stat-cell"><div class="stat-value">${meal.carbs || 30}g</div><div class="stat-label">Carbs</div></div>
     </div>
+    <p style="font-size:10px; color:var(--text-muted); text-align:center; margin:0 0 12px; font-style:italic;">*Approx. nutritional values</p>
     
     <div class="card" style="margin-bottom:12px; background:rgba(255,255,255,0.02)">
       <p class="section-label">📋 Ingredients</p>
@@ -365,13 +367,15 @@ function _openMealDetail(meal) {
       </p>
       <p class="section-label">🍳 Recipe Steps</p>
       <p style="font-size:var(--text-sm);color:var(--text-secondary);line-height:1.6">${meal.recipe}</p>
+      <p style="font-size:10px; color:var(--text-muted); margin:10px 0 0; font-style:italic;">*Nutrition values are approximate. Actual values may vary by portion and preparation method.</p>
     </div>
 
     <div class="card" style="margin-bottom:12px; background:rgba(255,255,255,0.02)">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span class="section-label" style="margin-bottom:0;">Estimated Cost</span>
+        <span class="section-label" style="margin-bottom:0;">Approx. Cost</span>
         <span style="font-weight:var(--fw-bold); color:var(--aura-amber-light);">₹${cost}</span>
       </div>
+      <p style="font-size:10px; color:var(--text-muted); margin:4px 0 0; font-style:italic;">*Approx. market price</p>
     </div>
 
     <div class="card" style="margin-bottom:16px; background:rgba(255,255,255,0.02); text-align:center;">

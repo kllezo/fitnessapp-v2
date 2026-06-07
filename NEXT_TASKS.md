@@ -30,13 +30,19 @@
 - [x] Username routing inside chats, DMs, leaderboards, partner pages, and friend lists to show Friend Profiles.
 - [x] Inbox button header trigger displaying active group and direct message chat overlays.
 - [x] Replaced local daily sync bottom sheet with Modal Manager overlay to avoid overlay remnants and double layouts.
-- [x] Recovery Page: Removed Today's Vitals section from main screen. Somatic values (Sleep, Energy, Stress, Motivation, Hydration, Soreness) now only shown inside Recovery Details modal (tap Recovery Score card).
-- [x] Group Detail Modal: Removed Group Chat Preview snippet card. Replaced with clean 💬 Open Group Chat button card. Group Overview now only shows Stats, Table, Charts, and Chat button.
+- [x] Recovery Page: Removed Today's Vitals section from main screen. Somatic values now only shown inside Recovery Details modal.
+- [x] Group Detail Modal: Removed Group Chat Preview snippet. Replaced with 💬 Open Group Chat button card.
+- [x] Onboarding: BMI + BMR + TDEE (Maintenance Calories) calculated and displayed on final completion screen.
+- [x] Onboarding: Optional Body Fat % field (preset 10/15/20/25/30% buttons + custom input) on Personal step.
+- [x] Onboarding: Gym mode auto-skips Equipment step. Back button also skips it when in gym mode.
+- [x] Onboarding: Back button fixed — goes back exactly 1 step (no resets).
+- [x] Onboarding: BMI/BMR/TDEE/Lean Mass saved to `profile` state on completion.
+- [x] Profile Page: Body Metrics section added (BMI, BMR, Maintenance, Protein Target, Water Target, Lean Mass).
+- [x] Diet: All estimated values marked with `*Approx.` — custom logger preview, meal detail stats, cost card, recipe footer.
+- [x] Socials: #chat-content CSS fixed to fill overlay as flex column, ensuring DM input is always bottom-pinned.
 
 ### 2. Next Priorities & Unresolved
-- [ ] Onboarding goals multi-select checks (e.g. Build Muscle + Lose Fat).
-- [ ] Equipment selection expansion to support Bench, Smith Machine, bands, mat, weight options.
-- [ ] Auto-advance on single-selection questionnaire steps.
-- [ ] Back button navigation logic fixes for onboarding steps.
 - [ ] Share workout cards download options.
 - [ ] Readiness syncing checks logic loop check.
+- [ ] Home dashboard mini Body Metrics card (BMI/BMR quick view).
+- [ ] Onboarding goals multi-select persistence verification.

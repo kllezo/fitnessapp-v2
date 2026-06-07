@@ -281,6 +281,14 @@
 }
 .chat-overlay.hidden { display: none; }
 
+/* Ensure chat content fills overlay as flex column */
+#chat-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
 .chat-header {
   display: flex;
   align-items: center;

@@ -97,7 +97,7 @@ export function render() {
         <div class="section-label">Training Profile</div>
         <div class="profile-info-grid card">
           ${_infoRow('🎯', 'Goal', goalLabel)}
-          ${_infoRow('🏋️', 'Mode', ob?.workoutMode === 'gym' ? 'Gym' : 'Home')}
+          ${_infoRow('🏗️', 'Mode', ob?.workoutMode === 'gym' ? 'Gym' : 'Home')}
           ${_infoRow('📅', 'Days/Week', `${ob?.trainingDays || '—'} days`)}
           ${_infoRow('⚡', 'Experience', ob?.experience || '—')}
           ${_infoRow('💪', 'Primary Focus', ob?.primaryMuscle || '—')}
@@ -105,6 +105,58 @@ export function render() {
           ${ob?.weight ? _infoRow('⚖️', 'Body Stats', `${ob.weight}kg · ${ob.height}cm · Age ${ob.age}`) : ''}
         </div>
       </div>
+
+      <!-- Body Metrics Section -->
+      ${(() => {
+        const prof = state.profile || {};
+        const macros = state.nutrition;
+        const bmi = prof.bmi;
+        const bmr = prof.bmr;
+        const tdee = prof.tdee || prof.maintenanceCalories;
+        const protTarget = prof.proteinTarget || macros?.protein?.target;
+        const waterTarget = prof.waterTarget || macros?.water?.target;
+        const leanMass = prof.leanMass;
+        const bmiCat = prof.bmiCat || '';
+        if (!bmi && !bmr) return '';
+        const bmiColor = bmiCat === 'Healthy' ? 'var(--aura-mint-light)' : bmiCat === 'Underweight' ? 'var(--aura-violet-light)' : 'var(--aura-rose-light)';
+        return `
+          <div class="profile-section">
+            <div class="section-label">Body Metrics</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              ${bmi ? `<div class="card" style="padding:12px; text-align:center;">
+                <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase; letter-spacing:0.5px;">BMI</span>
+                <strong style="font-size:22px; color:${bmiColor}; display:block; margin-top:2px;">${bmi}</strong>
+                <span style="font-size:10px; color:${bmiColor};">${bmiCat}</span>
+              </div>` : ''}
+              ${bmr ? `<div class="card" style="padding:12px; text-align:center;">
+                <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase; letter-spacing:0.5px;">BMR</span>
+                <strong style="font-size:22px; color:var(--text-primary); display:block; margin-top:2px;">${bmr}</strong>
+                <span style="font-size:10px; color:var(--text-muted);">kcal / day</span>
+              </div>` : ''}
+              ${tdee ? `<div class="card" style="padding:12px; text-align:center;">
+                <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase; letter-spacing:0.5px;">Maintenance</span>
+                <strong style="font-size:22px; color:var(--aura-amber-light); display:block; margin-top:2px;">${tdee}</strong>
+                <span style="font-size:10px; color:var(--text-muted);">kcal / day</span>
+              </div>` : ''}
+              ${protTarget ? `<div class="card" style="padding:12px; text-align:center;">
+                <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase; letter-spacing:0.5px;">Protein Target</span>
+                <strong style="font-size:22px; color:var(--aura-mint-light); display:block; margin-top:2px;">${protTarget}g</strong>
+                <span style="font-size:10px; color:var(--text-muted);">per day</span>
+              </div>` : ''}
+              ${waterTarget ? `<div class="card" style="padding:12px; text-align:center;">
+                <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase; letter-spacing:0.5px;">Water Target</span>
+                <strong style="font-size:22px; color:#60a5fa; display:block; margin-top:2px;">${waterTarget}L</strong>
+                <span style="font-size:10px; color:var(--text-muted);">per day</span>
+              </div>` : ''}
+              ${leanMass ? `<div class="card" style="padding:12px; text-align:center;">
+                <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase; letter-spacing:0.5px;">Lean Mass</span>
+                <strong style="font-size:22px; color:var(--aura-violet-light); display:block; margin-top:2px;">${leanMass}kg</strong>
+                <span style="font-size:10px; color:var(--text-muted);">Est.</span>
+              </div>` : ''}
+            </div>
+          </div>
+        `;
+      })()}
     </div>
 
     <!-- Edit Profile Sheet -->
