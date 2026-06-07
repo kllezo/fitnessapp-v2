@@ -144,22 +144,6 @@ export function render() {
         </div>
       </div>
 
-      <!-- Somatic Status -->
-      <div class="rec-section">
-        <div class="section-label">Today's Vitals</div>
-        <div class="somatic-grid">
-          ${indicators.map(ind => `
-            <div class="somatic-card">
-              <span class="somatic-icon">${ind.icon}</span>
-              <span class="somatic-label">${ind.label}</span>
-              <div class="somatic-bar">
-                <div class="somatic-fill" style="width:${ind.val * 20}%"></div>
-              </div>
-              <span class="somatic-val">${ind.val}/5</span>
-            </div>
-          `).join('')}
-        </div>
-      </div>
 
       <!-- Quick Actions / Recovery Tools (Moved ABOVE Diagnostics) -->
       <div class="rec-section">

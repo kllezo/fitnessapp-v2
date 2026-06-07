@@ -30,6 +30,8 @@
 - [x] Username routing inside chats, DMs, leaderboards, partner pages, and friend lists to show Friend Profiles.
 - [x] Inbox button header trigger displaying active group and direct message chat overlays.
 - [x] Replaced local daily sync bottom sheet with Modal Manager overlay to avoid overlay remnants and double layouts.
+- [x] Recovery Page: Removed Today's Vitals section from main screen. Somatic values (Sleep, Energy, Stress, Motivation, Hydration, Soreness) now only shown inside Recovery Details modal (tap Recovery Score card).
+- [x] Group Detail Modal: Removed Group Chat Preview snippet card. Replaced with clean 💬 Open Group Chat button card. Group Overview now only shows Stats, Table, Charts, and Chat button.
 
 ### 2. Next Priorities & Unresolved
 - [ ] Onboarding goals multi-select checks (e.g. Build Muscle + Lose Fat).

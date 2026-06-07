@@ -57,7 +57,7 @@
 - Meal catalog and custom food logging overlay supporting Indian foods (Tea, Coffee, Curd, Rice, Dal, Paneer, eggs, etc.) with custom quantities and units.
 
 ## 7. Recovery (`/recovery`)
-- Somatic vital tracking and daily check-ins. Clickable Recovery Score top card to expand detailed survey results & 7-day Readiness Trend SVG chart in a modal sheet.
+- Recovery Summary Card (score ring + 7-day sparkline) is the top element. Clickable to open Detailed Recovery Diagnostics modal showing Sleep Duration, Energy, Stress, Motivation, Hydration, Soreness, and 7-Day Readiness Trend SVG chart. Today's Vitals removed from main screen.
 - Box Breathing exercise trainer integrated into `GlobalModalManager` (4-4-4-4 phase timer).
 - Walk Reset interactive stopwatch modal containing steps goal, progress rings, and estimated burns.
 - Mindfulness guided timer (1, 2, 5 min resets) with cycles of somatic prompts and scaling breathing animations.
@@ -69,7 +69,7 @@
 - Strangers compatibility search supporting expanded matching filters (Age, Gender, Goal, Level, Country, Language, Frequency, Time Zone, Discipline) with clean "Find My Match" CTA.
 - AURA themed Add Friend modal replacing generic browser dialog prompts.
 - Friends sub-section featuring the Universal Leaderboard ranking all friends + Me together by default, and a My Groups card grid.
-- Group Detail Modal consolidating Group average stats, comparative table, group chat preview, and 4 SVG weekly trend charts (Discipline, Workouts, Recovery, Protein) with unique member color lines.
+- Group Detail Modal: Group Rank, Group Average stats, Comparative Squad Matrix table, 4 SVG weekly trend charts (Discipline, Workouts, Recovery, Protein), and a 💬 Open Group Chat button card (no chat preview snippets on overview).
 - Fullscreen chat overlays for direct messages and group chats that hide bottom navigation, lock page scrolling, and attach message input sticky to the bottom safe area.
 - Username click routing anywhere in Squad (chats, leaderboards, list cards) to expand the friend profile card.
 - Squad header Inbox button opening a dialog list of active group chats, partner chats, and direct messages.

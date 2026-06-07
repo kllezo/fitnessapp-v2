@@ -1297,26 +1297,18 @@ function _openGroupDetailModal(groupId) {
   const totalScore = group.members.reduce((sum, m) => sum + m.discipline, 0);
   const avgScore = Math.round(totalScore / group.members.length);
 
-  const chatMessages = group.messages || [];
-  const last2Messages = chatMessages.slice(-2);
-  const chatPreviewHtml = last2Messages.length ? `
-    <div class="group-chat-preview-card card" id="group-chat-preview-btn" style="cursor:pointer; padding:12px; margin-bottom:12px; border:1.5px solid var(--border-card);">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <span style="font-size:11px; font-weight:700; color:var(--text-muted);">💬 Group Chat Preview</span>
-        <span style="font-size:10px; color:var(--aura-violet-light);">Open Fullscreen →</span>
+  const openGroupChatBtnHtml = `
+    <div class="card" id="group-open-chat-btn" style="cursor:pointer; padding:16px; margin-bottom:12px; border:1.5px solid rgba(167,139,250,0.25); background:rgba(167,139,250,0.04); display:flex; flex-direction:column; gap:8px; transition:all 0.2s ease;" onmouseenter="this.style.borderColor='rgba(167,139,250,0.5)'" onmouseleave="this.style.borderColor='rgba(167,139,250,0.25)'">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:22px;">💬</span>
+        <div style="flex:1;">
+          <strong style="font-size:13px; color:var(--text-primary); display:block;">Group Chat</strong>
+          <span style="font-size:11px; color:var(--text-muted);">Open group conversation with all members</span>
+        </div>
       </div>
-      <div style="display:flex; flex-direction:column; gap:4px;">
-        ${last2Messages.map(m => `
-          <div style="font-size:11.5px; line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-            <strong class="username-clickable" data-username="${m.from}" style="color:var(--aura-violet-light); cursor:pointer;">${m.from}:</strong>
-            <span style="color:var(--text-secondary);">${m.text}</span>
-          </div>
-        `).join('')}
+      <div style="display:flex; align-items:center; justify-content:flex-end;">
+        <span style="font-size:11px; color:var(--aura-violet-light); font-weight:700;">Open Group Chat →</span>
       </div>
-    </div>
-  ` : `
-    <div class="group-chat-preview-card card" id="group-chat-preview-btn" style="cursor:pointer; padding:16px; margin-bottom:12px; text-align:center;">
-      <span style="font-size:11px; color:var(--text-muted);">No messages in group chat yet. Tap to start chatting! 💬</span>
     </div>
   `;
 
@@ -1373,15 +1365,15 @@ function _openGroupDetailModal(groupId) {
         </div>
       </div>
 
-      ${chatPreviewHtml}
-
-      <span class="section-label" style="margin-top:12px; display:block;">Squad Matrix Matrix</span>
+      <span class="section-label" style="display:block; margin-bottom:8px;">Squad Matrix</span>
       ${tableHtml}
 
       <span class="section-label" style="margin-top:12px; display:block;">Weekly Trends</span>
       ${chartsHtml}
 
-      <button class="btn btn-ghost btn-sm btn-full" id="close-group-details-btn" style="margin-top:16px;">Close Details</button>
+      ${openGroupChatBtnHtml}
+
+      <button class="btn btn-ghost btn-sm btn-full" id="close-group-details-btn" style="margin-top:4px;">Close Details</button>
     </div>
   `;
 
@@ -1391,7 +1383,7 @@ function _openGroupDetailModal(groupId) {
   });
 
   document.getElementById('close-group-details-btn')?.addEventListener('click', closeModal);
-  document.getElementById('group-chat-preview-btn')?.addEventListener('click', () => {
+  document.getElementById('group-open-chat-btn')?.addEventListener('click', () => {
     closeModal();
     _openGroupChatFullscreen(group.id);
   });
