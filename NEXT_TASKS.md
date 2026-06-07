@@ -40,6 +40,12 @@
 - [x] Profile Page: Body Metrics section added (BMI, BMR, Maintenance, Protein Target, Water Target, Lean Mass).
 - [x] Diet: All estimated values marked with `*Approx.` — custom logger preview, meal detail stats, cost card, recipe footer.
 - [x] Socials: #chat-content CSS fixed to fill overlay as flex column, ensuring DM input is always bottom-pinned.
+- [x] Global Theme Option 3: Applied deeper background (#050505), cards (#11121A), borders (#23253A), primary (#5B5CF6), accent (#00E5A8), recovery (#42D4FF), secondary text (#8E93B8).
+- [x] Partner Schedule Matching: Added "Match Partner Schedule" trigger button, Mon-Sun splits schedule preview modal sheet, state persistence, success toast, and "Partner Schedule Match" analytics (weekly completion, alignment adherence, recovery metric comparison).
+- [x] Squad Copy Schedule: Added "Copy Schedule" button in Group Detail Modal. Displayed squad members selection row with discipline level and compatibility %. Opens daily split preview and saves as personalized squad synced plan.
+- [x] Admin Schedule Sync: Allowed admin to apply/sync their schedule to the squad, with a confirmation modal previewing daily splits. Sends accepted/pending sync invites.
+- [x] Squad Sync Panel: Integrated progress tracking showing accept/decline/pending status of the sync for all squad members.
+- [x] Group Analytics: Added custom high-fidelity stats cards for "Most Copied Schedule", "Schedule Compatibility", and "Schedule Compliance" below the group details weekly trend charts.
 
 ### 2. Next Priorities & Unresolved
 - [ ] Share workout cards download options.

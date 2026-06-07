@@ -70,6 +70,11 @@
 - Squad header [+ Add Friend] [Inbox] square icons.
 - Partner Page Rework: 2x2 grid of meaningful Partner, Train, Diet, and Friends cards.
 - Interactive You vs Partner comparison cards plotting completed workouts, water levels, protein, sleep, recovery score, and streak counts in dual progress bars.
+- Match Partner Schedule: Adds a schedule matching button below Partner Metrics. Clicking it displays a weekly schedule preview modal sheet (Mon-Sun split structure). Matching the schedule registers a synced plan in the state and shows a visual success notification.
+- Partner Schedule Match Analytics: Details synchronization status, weekly completion rate, alignment adherence percentage, and a visual comparison of recovery metrics.
+- Copy Squad Schedule: Allows copying a squad member's workout split pattern to your own schedule inside the Group Detail modal. Shows list of members with discipline metrics and compatibility percentages, opens a day-by-day preview, and copies the split personalized to your stats.
+- Squad Sync Panel: Interactive synchronization tracking panel in the Group Detail modal displaying sync alignment progress and status for all squad members.
+- Group Analytics: High-fidelity squad analytics cards displaying Most Copied Schedule, Schedule Compatibility, and Schedule Compliance percentages below the weekly trends.
 
 ## 9. Profile & Settings (`/profile`, `/settings`)
 - Photo file upload integration.

@@ -248,7 +248,17 @@ function _renderPartnerTab() {
         </div>
       </div>
 
-      <!-- Partner Action Cards (2x2 grid replacing generic actions) -->
+      <!-- Match Partner Schedule -->
+      <div class="card" id="match-partner-schedule-btn" style="cursor:pointer; padding:14px; display:flex; align-items:center; gap:12px; border-color:rgba(0,229,168,0.3); background:rgba(0,229,168,0.05); transition:all 0.2s;" onmouseenter="this.style.borderColor='rgba(0,229,168,0.6)'" onmouseleave="this.style.borderColor='rgba(0,229,168,0.3)'">
+        <span style="font-size:28px;">🔥</span>
+        <div style="flex:1;">
+          <strong style="font-size:13px; color:#00E5A8; display:block;">Match Partner Schedule</strong>
+          <span style="font-size:11px; color:var(--text-muted);">Copy ${partner.name}'s split structure — personalised for you</span>
+        </div>
+        <span style="font-size:11px; color:#00E5A8; font-weight:700;">Preview →</span>
+      </div>
+
+      <!-- Partner Action Cards (2x2 grid) -->
       <div class="partner-actions-section" style="margin-top:4px;">
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           
@@ -292,6 +302,40 @@ function _renderPartnerTab() {
           ${_renderComparisonRow('Current Workout Streak', state.workout?.streakDays || 0, partner.streakDays, '🔥', 'd')}
         </div>
       </div>
+
+      <!-- Partner Schedule Match Analytics -->
+      ${(() => {
+        const synced = state.socials?.partnerScheduleSynced === partner.id;
+        const yourComp = Math.min(100, Math.round((workoutsMe / 7) * 100));
+        const partComp = Math.min(100, Math.round((workoutsPartner / 7) * 100));
+        const adherence = Math.round((yourComp + partComp) / 2);
+        const bmiColor = recMe >= 80 ? '#00E5A8' : recMe >= 60 ? '#fcd34d' : '#fda4af';
+        return `
+          <div class="card" style="padding:14px; margin-top:4px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <span class="section-label" style="margin-bottom:0;">Partner Schedule Match</span>
+              <span style="font-size:10px; padding:3px 8px; border-radius:20px; font-weight:700; ${synced ? 'background:rgba(0,229,168,0.12);color:#00E5A8;' : 'background:rgba(35,37,58,0.8);color:var(--text-muted);'}">${synced ? '✓ Matched' : 'Not Matched'}</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
+              <div style="text-align:center; padding:8px; background:rgba(35,37,58,0.5); border-radius:10px;">
+                <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Weekly Completion</span>
+                <strong style="font-size:13px; color:var(--text-primary); display:block; margin-top:3px;">You ${workoutsMe}/7</strong>
+                <strong style="font-size:13px; color:var(--aura-violet-light); display:block;">Partner ${workoutsPartner}/7</strong>
+              </div>
+              <div style="text-align:center; padding:8px; background:rgba(35,37,58,0.5); border-radius:10px;">
+                <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Adherence</span>
+                <strong style="font-size:22px; color:${bmiColor}; display:block; margin-top:3px;">${adherence}%</strong>
+              </div>
+            </div>
+            <div style="margin-bottom:4px;">
+              <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-bottom:4px;"><span>Recovery Comparison</span><span style="color:${bmiColor};">${recMe}% vs ${recPartner}%</span></div>
+              <div style="height:4px; background:var(--border-card); border-radius:4px; overflow:hidden;">
+                <div style="height:100%; width:${adherence}%; background:linear-gradient(90deg,#00E5A8,#42D4FF); border-radius:4px;"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      })()}
 
       <!-- End Partnership -->
       <button class="btn btn-ghost btn-sm" id="end-partner-btn" style="margin-top:8px;width:100%;color:var(--aura-rose-light)">
@@ -634,6 +678,12 @@ function _wireContentEvents() {
   });
   document.getElementById('partner-card-action-chat')?.addEventListener('click', () => {
     if (partner) _openChat(partner);
+  });
+
+  // Match Partner Schedule
+  document.getElementById('match-partner-schedule-btn')?.addEventListener('click', () => {
+    const p = getState().auth?.partner;
+    if (p) _openMatchPartnerScheduleModal(p);
   });
 
   // Friends tab triggers
@@ -1372,8 +1422,106 @@ function _openGroupDetailModal(groupId) {
       <span class="section-label" style="display:block; margin-bottom:8px;">Squad Matrix</span>
       ${tableHtml}
 
+      <!-- Copy Schedule + Squad Sync Panel -->
+      ${(() => {
+        const friends = state.auth?.friends || [];
+        const syncStatus = state.socials?.squadSync?.[group.id] || {};
+        const syncedCount = group.members.filter(m => syncStatus[m.id] === 'accepted').length;
+        const totalMembers = group.members.length;
+        return `
+          <div style="margin:12px 0 0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span class="section-label" style="margin-bottom:0;">Schedule Sync</span>
+              <button class="btn btn-sm" id="copy-squad-schedule-btn" style="padding:5px 12px; font-size:10px; background:rgba(0,229,168,0.1); border:1px solid rgba(0,229,168,0.3); color:#00E5A8; border-radius:var(--radius-md); cursor:pointer;">🔥 Copy Schedule</button>
+            </div>
+            <div class="card" style="padding:12px; background:rgba(35,37,58,0.5);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:11px; font-weight:700; color:var(--text-primary);">Squad Schedule Sync</span>
+                <span style="font-size:10px; color:#00E5A8; font-weight:700;">${syncedCount}/${totalMembers} Synced</span>
+              </div>
+              <div style="height:4px; background:var(--border-card); border-radius:4px; overflow:hidden; margin-bottom:10px;">
+                <div style="height:100%; width:${Math.round(syncedCount/totalMembers*100)}%; background:linear-gradient(90deg,#00E5A8,#42D4FF); border-radius:4px;"></div>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                ${group.members.map(m => {
+                  const st = syncStatus[m.id];
+                  const icon = st === 'accepted' ? '✓' : st === 'pending' ? '⏳' : '✗';
+                  const col = st === 'accepted' ? '#00E5A8' : st === 'pending' ? '#fcd34d' : '#fda4af';
+                  return `<div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:11px; color:var(--text-secondary);">${m.name}</span>
+                    <span style="font-size:11px; color:${col}; font-weight:700;">${icon} ${st === 'accepted' ? 'Synced' : st === 'pending' ? 'Pending' : 'Not Synced'}</span>
+                  </div>`;
+                }).join('')}
+              </div>
+              <button class="btn btn-sm" id="admin-sync-btn" style="width:100%; margin-top:10px; padding:6px 0; font-size:11px; background:rgba(91,92,246,0.1); border:1px solid rgba(91,92,246,0.3); color:var(--aura-violet-light); border-radius:var(--radius-md); cursor:pointer;">🔥 Sync Schedule To Squad</button>
+            </div>
+          </div>
+        `;
+      })()}
+
       <span class="section-label" style="margin-top:12px; display:block;">Weekly Trends</span>
       ${chartsHtml}
+
+      <!-- Group Analytics -->
+      ${(() => {
+        const friends = state.auth?.friends || [];
+        const copyCounts = { 'Arjun K.': 4, 'Priya S.': 2, 'Rohan M.': 1 };
+        const podium = Object.entries(copyCounts).sort((a,b)=>b[1]-a[1]);
+        const medals = ['🥇','🥈','🥉'];
+        const compToday = group.members.filter(m => m.workout).length;
+        const compPct = Math.round(compToday / group.members.length * 100);
+        const weeklyAdh = [72,80,65,88,75,82,78];
+        const days = ['M','T','W','T','F','S','S'];
+        return `
+          <div style="margin-top:12px;">
+            <span class="section-label" style="display:block; margin-bottom:8px;">Group Analytics</span>
+            <div class="card" style="padding:12px; margin-bottom:10px;">
+              <p style="font-size:11px; font-weight:700; color:var(--text-primary); margin-bottom:8px;">Most Copied Schedule</p>
+              ${podium.map(([name, count], i) => `
+                <div style="display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid rgba(35,37,58,0.8);">
+                  <span style="font-size:14px;">${medals[i]}</span>
+                  <span style="flex:1; font-size:12px; color:var(--text-primary); font-weight:600;">${name}</span>
+                  <span style="font-size:10px; color:var(--text-muted);">copied by ${count} members</span>
+                </div>
+              `).join('')}
+            </div>
+            <div class="card" style="padding:12px; margin-bottom:10px;">
+              <p style="font-size:11px; font-weight:700; color:var(--text-primary); margin-bottom:8px;">Schedule Compatibility</p>
+              ${group.members.filter(m => m.id !== 'me').map(m => {
+                const compat = friends.find(f => f.name === m.name)?.compatibility || Math.floor(65 + Math.random()*25);
+                const col = compat >= 85 ? '#00E5A8' : compat >= 70 ? '#fcd34d' : '#fda4af';
+                return `<div style="margin-bottom:8px;">
+                  <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+                    <span style="color:var(--text-secondary);">${m.name}</span>
+                    <span style="color:${col}; font-weight:700;">${compat}% Match</span>
+                  </div>
+                  <div style="height:3px; background:var(--border-card); border-radius:3px; overflow:hidden;">
+                    <div style="height:100%; width:${compat}%; background:${col}; border-radius:3px;"></div>
+                  </div>
+                </div>`;
+              }).join('')}
+            </div>
+            <div class="card" style="padding:12px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <p style="font-size:11px; font-weight:700; color:var(--text-primary);">Schedule Compliance</p>
+                <span style="font-size:11px; color:#00E5A8; font-weight:700;">${compToday}/${group.members.length} Today</span>
+              </div>
+              <div style="height:4px; background:var(--border-card); border-radius:4px; overflow:hidden; margin-bottom:10px;">
+                <div style="height:100%; width:${compPct}%; background:linear-gradient(90deg,#00E5A8,#42D4FF); border-radius:4px;"></div>
+              </div>
+              <p style="font-size:10px; color:var(--text-muted); margin-bottom:6px;">Weekly Adherence</p>
+              <div style="display:flex; gap:4px; align-items:flex-end; height:32px;">
+                ${weeklyAdh.map((h,i) => `
+                  <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;">
+                    <div style="width:100%; height:${Math.round(h/100*28)}px; background:linear-gradient(180deg,#00E5A8,#42D4FF); border-radius:2px; opacity:0.8;"></div>
+                    <span style="font-size:8px; color:var(--text-muted);">${days[i]}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      })()}
 
       <button class="btn btn-ghost btn-sm btn-full" id="close-group-details-btn" style="margin-top:12px;">Close Details</button>
     </div>
@@ -1389,6 +1537,8 @@ function _openGroupDetailModal(groupId) {
     closeModal();
     _openGroupChatFullscreen(group.id);
   });
+  document.getElementById('copy-squad-schedule-btn')?.addEventListener('click', () => _openCopySquadScheduleModal(group));
+  document.getElementById('admin-sync-btn')?.addEventListener('click', () => _openAdminSyncModal(group));
 
   // Wire username click inside detail sheet
   document.querySelectorAll('.modal-sheet .username-clickable').forEach(el => {
@@ -1702,4 +1852,227 @@ function _sendGroupMessage() {
     `;
     container.scrollTop = container.scrollHeight;
   }
+}
+
+// ====================================================
+// SCHEDULE MATCHING SYSTEM
+// ====================================================
+
+const _WEEKDAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+const _PARTNER_SCHEDULES = {
+  f1: { name: 'Push Pull Legs', split: ['Push','Pull','Legs','Recovery','Push','Pull','Recovery'] },
+  f2: { name: 'Upper / Lower', split: ['Upper','Lower','Rest','Upper','Lower','Cardio','Rest'] },
+  f3: { name: 'Full Body 3×', split: ['Full Body','Rest','Full Body','Rest','Full Body','Rest','Rest'] },
+  f4: { name: 'High Freq PPL', split: ['Push','Pull','Legs','Cardio','Push','Pull','Rest'] },
+};
+
+const _DEFAULT_SCHEDULE = { name: 'Push Pull Legs', split: ['Push','Pull','Legs','Recovery','Push','Pull','Rest'] };
+
+function _getPartnerSchedule(partnerId) {
+  return _PARTNER_SCHEDULES[partnerId] || _DEFAULT_SCHEDULE;
+}
+
+function _getPersonalizedExercises(dayType, ob) {
+  const isGym = ob?.workoutMode === 'gym';
+  const isAdv = ob?.experience === 'experienced';
+  const map = {
+    Push: isGym
+      ? (isAdv ? ['Barbell Bench Press','Incline Dumbbell Press','Overhead Press','Cable Fly','Tricep Pushdown'] : ['Dumbbell Bench Press','Shoulder Press','Chest Fly','Pushups'])
+      : ['Pushups','Incline Pushups','Pike Pushups','Diamond Pushups','Dips'],
+    Pull: isGym
+      ? (isAdv ? ['Weighted Pull-ups','Barbell Row','Cable Row','Face Pulls','Bicep Curls'] : ['Lat Pulldown','Dumbbell Row','Reverse Fly','Hammer Curls'])
+      : ['Pull-ups','Resistance Band Row','Inverted Row','Band Pull-apart','Bicep Curls'],
+    Legs: isGym
+      ? (isAdv ? ['Barbell Squat','Romanian Deadlift','Leg Press','Leg Curl','Calf Raise'] : ['Goblet Squat','Dumbbell Lunge','Leg Extension','Calf Raise'])
+      : ['Bodyweight Squat','Lunges','Glute Bridge','Wall Sit','Jump Squat'],
+    Upper: isGym
+      ? ['Bench Press','Overhead Press','Pull-ups','Dumbbell Row','Lateral Raise']
+      : ['Pushups','Pike Pushups','Pull-ups','Band Row','Shoulder Tap'],
+    Lower: isGym
+      ? ['Squat','Deadlift','Leg Press','Leg Curl','Hip Thrust']
+      : ['Bodyweight Squat','Glute Bridge','Lunges','Step-ups','Donkey Kick'],
+    'Full Body': isGym
+      ? ['Deadlift','Bench Press','Squat','Pull-ups','Plank']
+      : ['Burpees','Pushups','Bodyweight Squat','Pull-ups','Plank'],
+    Cardio: ['Treadmill Run','Jump Rope','Cycling','HIIT Intervals','Stair Climber'],
+    Recovery: ['Foam Rolling','Static Stretching','Box Breathing','Walk Reset','Light Yoga'],
+    Rest: [],
+  };
+  return map[dayType] || [];
+}
+
+function _openMatchPartnerScheduleModal(partner) {
+  const schedule = _getPartnerSchedule(partner.id);
+  const ob = getState().onboarding || {};
+  const DAYS = _WEEKDAYS;
+  const dayTypeColors = {
+    Push:'#818CF8', Pull:'#00E5A8', Legs:'#42D4FF', Recovery:'#fcd34d',
+    Cardio:'#fda4af', Upper:'#818CF8', Lower:'#00E5A8', 'Full Body':'#00E5A8', Rest:'#4A4F6E'
+  };
+
+  const scheduleRowsHtml = DAYS.map((day, i) => {
+    const type = schedule.split[i];
+    const exercises = _getPersonalizedExercises(type, ob);
+    const col = dayTypeColors[type] || '#8E93B8';
+    return `
+      <div style="display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid rgba(35,37,58,0.8);">
+        <span style="font-size:10px; color:var(--text-muted); width:28px; flex-shrink:0; margin-top:3px;">${day}</span>
+        <div style="flex:1;">
+          <span style="font-size:12px; font-weight:700; color:${col};">${type}</span>
+          ${exercises.length ? `<p style="font-size:10px; color:var(--text-muted); margin:2px 0 0; line-height:1.5;">${exercises.slice(0,3).join(' · ')}${exercises.length > 3 ? ' +more' : ''}</p>` : ''}
+        </div>
+        <span style="font-size:9px; color:var(--text-muted); flex-shrink:0; margin-top:3px;">Partner: ${type}</span>
+      </div>
+    `;
+  }).join('');
+
+  showModal({
+    title: `🔥 Match ${partner.name}'s Schedule`,
+    content: `
+      <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px; line-height:1.5;">Structure: <strong style="color:var(--text-primary);">${schedule.name}</strong> — Exercises personalised for your level & equipment.</p>
+      <div style="margin-bottom:14px;">${scheduleRowsHtml}</div>
+      <p style="font-size:10px; color:var(--text-muted); font-style:italic; margin-bottom:14px;">Saves as your Partner Synced Plan — won't overwrite existing workouts.</p>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-primary btn-full" id="confirm-match-schedule-btn">Match Schedule ✓</button>
+        <button class="btn btn-ghost btn-sm" id="cancel-match-schedule-btn">Cancel</button>
+      </div>
+    `
+  });
+
+  document.getElementById('confirm-match-schedule-btn')?.addEventListener('click', () => {
+    const partnerSyncedPlan = schedule.split.map((type, i) => ({
+      day: _WEEKDAYS[i], type, exercises: _getPersonalizedExercises(type, getState().onboarding || {})
+    }));
+    setState('socials.partnerScheduleSynced', partner.id);
+    setState('socials.partnerSyncedPlan', partnerSyncedPlan);
+    closeModal();
+    showToast(`🔥 Schedule matched with ${partner.name}!`, 'success');
+    const content = document.getElementById('socials-content');
+    if (content) content.innerHTML = _renderTab('partner');
+    _wireContentEvents();
+  });
+  document.getElementById('cancel-match-schedule-btn')?.addEventListener('click', closeModal);
+}
+
+function _openCopySquadScheduleModal(group) {
+  const state = getState();
+  const friends = state.auth?.friends || [];
+  const ob = state.onboarding || {};
+  const DAYS = _WEEKDAYS;
+  let selectedMemberId = null;
+
+  const dayTypeColors = {
+    Push:'#818CF8', Pull:'#00E5A8', Legs:'#42D4FF', Recovery:'#fcd34d',
+    Cardio:'#fda4af', Upper:'#818CF8', Lower:'#00E5A8', 'Full Body':'#00E5A8', Rest:'#4A4F6E'
+  };
+
+  const memberListHtml = group.members
+    .filter(m => m.id !== 'me')
+    .map(m => {
+      const friend = friends.find(f => f.name === m.name);
+      const sched = _getPartnerSchedule(friend?.id || '');
+      const compat = friend?.compatibility || Math.floor(65 + Math.random() * 25);
+      return `
+        <div class="squad-member-select-row" data-member-id="${friend?.id || m.id}" style="display:flex; align-items:center; gap:10px; padding:10px; border:1.5px solid var(--border-card); border-radius:var(--radius-md); cursor:pointer; transition:all 0.15s; margin-bottom:8px;">
+          <div style="width:36px; height:36px; border-radius:50%; background:var(--grad-violet); display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff; flex-shrink:0; font-size:14px;">${m.name[0]}</div>
+          <div style="flex:1;">
+            <strong style="font-size:12px; color:var(--text-primary); display:block;">${m.name}</strong>
+            <span style="font-size:10px; color:var(--text-muted);">${sched.name} · Disc ${m.discipline}</span>
+          </div>
+          <span style="font-size:10px; font-weight:700; color:#00E5A8;">${compat}% compat</span>
+        </div>
+      `;
+    }).join('');
+
+  showModal({
+    title: '🔥 Copy Schedule',
+    content: `
+      <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Choose a squad member to copy their split structure:</p>
+      <div id="squad-member-list">${memberListHtml}</div>
+      <div id="copy-schedule-preview" style="display:none;"></div>
+      <div id="copy-schedule-actions" style="display:none; margin-top:12px; gap:10px; display:none;">
+        <button class="btn btn-primary btn-full" id="confirm-copy-schedule-btn">Copy Schedule ✓</button>
+        <button class="btn btn-ghost btn-sm" id="back-to-member-list-btn">Back</button>
+      </div>
+    `
+  });
+
+  document.querySelectorAll('.squad-member-select-row').forEach(row => {
+    row.addEventListener('click', () => {
+      selectedMemberId = row.dataset.memberId;
+      const sched = _getPartnerSchedule(selectedMemberId);
+      const schedRows = DAYS.map((day, i) => {
+        const type = sched.split[i];
+        const exercises = _getPersonalizedExercises(type, ob);
+        const col = dayTypeColors[type] || '#8E93B8';
+        return `<div style="display:flex; align-items:flex-start; gap:10px; padding:7px 0; border-bottom:1px solid rgba(35,37,58,0.8);">
+          <span style="font-size:10px; color:var(--text-muted); width:28px; flex-shrink:0; margin-top:2px;">${day}</span>
+          <div style="flex:1;">
+            <span style="font-size:12px; font-weight:700; color:${col};">${type}</span>
+            ${exercises.length ? `<p style="font-size:10px; color:var(--text-muted); margin:2px 0 0;">${exercises.slice(0,3).join(' · ')}</p>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+
+      const memberName = row.querySelector('strong')?.textContent || 'Member';
+      const preview = document.getElementById('copy-schedule-preview');
+      const memberList = document.getElementById('squad-member-list');
+      const actions = document.getElementById('copy-schedule-actions');
+      if (preview) { preview.style.display = 'block'; preview.innerHTML = `<p style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">Copying <strong style="color:var(--text-primary);">${memberName}</strong>'s schedule — personalised for you:</p>${schedRows}<p style="font-size:10px; color:var(--text-muted); font-style:italic; margin-top:10px;">Saves as Squad Synced Plan — won't overwrite existing workouts.</p>`; }
+      if (memberList) memberList.style.display = 'none';
+      if (actions) { actions.style.display = 'flex'; }
+      document.getElementById('confirm-copy-schedule-btn')?.addEventListener('click', () => {
+        const plan = _getPartnerSchedule(selectedMemberId).split.map((type, i) => ({ day: _WEEKDAYS[i], type, exercises: _getPersonalizedExercises(type, ob) }));
+        setState('socials.squadSyncedPlan', plan);
+        setState('socials.squadSyncedFrom', selectedMemberId);
+        closeModal();
+        showToast('🔥 Squad schedule copied — personalised plan saved!', 'success');
+      });
+      document.getElementById('back-to-member-list-btn')?.addEventListener('click', () => {
+        if (preview) preview.style.display = 'none';
+        if (memberList) memberList.style.display = 'block';
+        if (actions) actions.style.display = 'none';
+      });
+    });
+  });
+}
+
+function _openAdminSyncModal(group) {
+  const state = getState();
+  const mySchedule = state.socials?.partnerSyncedPlan || state.socials?.squadSyncedPlan;
+  const DAYS = _WEEKDAYS;
+  const dayTypeColors = { Push:'#818CF8', Pull:'#00E5A8', Legs:'#42D4FF', Recovery:'#fcd34d', Cardio:'#fda4af', Upper:'#818CF8', Lower:'#00E5A8', 'Full Body':'#00E5A8', Rest:'#4A4F6E' };
+
+  const schedToShow = mySchedule || _DEFAULT_SCHEDULE.split.map((type, i) => ({ day: DAYS[i], type }));
+  const schedRows = schedToShow.map(d => {
+    const col = dayTypeColors[d.type] || '#8E93B8';
+    return `<div style="display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid rgba(35,37,58,0.8);">
+      <span style="font-size:10px; color:var(--text-muted); width:28px;">${d.day}</span>
+      <span style="font-size:12px; font-weight:700; color:${col};">${d.type}</span>
+    </div>`;
+  }).join('');
+
+  showModal({
+    title: '🔥 Sync Schedule To Squad',
+    content: `
+      <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px; line-height:1.5;">This will send your schedule structure to all squad members. Each member gets a personalized version based on their own BMI, BMR, goals, and equipment.</p>
+      <div style="margin-bottom:14px;">${schedRows}</div>
+      <p style="font-size:10px; color:var(--text-muted); font-style:italic; margin-bottom:14px;">Members will receive a notification to Accept or Decline. Their exercises are auto-personalized.</p>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-primary btn-full" id="confirm-admin-sync-btn">Apply To Squad →</button>
+        <button class="btn btn-ghost btn-sm" id="cancel-admin-sync-btn">Cancel</button>
+      </div>
+    `
+  });
+
+  document.getElementById('confirm-admin-sync-btn')?.addEventListener('click', () => {
+    const syncStatus = {};
+    group.members.forEach(m => { syncStatus[m.id] = m.id === 'me' ? 'accepted' : 'pending'; });
+    const existing = getState().socials?.squadSync || {};
+    setState('socials.squadSync', { ...existing, [group.id]: syncStatus });
+    closeModal();
+    showToast(`🔥 Sync sent to ${group.name}! Members notified.`, 'success');
+  });
+  document.getElementById('cancel-admin-sync-btn')?.addEventListener('click', closeModal);
 }
