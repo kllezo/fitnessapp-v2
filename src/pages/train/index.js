@@ -159,8 +159,10 @@ function _getDayMetrics(dateStr) {
   const todayStr = getTodayDateString();
 
   if (dateStr === todayStr) {
-    const workoutDone = state.workout?.generatedPlan?.[_activeDayIdx]?.exercises?.every(e => e.done) || false;
-    const workoutName = state.workout?.generatedPlan?.[_activeDayIdx]?.dayName || 'Rest Day';
+    const historyWorkout = state.workout?.history?.find(h => h.date === todayStr);
+    const planDone = state.workout?.generatedPlan?.[_activeDayIdx]?.exercises?.every(e => e.done) || false;
+    const workoutDone = planDone || !!historyWorkout;
+    const workoutName = planDone ? (state.workout?.generatedPlan?.[_activeDayIdx]?.dayName || 'Workout') : (historyWorkout?.day || 'Rest Day');
     const caloriesConsumed = state.nutrition?.calories?.consumed || 0;
     const caloriesTarget = state.nutrition?.calories?.target || 2000;
     const proteinConsumed = state.nutrition?.protein?.consumed || 0;
@@ -168,17 +170,20 @@ function _getDayMetrics(dateStr) {
     const waterIntake = state.nutrition?.water?.consumed || 0;
     const recoveryScore = state.checkIn?.readinessScore || 75;
 
+    const historyWorkoutCals = historyWorkout?.caloriesBurned || (planDone ? 380 : 0);
+    const caloriesBurned = workoutDone ? Math.max(80, historyWorkoutCals) : 80;
+
     return {
       date: dateStr,
       workout: {
         completed: workoutDone,
         name: workoutName,
-        volume: 3800,
-        duration: 45
+        volume: planDone ? 3800 : (historyWorkout?.totalVolume || 0),
+        duration: planDone ? 45 : (historyWorkout?.duration || 0)
       },
       caloriesConsumed,
       caloriesTarget,
-      caloriesBurned: workoutDone ? 380 : 80,
+      caloriesBurned,
       proteinConsumed,
       proteinTarget,
       proteinHit: proteinConsumed >= proteinTarget,
@@ -210,7 +215,7 @@ function _getDayMetrics(dateStr) {
       },
       caloriesConsumed,
       caloriesTarget,
-      caloriesBurned: workoutDone ? (historyWorkout?.duration * 8 || 350) : 80,
+      caloriesBurned: workoutDone ? (historyWorkout?.caloriesBurned || historyWorkout?.duration * 8 || 350) : 80,
       proteinConsumed,
       proteinTarget,
       proteinHit: proteinConsumed >= proteinTarget,
@@ -1173,6 +1178,10 @@ function _openCustomLogModal() {
           <input class="input" id="cust-log-duration" type="number" value="15" min="1" />
         </div>
       </div>
+      <div class="field-group">
+        <label class="field-label">Approx Calories Burned</label>
+        <input class="input" id="cust-log-calories" type="number" value="150" min="0" />
+      </div>
       <button class="btn btn-primary btn-full" id="cust-log-save-btn" style="margin-top:8px">Log Workout ✓</button>
     </div>
   `;
@@ -1188,6 +1197,7 @@ function _openCustomLogModal() {
     const reps = Number(document.getElementById('cust-log-reps')?.value || 10);
     const weight = Number(document.getElementById('cust-log-weight')?.value || 0);
     const duration = Number(document.getElementById('cust-log-duration')?.value || 15);
+    const caloriesBurned = Number(document.getElementById('cust-log-calories')?.value || 150);
 
     if (!name) {
       showToast('Please enter an exercise name', 'error');
@@ -1208,6 +1218,7 @@ function _openCustomLogModal() {
       ],
       totalVolume: weight * reps * sets,
       duration: duration,
+      caloriesBurned: caloriesBurned,
       readinessAtTime: state.checkIn?.readinessScore || 65,
       notes: 'Logged outside weekly plan.'
     };

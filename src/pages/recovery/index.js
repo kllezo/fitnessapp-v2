@@ -98,7 +98,7 @@ export function render() {
 
       <!-- Recovery Score -->
       <div class="rec-section">
-        <div class="rec-score-card card card-glow">
+        <div class="rec-score-card card card-glow" id="rec-score-card-btn" style="cursor: pointer;">
           <div class="rec-score-row">
             <div class="rec-score-ring">
               <svg width="80" height="80" viewBox="0 0 80 80">
@@ -183,6 +183,40 @@ export function render() {
         </div>
       </div>
 
+      <!-- Spotify-style Brown Noise Player (Full-Width card rework) -->
+      <div class="rec-section">
+        <div class="section-label">Rest Audio</div>
+        <div class="spotify-player card card-glow" style="display:flex; flex-direction:column; padding:16px; gap:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-size:36px; animation: pulse 2s infinite;">🌊</span>
+              <div>
+                <p style="font-size:14px; font-weight:700; color:var(--text-primary); margin:0;">Deep Space Brown Noise</p>
+                <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0;">AURA Calming Resonance Block</p>
+              </div>
+            </div>
+            <button class="player-play-btn ${isPlaying ? 'playing' : ''}" id="noise-play-btn" style="width:40px; height:40px; border-radius:50%; background:var(--aura-violet); border:none; color:#fff; font-size:16px; display:flex; align-items:center; justify-content:center; cursor:pointer;">${playIcon}</button>
+          </div>
+          
+          <!-- Progress Slider (Remaining vs Elapsed) -->
+          <div style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
+            <div class="player-progress-bar-bg" style="height:4px; background:var(--border-subtle); border-radius:2px; position:relative; overflow:hidden; cursor:pointer;" id="audio-progress-bar">
+              <div class="player-progress-fill" id="audio-progress-fill" style="width:${progressPct}%; height:100%; background:var(--aura-violet-light); transition: width 0.3s ease;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted);">
+              <span id="audio-elapsed">${timeElapsed}</span>
+              <span id="audio-remaining">-${timeRemaining}</span>
+            </div>
+          </div>
+
+          <!-- Volume Control -->
+          <div style="display:flex; align-items:center; gap:10px; justify-content:flex-end;">
+            <span style="font-size:12px; color:var(--text-muted);">🔊</span>
+            <input type="range" class="volume-slider" id="noise-volume" min="0" max="1" step="0.05" value="${volumeVal}" aria-label="Volume" style="width:100px; accent-color:var(--aura-violet-light);">
+          </div>
+        </div>
+      </div>
+
       <!-- Advanced Diagnostics -->
       <div class="rec-section">
         <div class="section-label">Advanced Diagnostics</div>
@@ -246,40 +280,6 @@ export function render() {
         </div>
       </div>
 
-      <!-- Spotify-style Brown Noise Player (Full-Width card rework) -->
-      <div class="rec-section">
-        <div class="section-label">Rest Audio</div>
-        <div class="spotify-player card card-glow" style="display:flex; flex-direction:column; padding:16px; gap:12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <span style="font-size:36px; animation: pulse 2s infinite;">🌊</span>
-              <div>
-                <p style="font-size:14px; font-weight:700; color:var(--text-primary); margin:0;">Deep Space Brown Noise</p>
-                <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0;">AURA Calming Resonance Block</p>
-              </div>
-            </div>
-            <button class="player-play-btn ${isPlaying ? 'playing' : ''}" id="noise-play-btn" style="width:40px; height:40px; border-radius:50%; background:var(--aura-violet); border:none; color:#fff; font-size:16px; display:flex; align-items:center; justify-content:center; cursor:pointer;">${playIcon}</button>
-          </div>
-          
-          <!-- Progress Slider (Remaining vs Elapsed) -->
-          <div style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
-            <div class="player-progress-bar-bg" style="height:4px; background:var(--border-subtle); border-radius:2px; position:relative; overflow:hidden; cursor:pointer;" id="audio-progress-bar">
-              <div class="player-progress-fill" id="audio-progress-fill" style="width:${progressPct}%; height:100%; background:var(--aura-violet-light); transition: width 0.3s ease;"></div>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted);">
-              <span id="audio-elapsed">${timeElapsed}</span>
-              <span id="audio-remaining">-${timeRemaining}</span>
-            </div>
-          </div>
-
-          <!-- Volume Control -->
-          <div style="display:flex; align-items:center; gap:10px; justify-content:flex-end;">
-            <span style="font-size:12px; color:var(--text-muted);">🔊</span>
-            <input type="range" class="volume-slider" id="noise-volume" min="0" max="1" step="0.05" value="${volumeVal}" aria-label="Volume" style="width:100px; accent-color:var(--aura-violet-light);">
-          </div>
-        </div>
-      </div>
-
       <!-- Recovery Tips -->
       <div class="rec-section">
         <div class="section-label">Recovery Insights</div>
@@ -307,6 +307,90 @@ function _getRecoveryInsight(score, sleepDebt, answers) {
   return '📊 <strong>Stable recovery.</strong> Maintain your hydration, sleep consistency and stress management. Your trend is moving in the right direction.';
 }
 
+function _openDetailedRecoveryModal() {
+  const state = getState();
+  const answers = state.checkIn?.answers || {};
+  const sleepHoursVal = answers.sleep ? ['< 2 Hours', '2–4 Hours', '4–6 Hours', '6–8 Hours', '8+ Hours'][answers.sleep - 1] || 'Not Synced' : 'Not Synced';
+  
+  const energyMap = ['🪫 Empty', '😮‍💨 Low', '😐 OK', '💪 Good', '⚡ High'];
+  const sorenessMap = ['😣 Severe', '😟 High', '😐 Moderate', '😊 Mild', '😁 None'];
+  const stressMap = ['😰 High', '😟 Elevated', '😐 OK', '😌 Low', '😎 Calm'];
+  const motivationMap = ['😫 None', '😪 Low', '😐 OK', '😊 Good', '🔥 Fired up'];
+
+  const energyText = answers.energy ? energyMap[answers.energy - 1] : 'Not Synced';
+  const sorenessText = answers.soreness ? sorenessMap[answers.soreness - 1] : 'Not Synced';
+  const stressText = answers.stress ? stressMap[answers.stress - 1] : 'Not Synced';
+  const motivationText = answers.motivation ? motivationMap[answers.motivation - 1] : 'Not Synced';
+
+  const waterConsumed = state.nutrition?.water?.consumed || 0;
+  const waterTarget = state.nutrition?.water?.target || 3;
+
+  const trend = getReadinessTrend(state);
+
+  const content = `
+    <div class="detailed-recovery-modal" style="display:flex; flex-direction:column; gap:var(--space-md); padding:var(--space-xs) 0;">
+      <p style="font-size:var(--text-xs); color:var(--text-muted); margin-bottom:var(--space-xs);">Today's detailed check-in responses & trend analysis</p>
+      
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-sm);">
+        <div class="card" style="padding:var(--space-md);">
+          <span style="font-size:10px; color:var(--text-muted); display:block;">Sleep Duration</span>
+          <strong style="font-size:var(--text-base); color:var(--text-primary); display:block; margin-top:4px;">😴 ${sleepHoursVal}</strong>
+        </div>
+        <div class="card" style="padding:var(--space-md);">
+          <span style="font-size:10px; color:var(--text-muted); display:block;">Energy Level</span>
+          <strong style="font-size:var(--text-base); color:var(--text-primary); display:block; margin-top:4px;">${energyText}</strong>
+        </div>
+        <div class="card" style="padding:var(--space-md);">
+          <span style="font-size:10px; color:var(--text-muted); display:block;">Stress Level</span>
+          <strong style="font-size:var(--text-base); color:var(--text-primary); display:block; margin-top:4px;">${stressText}</strong>
+        </div>
+        <div class="card" style="padding:var(--space-md);">
+          <span style="font-size:10px; color:var(--text-muted); display:block;">Motivation</span>
+          <strong style="font-size:var(--text-base); color:var(--text-primary); display:block; margin-top:4px;">${motivationText}</strong>
+        </div>
+        <div class="card" style="padding:var(--space-md);">
+          <span style="font-size:10px; color:var(--text-muted); display:block;">Hydration</span>
+          <strong style="font-size:var(--text-base); color:var(--text-primary); display:block; margin-top:4px;">💧 ${waterConsumed.toFixed(1)}L / ${waterTarget}L</strong>
+        </div>
+        <div class="card" style="padding:var(--space-md);">
+          <span style="font-size:10px; color:var(--text-muted); display:block;">Muscle Soreness</span>
+          <strong style="font-size:var(--text-base); color:var(--text-primary); display:block; margin-top:4px;">${sorenessText}</strong>
+        </div>
+      </div>
+
+      <div class="card" style="padding:var(--space-md); margin-top:var(--space-xs);">
+        <span style="font-size:10px; color:var(--text-muted); display:block; margin-bottom:var(--space-sm);">7-Day Readiness Trend</span>
+        
+        <!-- SVG Trend Chart -->
+        <div style="height:100px; display:flex; align-items:flex-end; gap:var(--space-md); padding-top:var(--space-sm);">
+          ${trend.map(d => {
+            const h = d.value ? Math.max(8, d.value) : 8; // 8% min height to make clickable/visible
+            return `
+              <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:var(--space-xs);">
+                <div style="position:relative; width:100%; height:80px; display:flex; align-items:flex-end; justify-content:center;">
+                  <div style="position:absolute; top:-16px; font-size:9px; color:var(--text-muted); font-weight:var(--fw-medium);">${d.value || '—'}</div>
+                  <div style="width:16px; height:${h}%; background:${d.value >= 75 ? 'var(--aura-mint)' : d.value >= 50 ? 'var(--aura-violet)' : d.value > 0 ? 'var(--aura-rose)' : 'rgba(255,255,255,0.06)'}; border-radius:4px 4px 0 0; transition: height 0.5s ease-out;"></div>
+                </div>
+                <span style="font-size:10px; color:${d.isToday ? 'var(--aura-violet-light)' : 'var(--text-muted)'}; font-weight:${d.isToday ? 'var(--fw-bold)' : 'var(--fw-regular)'};">${d.day}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-full" id="close-detailed-rec-btn" style="margin-top:var(--space-sm);">Close Details</button>
+    </div>
+  `;
+
+  showModal({
+    title: 'Detailed Recovery Diagnostics',
+    content: content,
+    onClose: () => {}
+  });
+
+  document.getElementById('close-detailed-rec-btn')?.addEventListener('click', closeModal);
+}
+
 export function onEnter() {
   _wireEvents();
 }
@@ -322,6 +406,7 @@ function _wireEvents() {
   document.getElementById('breathe-btn')?.addEventListener('click', _openBreathe);
   document.getElementById('walk-btn')?.addEventListener('click', _openWalkReset);
   document.getElementById('mind-btn')?.addEventListener('click', _openMindfulness);
+  document.getElementById('rec-score-card-btn')?.addEventListener('click', _openDetailedRecoveryModal);
   
   // Brown Noise triggers
   const playBtn = document.getElementById('noise-play-btn');

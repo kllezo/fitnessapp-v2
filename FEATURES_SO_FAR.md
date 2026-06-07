@@ -31,7 +31,7 @@
 
 ## 4. Home Dashboard (`/home`)
 - Home header layout presenting notifications left and profile shortcuts right.
-- Daily Sync check-in sheet (Sleep, Energy, Soreness, Stress, Motivation).
+- Daily Sync check-in sheet (Sleep, Energy, Soreness, Stress, Motivation) powered by the global Modal Manager (fully unmounted on close).
 - Dynamic Readiness Score calculated from check-in metrics.
 - AI Weekly Review card highlighting achievements.
 - Habit pattern detector cards.
@@ -41,8 +41,9 @@
 ## 5. Training (`/train`)
 - Expandable Weekly Planner Dropdown header replacing default scroll.
 - Interactive Training Calendar View support (Week / Month zoom, arrow navigation, swipe gestures) detailing workouts completed, calories, protein, recovery score, and water metrics.
-- Daily Summary Modal displaying comprehensive logged stats per calendar day.
+- Daily Summary Modal displaying comprehensive logged stats per calendar day, dynamically reading custom logged calories burned.
 - Clickable Exercise Cards allowing instant log access.
+- External Exercise Logger supporting Approx Calories Burned input field and saving to history and metrics.
 - Muscle group selection guides with categories: Chest, Back, Shoulders, Arms, Legs, Core, Abs, Glutes, Forearms, Calves, Cardio.
 - Live Rest Timer bottom sheet (30s, 60s, 90s, 120s options).
 - Celebration summary popup on session completion with social share hooks.
@@ -56,7 +57,7 @@
 - Meal catalog and custom food logging overlay supporting Indian foods (Tea, Coffee, Curd, Rice, Dal, Paneer, eggs, etc.) with custom quantities and units.
 
 ## 7. Recovery (`/recovery`)
-- Somatic vital tracking and daily check-ins.
+- Somatic vital tracking and daily check-ins. Clickable Recovery Score top card to expand detailed survey results & 7-day Readiness Trend SVG chart in a modal sheet.
 - Box Breathing exercise trainer integrated into `GlobalModalManager` (4-4-4-4 phase timer).
 - Walk Reset interactive stopwatch modal containing steps goal, progress rings, and estimated burns.
 - Mindfulness guided timer (1, 2, 5 min resets) with cycles of somatic prompts and scaling breathing animations.
@@ -67,7 +68,11 @@
 - Social sub-sections: Partner, Friends, Find Partner.
 - Strangers compatibility search supporting expanded matching filters (Age, Gender, Goal, Level, Country, Language, Frequency, Time Zone, Discipline) with clean "Find My Match" CTA.
 - AURA themed Add Friend modal replacing generic browser dialog prompts.
-- Friends sub-section featuring Custom Groups with Leaderboards, Group chats, and Excel-like Comparison Matrix tables (Friend, Workout, Protein, Water, Sleep, Recovery, Discipline).
+- Friends sub-section featuring the Universal Leaderboard ranking all friends + Me together by default, and a My Groups card grid.
+- Group Detail Modal consolidating Group average stats, comparative table, group chat preview, and 4 SVG weekly trend charts (Discipline, Workouts, Recovery, Protein) with unique member color lines.
+- Fullscreen chat overlays for direct messages and group chats that hide bottom navigation, lock page scrolling, and attach message input sticky to the bottom safe area.
+- Username click routing anywhere in Squad (chats, leaderboards, list cards) to expand the friend profile card.
+- Squad header Inbox button opening a dialog list of active group chats, partner chats, and direct messages.
 - Squad header [+ Add Friend] [Inbox] square icons.
 - Partner Page Rework: 2x2 grid of meaningful Partner, Train, Diet, and Friends cards.
 - Interactive You vs Partner comparison cards plotting completed workouts, water levels, protein, sleep, recovery score, and streak counts in dual progress bars.

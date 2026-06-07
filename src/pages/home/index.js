@@ -5,7 +5,7 @@
 
 import { getState, setState, updateState, getDisciplineScore, getReadinessLabel, getTodayDateString } from '../../state/index.js';
 import { navigate } from '../../router.js';
-import { showToast } from '../../components/shared/ui.js';
+import { showToast, showModal, closeModal } from '../../components/shared/ui.js';
 import { computeReadinessScore, generateWeeklyReview, detectHabitPatterns, extractPRFeed } from '../../services/ai-engine.js';
 import './home.css';
 
@@ -13,7 +13,7 @@ import './home.css';
 let _syncStep = 0;
 let _syncAnswers = {};
 const SYNC_QUESTIONS = [
-  { key: 'sleep', label: 'Sleep Quality', emoji: '😴', opts: ['😫 Poor', '😪 Low', '😐 OK', '😊 Good', '😁 Great'] },
+  { key: 'sleep', label: 'Sleep Hours', emoji: '😴', opts: ['< 2 Hours', '2–4 Hours', '4–6 Hours', '6–8 Hours', '8+ Hours'] },
   { key: 'energy', label: 'Energy Level', emoji: '⚡', opts: ['🪫 Empty', '😮‍💨 Low', '😐 OK', '💪 Good', '⚡ High'] },
   { key: 'soreness', label: 'Muscle Soreness', emoji: '💊', opts: ['😣 Severe', '😟 High', '😐 Moderate', '😊 Mild', '😁 None'] },
   { key: 'stress', label: 'Stress Level', emoji: '🧠', opts: ['😰 High', '😟 Elevated', '😐 OK', '😌 Low', '😎 Calm'] },
@@ -162,13 +162,6 @@ export function render() {
       </div>
 
     </div>
-
-    <!-- Daily Sync Bottom Sheet -->
-    <div class="bottom-sheet-overlay" id="sync-overlay"></div>
-    <div class="bottom-sheet" id="sync-sheet">
-      <div class="modal-handle"></div>
-      <div id="sync-content"></div>
-    </div>
   `;
 }
 
@@ -301,17 +294,18 @@ function _checkDailySync() {
 }
 
 function _openSyncSheet() {
-  const overlay = document.getElementById('sync-overlay');
-  const sheet = document.getElementById('sync-sheet');
-  if (!overlay || !sheet) return;
-  overlay.classList.add('open');
-  sheet.classList.add('open');
+  _syncStep = 0;
+  _syncAnswers = {};
+  showModal({
+    className: 'sync-modal',
+    content: `<div id="sync-content"></div>`,
+    onClose: () => {}
+  });
   _renderSyncStep();
 }
 
 function _closeSyncSheet() {
-  document.getElementById('sync-overlay')?.classList.remove('open');
-  document.getElementById('sync-sheet')?.classList.remove('open');
+  closeModal();
 }
 
 function _renderSyncStep() {

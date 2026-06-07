@@ -46,5 +46,5 @@ webiste 2/
 - Updates serialize to `localStorage` under `aura_state_v2`.
 
 ## Global Shell UI Overlay Structure
-- Backdrop and sheet modals are appended inside `div#modal-container` in `index.html`.
+- Backdrop and sheet modals are appended inside `div#modal-container` in `index.html` and managed dynamically via `showModal` / `closeModal` from `src/components/shared/ui.js` to ensure a single active modal instance and clean DOM unmounting.
 - Toasts are appended inside `div#toast-container`.

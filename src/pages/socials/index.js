@@ -221,7 +221,7 @@ function _renderPartnerTab() {
         <div class="partner-header">
           <div class="partner-avatar">${partner.name?.[0] || 'P'}</div>
           <div class="partner-info">
-            <h3 class="partner-name">${partner.name}</h3>
+            <h3 class="partner-name username-clickable" data-user-id="${partner.id}" style="cursor:pointer; display:inline-block;">${partner.name}</h3>
             <p class="partner-meta">${partner.city || 'India'}, ${partner.country || 'India'}</p>
             <div style="display:flex; gap:6px;">
               <span class="pill pill-violet">${partner.compatibility || 85}% Match</span>
@@ -332,106 +332,79 @@ function _renderComparisonRow(label, valMe, valPartner, icon, unit) {
 
 function _renderFriendsTab() {
   const state = getState();
-  const groups = state.socials?.groups || [];
-  const activeGroup = groups.find(g => g.id === _activeGroupChatId) || groups[0];
+  const friends = state.auth?.friends || [];
+  const myDiscipline = getDisciplineScore(state);
+  
+  // Sort friends + me for Universal Leaderboard
+  const universalLeaderboard = [
+    { id: 'me', name: 'You (Me)', discipline: myDiscipline, isMe: true },
+    ...friends.map(f => ({ id: f.id, name: f.name, discipline: f.disciplineScore || 65, isMe: false }))
+  ].sort((a, b) => b.discipline - a.discipline);
 
-  // If no group selected but exist, fallback to first
-  if (!activeGroup) {
+  const groups = state.socials?.groups || [];
+
+  const universalLeaderboardHtml = universalLeaderboard.map((m, i) => `
+    <div class="leaderboard-row ${m.isMe ? 'you' : ''}" style="display:flex; align-items:center; gap:8px; padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.02)">
+      <span class="lb-rank" style="font-family:var(--font-display); font-weight:bold; color:var(--text-muted); width:20px;">${i + 1}</span>
+      <span class="lb-name username-clickable" data-user-id="${m.id}" style="flex:1; cursor:pointer; font-weight:bold; color:${m.isMe ? 'var(--aura-violet-light)' : 'var(--text-primary)'};">${m.name}</span>
+      <div class="lb-bar-wrap" style="flex:2; height:6px; background:rgba(255,255,255,0.04); border-radius:var(--radius-full); overflow:hidden; position:relative; max-width:140px;">
+        <div class="lb-bar" style="height:100%; width:${m.discipline}%; background:${m.isMe ? 'var(--grad-violet)' : `linear-gradient(90deg,hsl(${200 + i * 30},70%,55%),hsl(${230 + i * 30},70%,45%))`}"></div>
+      </div>
+      <span class="lb-score" style="font-family:var(--font-display); font-weight:bold; color:var(--text-secondary); width:28px; text-align:right;">${m.discipline}</span>
+    </div>
+  `).join('');
+
+  const groupsCardsHtml = groups.map(g => {
+    const sortedMembers = [...g.members].sort((a, b) => b.discipline - a.discipline);
+    const myRankIdx = sortedMembers.findIndex(m => m.id === 'me' || m.id === 'You');
+    const myRank = myRankIdx !== -1 ? myRankIdx + 1 : '—';
+    const totalScore = g.members.reduce((sum, m) => sum + m.discipline, 0);
+    const avgScore = Math.round(totalScore / g.members.length);
+    
     return `
-      <div class="socials-section">
-        <div class="card text-center" style="padding:24px;">
-          <span style="font-size:36px; display:block; margin-bottom:12px;">👥</span>
-          <p style="color:var(--text-muted); font-size:12px;">Create a group to compete with squad friends</p>
-          <button class="btn btn-primary btn-sm" id="create-group-btn" style="margin-top:12px;">+ Create Group</button>
+      <div class="group-card card card-glow clickable-group-card" data-group-id="${g.id}" style="cursor:pointer; display:flex; flex-direction:column; gap:8px; padding:16px; border:1.5px solid var(--border-card); background:rgba(255,255,255,0.01); margin-top:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="font-family:var(--font-display); font-size:15px; font-weight:700; color:var(--text-primary); margin:0;">${g.name}</h3>
+          <span style="font-size:10px; color:var(--text-muted);">${g.members.length} Members</span>
+        </div>
+        <div style="display:flex; gap:16px; margin-top:4px;">
+          <div style="flex:1;">
+            <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Your Rank</span>
+            <strong style="font-size:15px; color:var(--aura-violet-light);">${myRank === 1 ? '🥇 1st' : myRank === 2 ? '🥈 2nd' : myRank === 3 ? '🥉 3rd' : `${myRank}th`}</strong>
+          </div>
+          <div style="flex:1;">
+            <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Avg. Score</span>
+            <strong style="font-size:15px; color:var(--aura-amber-light);">${avgScore} Disc</strong>
+          </div>
         </div>
       </div>
     `;
-  }
-
-  // Sort members by discipline score to compute rankings
-  const leaderboard = [...activeGroup.members].sort((a, b) => b.discipline - a.discipline);
+  }).join('');
 
   return `
     <div class="socials-section">
-      <!-- Custom Groups Title Header and switcher -->
+      <!-- Universal Leaderboard Section -->
+      <div class="section-label" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Universal Leaderboard</span>
+        <span style="font-size:10px; color:var(--text-muted); font-weight:normal;">Ranked by Discipline</span>
+      </div>
+      <div class="leaderboard-card card" style="margin-bottom:16px; padding:6px 0;">
+        ${universalLeaderboardHtml}
+      </div>
+
+      <!-- Custom Groups Section -->
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-        <span class="section-label" style="margin-bottom:0;">Custom Groups</span>
+        <span class="section-label" style="margin-bottom:0;">My Groups</span>
         <button class="btn btn-xs btn-secondary" id="create-group-btn" style="padding:4px 10px;">+ Create Group</button>
       </div>
-
-      <!-- Groups List Selector Tabs -->
-      <div class="groups-selector" style="display:flex; gap:6px; overflow-x:auto; padding-bottom:8px;">
-        ${groups.map(g => `
-          <button class="btn btn-xs ${g.id === _activeGroupChatId ? 'btn-primary' : 'btn-secondary'}" data-group-id="${g.id}" style="padding:6px 14px; white-space:nowrap;">
-            ${g.name}
-          </button>
-        `).join('')}
-      </div>
-
-      <!-- Active Group Leaderboard -->
-      <div class="section-label">Group Leaderboard: ${activeGroup.name}</div>
-      <div class="leaderboard-card card" style="margin-bottom:12px">
-        ${leaderboard.map((m, i) => `
-          <div class="leaderboard-row ${m.id === 'me' ? 'you' : ''}">
-            <span class="lb-rank">${i + 1}</span>
-            <span class="lb-name">${m.name}</span>
-            <div class="lb-bar-wrap">
-              <div class="lb-bar" style="width:${m.discipline}%; background:${m.id === 'me' ? 'var(--grad-violet)' : `linear-gradient(90deg,hsl(${200 + i * 30},70%,55%),hsl(${230 + i * 30},70%,45%))`}"></div>
-            </div>
-            <span class="lb-score">${m.discipline}</span>
+      
+      <div class="groups-grid" style="display:flex; flex-direction:column; gap:10px;">
+        ${groupsCardsHtml || `
+          <div class="card text-center" style="padding:20px;">
+            <p style="color:var(--text-muted); font-size:11px;">Create a group to compete with squad friends</p>
           </div>
-        `).join('')}
+        `}
       </div>
-
-      <!-- Group Chat Widget -->
-      <div class="section-label">Group Chat</div>
-      <div class="group-chat-card card" style="margin-bottom:12px;">
-        <div class="group-chat-messages" id="group-chat-messages">
-          ${activeGroup.messages.map(msg => `
-            <div class="group-chat-msg-row ${msg.from === 'You' ? 'mine' : 'theirs'}">
-              <span class="group-chat-msg-sender">${msg.from}</span>
-              <div class="group-chat-msg-bubble">${msg.text}</div>
-              <span class="group-chat-msg-time">${msg.time}</span>
-            </div>
-          `).join('')}
-        </div>
-        <div style="display:flex; border-top:1px solid var(--border-subtle); padding:8px 12px; gap:8px; background:rgba(255,255,255,0.01);">
-          <input class="input" id="group-chat-input" placeholder="Message group..." style="flex:1; font-size:11px;" />
-          <button class="btn btn-primary btn-sm" id="send-group-chat-btn" style="padding:0 12px;">Send</button>
-        </div>
-      </div>
-
-      <!-- Group Comparison Table View (Excel-like layout) -->
-      <div class="section-label">Squad Matrix Comparative Table</div>
-      <div class="group-table-container">
-        <table class="group-table">
-          <thead>
-            <tr>
-              <th style="text-align:left; padding-left:10px;">Friend</th>
-              <th>Workout</th>
-              <th>Protein</th>
-              <th>Water</th>
-              <th>Sleep</th>
-              <th>Recovery</th>
-              <th>Discipline</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${activeGroup.members.map(m => `
-              <tr>
-                <td class="friend-cell" style="padding-left:10px;">${m.name}</td>
-                <td class="${m.workout ? 'cell-yes' : 'cell-no'}">${m.workout ? '✓' : '✗'}</td>
-                <td class="${m.protein ? 'cell-yes' : 'cell-no'}">${m.protein ? '✓' : '✗'}</td>
-                <td class="${m.water ? 'cell-yes' : 'cell-no'}">${m.water ? '✓' : '✗'}</td>
-                <td>${m.sleep}h</td>
-                <td style="color:var(--aura-violet-light); font-weight:bold;">${m.recovery}%</td>
-                <td style="color:var(--aura-amber-light); font-weight:bold;">${m.discipline}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-
     </div>
   `;
 }
@@ -596,6 +569,10 @@ export function onEnter() {
 
 export function onLeave() {
   document.getElementById('chat-overlay')?.classList.add('hidden');
+  const bottomNav = document.getElementById('bottom-nav-mount');
+  if (bottomNav) bottomNav.style.display = 'block';
+  const pageContent = document.getElementById('page-content');
+  if (pageContent) pageContent.style.overflow = 'auto';
 }
 
 function _wireEvents() {
@@ -613,9 +590,7 @@ function _wireEvents() {
 
   // Top right header buttons
   document.getElementById('add-friend-header-btn')?.addEventListener('click', _openAddFriendModal);
-  document.getElementById('inbox-header-btn')?.addEventListener('click', () => {
-    showToast('Inbox is currently empty', 'default');
-  });
+  document.getElementById('inbox-header-btn')?.addEventListener('click', _openInboxModal);
 
   _wireContentEvents();
 }
@@ -664,20 +639,41 @@ function _wireContentEvents() {
   // Friends tab triggers
   document.getElementById('create-group-btn')?.addEventListener('click', _openCreateGroupModal);
 
-  // Selector switcher for groups
-  document.querySelectorAll('.groups-selector button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      _activeGroupChatId = btn.dataset.groupId;
-      const content = document.getElementById('socials-content');
-      if (content) content.innerHTML = _renderTab('friends');
-      _wireContentEvents();
+  // Group cards clicks
+  document.querySelectorAll('.clickable-group-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const gId = card.dataset.groupId;
+      _openGroupDetailModal(gId);
     });
   });
 
-  // Group chat messaging
-  document.getElementById('send-group-chat-btn')?.addEventListener('click', _sendGroupMessage);
-  document.getElementById('group-chat-input')?.addEventListener('keydown', e => {
-    if (e.key === 'Enter') _sendGroupMessage();
+  // Username click routing anywhere in tab content
+  document.querySelectorAll('.username-clickable').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const uId = el.dataset.userId;
+      const uname = el.dataset.username;
+      const state = getState();
+      let friendObj = null;
+
+      if (uId) {
+        if (uId === 'me' || uId === 'You') {
+          navigate('/profile');
+          return;
+        }
+        friendObj = state.auth?.friends?.find(f => f.id === uId);
+      } else if (uname) {
+        if (uname === 'You' || uname === 'me' || uname === 'You (Me)') {
+          navigate('/profile');
+          return;
+        }
+        friendObj = state.auth?.friends?.find(f => f.name === uname);
+      }
+
+      if (friendObj) {
+        _openFriendProfile(friendObj);
+      }
+    });
   });
 
   // Invite Friend as Partner
@@ -1131,6 +1127,17 @@ function _openChat(user, prefill = '') {
   const content = document.getElementById('chat-content');
   if (!overlay || !content) return;
 
+  const pageContent = document.getElementById('page-content');
+  const bottomNav = document.getElementById('bottom-nav-mount');
+
+  if (pageContent) {
+    pageContent.style.overflow = 'hidden';
+    pageContent.scrollTop = 0;
+  }
+  if (bottomNav) {
+    bottomNav.style.display = 'none';
+  }
+
   const state = getState();
   const msgs = state.socials?.chatMessages?.[user.id] || [];
 
@@ -1164,6 +1171,9 @@ function _openChat(user, prefill = '') {
   document.getElementById('close-chat-btn')?.addEventListener('click', () => {
     overlay.classList.add('hidden');
     _activeChatUser = null;
+    if (pageContent) pageContent.style.overflow = 'auto';
+    if (bottomNav) bottomNav.style.display = 'block';
+
     const content = document.getElementById('socials-content');
     if (content) content.innerHTML = _renderTab(_activeTab);
     _wireContentEvents();
@@ -1176,6 +1186,463 @@ function _openChat(user, prefill = '') {
   document.getElementById('send-chat-btn')?.addEventListener('click', _sendMessage);
   document.getElementById('chat-input')?.addEventListener('keydown', e => {
     if (e.key === 'Enter') _sendMessage();
+  });
+}
+
+const MEMBER_MOCK_DATA = {
+  'me': {
+    discipline: [80, 82, 85, 85, 83, 85, 85],
+    workouts: [1, 0, 1, 1, 0, 1, 0],
+    recovery: [75, 78, 80, 82, 81, 82, 82],
+    protein: [120, 100, 130, 125, 90, 130, 110]
+  },
+  'f1': {
+    discipline: [85, 84, 84, 86, 85, 84, 84],
+    workouts: [1, 1, 0, 1, 0, 1, 0],
+    recovery: [80, 79, 78, 81, 80, 78, 78],
+    protein: [130, 120, 95, 130, 100, 120, 110]
+  },
+  'f2': {
+    discipline: [70, 72, 75, 76, 75, 76, 76],
+    workouts: [0, 1, 0, 1, 0, 1, 1],
+    recovery: [82, 84, 85, 83, 86, 85, 85],
+    protein: [80, 110, 85, 115, 90, 120, 115]
+  },
+  'f4': {
+    discipline: [90, 92, 93, 91, 94, 93, 93],
+    workouts: [1, 1, 1, 0, 1, 1, 0],
+    recovery: [70, 72, 74, 75, 73, 74, 74],
+    protein: [140, 135, 145, 110, 135, 140, 100]
+  }
+};
+
+function _renderGroupSVGChart(metricKey, title, group) {
+  const colors = ['#a78bfa', '#34d399', '#f43f5e', '#fbbf24', '#60a5fa'];
+  const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  const width = 280;
+  const height = 80;
+  const padding = 15;
+  
+  let linesHtml = '';
+  let legendHtml = '';
+  
+  group.members.forEach((m, idx) => {
+    const mColor = colors[idx % colors.length];
+    const mData = MEMBER_MOCK_DATA[m.id] || MEMBER_MOCK_DATA['me'];
+    const values = mData[metricKey] || [70, 75, 80, 82, 80, 85, 85];
+    
+    const maxVal = Math.max(...values, 1);
+    const minVal = Math.min(...values, 0);
+    const range = maxVal - minVal || 1;
+    
+    const points = values.map((val, i) => {
+      const x = padding + (i * (width - 2 * padding) / 6);
+      const y = height - padding - ((val - minVal) * (height - 2 * padding) / range);
+      return `${x},${y}`;
+    }).join(' ');
+    
+    linesHtml += `
+      <polyline fill="none" stroke="${mColor}" stroke-width="2" points="${points}" stroke-linecap="round" stroke-linejoin="round" />
+      ${values.map((val, i) => {
+        const x = padding + (i * (width - 2 * padding) / 6);
+        const y = height - padding - ((val - minVal) * (height - 2 * padding) / range);
+        return `<circle cx="${x}" cy="${y}" r="2.5" fill="${mColor}" />`;
+      }).join('')}
+    `;
+    
+    legendHtml += `
+      <div style="display:flex; align-items:center; gap:4px; font-size:9px;">
+        <span style="width:7px; height:7px; background:${mColor}; border-radius:50%; display:inline-block;"></span>
+        <span style="color:var(--text-secondary);">${m.name}</span>
+      </div>
+    `;
+  });
+  
+  return `
+    <div class="card" style="padding:10px; display:flex; flex-direction:column; gap:6px;">
+      <span style="font-size:10.5px; font-weight:700; color:var(--text-primary);">${title}</span>
+      <svg viewBox="0 0 ${width} ${height}" style="width:100%; height:80px; overflow:visible;">
+        <!-- Grid Lines -->
+        <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="rgba(255,255,255,0.03)" stroke-dasharray="2" />
+        <line x1="${padding}" y1="${height / 2}" x2="${width - padding}" y2="${height / 2}" stroke="rgba(255,255,255,0.03)" stroke-dasharray="2" />
+        <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="rgba(255,255,255,0.06)" />
+        
+        <!-- Polylines -->
+        ${linesHtml}
+        
+        <!-- X-Axis Labels -->
+        ${days.map((day, i) => {
+          const x = padding + (i * (width - 2 * padding) / 6);
+          return `<text x="${x}" y="${height - 2}" font-size="7" fill="var(--text-muted)" text-anchor="middle">${day}</text>`;
+        }).join('')}
+      </svg>
+      <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:2px;">
+        ${legendHtml}
+      </div>
+    </div>
+  `;
+}
+
+function _openGroupDetailModal(groupId) {
+  const state = getState();
+  const groups = state.socials?.groups || [];
+  const group = groups.find(g => g.id === groupId) || groups[0];
+  if (!group) return;
+
+  _activeGroupChatId = group.id;
+
+  const sortedMembers = [...group.members].sort((a, b) => b.discipline - a.discipline);
+  const myRankIdx = sortedMembers.findIndex(m => m.id === 'me' || m.id === 'You');
+  const myRank = myRankIdx !== -1 ? myRankIdx + 1 : '—';
+  const totalScore = group.members.reduce((sum, m) => sum + m.discipline, 0);
+  const avgScore = Math.round(totalScore / group.members.length);
+
+  const chatMessages = group.messages || [];
+  const last2Messages = chatMessages.slice(-2);
+  const chatPreviewHtml = last2Messages.length ? `
+    <div class="group-chat-preview-card card" id="group-chat-preview-btn" style="cursor:pointer; padding:12px; margin-bottom:12px; border:1.5px solid var(--border-card);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-size:11px; font-weight:700; color:var(--text-muted);">💬 Group Chat Preview</span>
+        <span style="font-size:10px; color:var(--aura-violet-light);">Open Fullscreen →</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        ${last2Messages.map(m => `
+          <div style="font-size:11.5px; line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            <strong class="username-clickable" data-username="${m.from}" style="color:var(--aura-violet-light); cursor:pointer;">${m.from}:</strong>
+            <span style="color:var(--text-secondary);">${m.text}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  ` : `
+    <div class="group-chat-preview-card card" id="group-chat-preview-btn" style="cursor:pointer; padding:16px; margin-bottom:12px; text-align:center;">
+      <span style="font-size:11px; color:var(--text-muted);">No messages in group chat yet. Tap to start chatting! 💬</span>
+    </div>
+  `;
+
+  const tableHtml = `
+    <div class="group-table-container" style="margin-bottom:16px; margin-top:8px;">
+      <table class="group-table" style="width:100%; font-size:11px; border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border-subtle); color:var(--text-muted); font-size:10px; text-transform:uppercase;">
+            <th style="text-align:left; padding:6px 4px;">Friend</th>
+            <th style="text-align:center; padding:6px 4px;">Work</th>
+            <th style="text-align:center; padding:6px 4px;">Prot</th>
+            <th style="text-align:center; padding:6px 4px;">Watr</th>
+            <th style="text-align:center; padding:6px 4px;">Sleep</th>
+            <th style="text-align:center; padding:6px 4px;">Recv</th>
+            <th style="text-align:center; padding:6px 4px;">Disc</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${group.members.map(m => `
+            <tr style="border-bottom:1px dashed rgba(255,255,255,0.03);">
+              <td class="username-clickable" data-username="${m.name}" style="padding:8px 4px; font-weight:bold; color:var(--text-primary); cursor:pointer; text-align:left;">${m.name}</td>
+              <td style="text-align:center; padding:8px 4px; color:${m.workout ? 'var(--aura-mint-light)' : 'var(--aura-rose-light)'};">${m.workout ? '✓' : '✗'}</td>
+              <td style="text-align:center; padding:8px 4px; color:${m.protein ? 'var(--aura-mint-light)' : 'var(--aura-rose-light)'};">${m.protein ? '✓' : '✗'}</td>
+              <td style="text-align:center; padding:8px 4px; color:${m.water ? 'var(--aura-mint-light)' : 'var(--aura-rose-light)'};">${m.water ? '✓' : '✗'}</td>
+              <td style="text-align:center; padding:8px 4px; color:var(--text-secondary);">${m.sleep}h</td>
+              <td style="text-align:center; padding:8px 4px; color:var(--aura-violet-light); font-weight:bold;">${m.recovery}%</td>
+              <td style="text-align:center; padding:8px 4px; color:var(--aura-amber-light); font-weight:bold;">${m.discipline}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  const chartsHtml = `
+    <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px;">
+      ${_renderGroupSVGChart('discipline', 'Discipline Trend (Score)', group)}
+      ${_renderGroupSVGChart('workouts', 'Workouts Completed (Sessions)', group)}
+      ${_renderGroupSVGChart('recovery', 'Recovery Readiness (%)', group)}
+      ${_renderGroupSVGChart('protein', 'Protein Intake Logged (g)', group)}
+    </div>
+  `;
+
+  const modalContentHtml = `
+    <div class="group-detail-modal-body" style="max-height:72vh; overflow-y:auto; padding-right:4px;">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+        <div class="card" style="padding:10px; text-align:center;">
+          <span style="font-size:10px; color:var(--text-muted); display:block;">Your Rank</span>
+          <strong style="font-size:16px; color:var(--aura-violet-light); display:block; margin-top:4px;">${myRank === 1 ? '🥇 1st' : myRank === 2 ? '🥈 2nd' : myRank === 3 ? '🥉 3rd' : `${myRank}th`}</strong>
+        </div>
+        <div class="card" style="padding:10px; text-align:center;">
+          <span style="font-size:10px; color:var(--text-muted); display:block;">Group Average</span>
+          <strong style="font-size:16px; color:var(--aura-amber-light); display:block; margin-top:4px;">${avgScore} Disc</strong>
+        </div>
+      </div>
+
+      ${chatPreviewHtml}
+
+      <span class="section-label" style="margin-top:12px; display:block;">Squad Matrix Matrix</span>
+      ${tableHtml}
+
+      <span class="section-label" style="margin-top:12px; display:block;">Weekly Trends</span>
+      ${chartsHtml}
+
+      <button class="btn btn-ghost btn-sm btn-full" id="close-group-details-btn" style="margin-top:16px;">Close Details</button>
+    </div>
+  `;
+
+  showModal({
+    title: group.name,
+    content: modalContentHtml
+  });
+
+  document.getElementById('close-group-details-btn')?.addEventListener('click', closeModal);
+  document.getElementById('group-chat-preview-btn')?.addEventListener('click', () => {
+    closeModal();
+    _openGroupChatFullscreen(group.id);
+  });
+
+  // Wire username click inside detail sheet
+  document.querySelectorAll('.modal-sheet .username-clickable').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const uname = el.dataset.username;
+      const state = getState();
+      const friendObj = state.auth?.friends?.find(f => f.name === uname);
+      if (friendObj) {
+        closeModal();
+        setTimeout(() => _openFriendProfile(friendObj), 200);
+      }
+    });
+  });
+}
+
+function _openGroupChatFullscreen(groupId) {
+  const state = getState();
+  const groups = state.socials?.groups || [];
+  const group = groups.find(g => g.id === groupId) || groups[0];
+  if (!group) return;
+
+  _activeGroupChatId = group.id;
+
+  const overlay = document.getElementById('chat-overlay');
+  const content = document.getElementById('chat-content');
+  if (!overlay || !content) return;
+
+  const pageContent = document.getElementById('page-content');
+  const bottomNav = document.getElementById('bottom-nav-mount');
+
+  if (pageContent) {
+    pageContent.style.overflow = 'hidden';
+    pageContent.scrollTop = 0;
+  }
+  if (bottomNav) {
+    bottomNav.style.display = 'none';
+  }
+
+  const msgs = group.messages || [];
+
+  content.innerHTML = `
+    <div class="chat-header">
+      <button class="icon-btn" id="close-group-chat-btn">←</button>
+      <div class="chat-user-info" style="cursor:pointer">
+        <div class="partner-avatar" style="width:32px;height:32px;font-size:13px;background:var(--grad-blue);display:flex;align-items:center;justify-content:center;color:#fff;border-radius:50%">${group.name?.[0]}</div>
+        <span class="chat-user-name">${group.name}</span>
+      </div>
+    </div>
+    <div class="chat-messages" id="group-fullscreen-messages">
+      ${!msgs.length ? `<div class="chat-empty">No messages yet. Say hi! 👋</div>` :
+        msgs.map(m => `
+          <div class="group-chat-msg-row ${m.from === 'You' ? 'mine' : 'theirs'}">
+            <span class="group-chat-msg-sender username-clickable" data-username="${m.from}" style="cursor:pointer; color:var(--aura-violet-light); font-weight:var(--fw-bold);">${m.from}</span>
+            <div class="group-chat-msg-bubble">${m.text}</div>
+            <span class="group-chat-msg-time">${m.time}</span>
+          </div>
+        `).join('')
+      }
+    </div>
+    <div class="chat-input-bar">
+      <input class="input" id="group-fullscreen-input" placeholder="Message group..." />
+      <button class="btn btn-primary btn-sm" id="send-group-fullscreen-btn">Send</button>
+    </div>
+  `;
+
+  overlay.classList.remove('hidden');
+
+  document.getElementById('close-group-chat-btn')?.addEventListener('click', () => {
+    overlay.classList.add('hidden');
+    if (pageContent) pageContent.style.overflow = 'auto';
+    if (bottomNav) bottomNav.style.display = 'block';
+
+    const content = document.getElementById('socials-content');
+    if (content) content.innerHTML = _renderTab(_activeTab);
+    _wireContentEvents();
+  });
+
+  // Wire username click inside fullscreen chat
+  document.getElementById('group-fullscreen-messages')?.addEventListener('click', (e) => {
+    const usernameSpan = e.target.closest('.group-chat-msg-sender');
+    if (usernameSpan) {
+      const username = usernameSpan.dataset.username;
+      if (username && username !== 'You' && username !== 'System') {
+        const userObj = state.auth?.friends?.find(f => f.name === username);
+        if (userObj) {
+          overlay.classList.add('hidden');
+          if (pageContent) pageContent.style.overflow = 'auto';
+          if (bottomNav) bottomNav.style.display = 'block';
+          _openFriendProfile(userObj);
+        } else {
+          showToast(`Profile of ${username} is not accessible`, 'default');
+        }
+      }
+    }
+  });
+
+  const sendBtn = document.getElementById('send-group-fullscreen-btn');
+  const inputEl = document.getElementById('group-fullscreen-input');
+
+  const sendMessage = () => {
+    const text = inputEl?.value?.trim();
+    if (!text) return;
+
+    const state = getState();
+    const groups = [...(state.socials?.groups || [])];
+    const groupIdx = groups.findIndex(g => g.id === _activeGroupChatId);
+    if (groupIdx === -1) return;
+
+    const now = new Date();
+    const time = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+    
+    groups[groupIdx].messages.push({
+      from: 'You',
+      text: text,
+      time: time
+    });
+
+    setState('socials.groups', groups);
+
+    if (inputEl) inputEl.value = '';
+
+    const container = document.getElementById('group-fullscreen-messages');
+    if (container) {
+      container.innerHTML += `
+        <div class="group-chat-msg-row mine">
+          <span class="group-chat-msg-sender">You</span>
+          <div class="group-chat-msg-bubble">${text}</div>
+          <span class="group-chat-msg-time">${time}</span>
+        </div>
+      `;
+      container.scrollTop = container.scrollHeight;
+    }
+  };
+
+  sendBtn?.addEventListener('click', sendMessage);
+  inputEl?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendMessage();
+  });
+}
+
+function _openInboxModal() {
+  const state = getState();
+  const friends = state.auth?.friends || [];
+  const groups = state.socials?.groups || [];
+  const partner = state.auth?.partner;
+  
+  const chatMessages = state.socials?.chatMessages || {};
+  
+  let dmsHtml = '';
+  friends.forEach(f => {
+    const msgs = chatMessages[f.id] || [];
+    const lastMsg = msgs.length ? msgs[msgs.length - 1].text : 'Start a direct message conversation...';
+    const lastTime = msgs.length ? msgs[msgs.length - 1].time : '';
+    dmsHtml += `
+      <div class="inbox-row card clickable-inbox-row" data-type="dm" data-id="${f.id}" style="cursor:pointer; display:flex; align-items:center; gap:12px; padding:12px; margin-bottom:8px;">
+        <div class="partner-avatar" style="width:36px; height:36px; font-size:14px; background:var(--grad-violet); display:flex; align-items:center; justify-content:center; color:#fff; border-radius:50%">${f.name[0]}</div>
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;">
+            <strong style="font-size:13px; color:var(--text-primary);">${f.name}</strong>
+            <span style="font-size:9px; color:var(--text-muted);">${lastTime}</span>
+          </div>
+          <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${lastMsg}</p>
+        </div>
+      </div>
+    `;
+  });
+
+  let groupsHtml = '';
+  groups.forEach(g => {
+    const lastMsg = g.messages.length ? g.messages[g.messages.length - 1] : null;
+    const lastMsgText = lastMsg ? `${lastMsg.from}: ${lastMsg.text}` : 'No messages yet';
+    const lastTime = lastMsg ? lastMsg.time : '';
+    groupsHtml += `
+      <div class="inbox-row card clickable-inbox-row" data-type="group" data-id="${g.id}" style="cursor:pointer; display:flex; align-items:center; gap:12px; padding:12px; margin-bottom:8px;">
+        <div class="partner-avatar" style="width:36px; height:36px; font-size:14px; background:var(--grad-blue); display:flex; align-items:center; justify-content:center; color:#fff; border-radius:50%">${g.name[0]}</div>
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;">
+            <strong style="font-size:13px; color:var(--text-primary);">${g.name}</strong>
+            <span style="font-size:9px; color:var(--text-muted);">${lastTime}</span>
+          </div>
+          <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${lastMsgText}</p>
+        </div>
+      </div>
+    `;
+  });
+
+  let partnerHtml = '';
+  if (partner) {
+    const msgs = chatMessages[partner.id] || [];
+    const lastMsg = msgs.length ? msgs[msgs.length - 1].text : 'Chat with your partner...';
+    const lastTime = msgs.length ? msgs[msgs.length - 1].time : '';
+    partnerHtml = `
+      <div class="inbox-row card clickable-inbox-row" data-type="partner" data-id="${partner.id}" style="cursor:pointer; display:flex; align-items:center; gap:12px; padding:12px; margin-bottom:8px; border-color:var(--aura-violet);">
+        <div class="partner-avatar" style="width:36px; height:36px; font-size:14px; background:var(--grad-violet); display:flex; align-items:center; justify-content:center; color:#fff; border-radius:50%">${partner.name[0]}</div>
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;">
+            <strong style="font-size:13px; color:var(--text-primary);">${partner.name} (Partner 🤝)</strong>
+            <span style="font-size:9px; color:var(--text-muted);">${lastTime}</span>
+          </div>
+          <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${lastMsg}</p>
+        </div>
+      </div>
+    `;
+  }
+
+  const content = `
+    <div class="inbox-modal-content" style="max-height:60vh; overflow-y:auto; padding-right:4px;">
+      ${partnerHtml ? `
+        <span class="section-label" style="margin-top:0;">Partner Chat</span>
+        ${partnerHtml}
+      ` : ''}
+      
+      <span class="section-label" style="${partnerHtml ? 'margin-top:12px;' : 'margin-top:0;'}">Group Chats</span>
+      ${groupsHtml || '<p style="font-size:11px; color:var(--text-muted); padding:10px 0;">No active group chats.</p>'}
+      
+      <span class="section-label" style="margin-top:12px;">Direct Messages</span>
+      ${dmsHtml || '<p style="font-size:11px; color:var(--text-muted); padding:10px 0;">No active direct messages.</p>'}
+      
+      <button class="btn btn-ghost btn-sm btn-full" id="close-inbox-btn" style="margin-top:16px;">Close Inbox</button>
+    </div>
+  `;
+
+  showModal({
+    title: 'Inbox / Messages',
+    content: content
+  });
+
+  document.getElementById('close-inbox-btn')?.addEventListener('click', closeModal);
+
+  // Wire inbox list clicks
+  document.querySelectorAll('.clickable-inbox-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const type = row.dataset.type;
+      const id = row.dataset.id;
+      closeModal();
+      
+      setTimeout(() => {
+        if (type === 'group') {
+          _openGroupChatFullscreen(id);
+        } else if (type === 'dm' || type === 'partner') {
+          const userObj = (type === 'partner') ? partner : friends.find(f => f.id === id);
+          if (userObj) {
+            _openChat(userObj);
+          }
+        }
+      }, 100);
+    });
   });
 }
 

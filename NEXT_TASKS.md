@@ -21,6 +21,15 @@
 - [x] Squad header updated to square [+ Add Friend] and [Inbox] icon buttons. Removed giant Add Friend button from content body.
 - [x] Partner Page Quick Actions: Reworked into 2x2 grid of Partner profile, Train, Diet, and Friends chat shortcut cards.
 - [x] Fixed duplicate overlays: All page overlays now clean up and close via Global Modal Manager sheet handlers.
+- [x] External Exercise Logger: Approx Calories Burned field added and integrated to workout history and daily cell metrics.
+- [x] Recovery Score top card clickable click detailed diagnostics bottom sheet modal with 7-day Readiness Trend SVG graph.
+- [x] Daily survey checklist options for sleep hours (<2h, 2-4h, 4-6h, 6-8h, 8+h).
+- [x] Friends tab default layout: Universal Leaderboard ranking all friends + Me together, and My Groups cards list.
+- [x] Custom groups details consolidated inside the Group Detail modal with Excel comparative tables, group metrics, chat preview, and weekly SVG line charts (Discipline, Workouts, Recovery, Protein) using colored lines.
+- [x] Fullscreen group and direct chat overlays with hidden bottom navigation, scroll safe-locks, and sticky bottom inputs.
+- [x] Username routing inside chats, DMs, leaderboards, partner pages, and friend lists to show Friend Profiles.
+- [x] Inbox button header trigger displaying active group and direct message chat overlays.
+- [x] Replaced local daily sync bottom sheet with Modal Manager overlay to avoid overlay remnants and double layouts.
 
 ### 2. Next Priorities & Unresolved
 - [ ] Onboarding goals multi-select checks (e.g. Build Muscle + Lose Fat).
