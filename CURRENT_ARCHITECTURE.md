@@ -51,5 +51,5 @@ webiste 2/
 - Toasts are appended inside `div#toast-container`.
 - Custom bottom sheets (such as Activity Details and Discipline Details sheets in `/home`) use absolute-positioned viewport drawers overlaying the main app shell container, driven by class toggles (`.open`) and custom event handlers.
 - **Orphan / Ghost Node Prevention**: The SPA router (`src/router.js`) explicitly imports and executes `closeModal()` at the beginning of page transitions to clean up backdrop and modal wrappers from previous page states, ensuring zero orphaned elements or duplicate rendering.
-
-
+- **Ghost Sheet Guards**: `home/index.js::_forceCloseAllSheets()` and `diet/index.js::_forceCloseAllDietSheets()` are called at the start of every `onEnter()` call. This defensively removes `.open` classes from all custom bottom-sheet overlays and panels before event rebinding, preventing ghost overlays from blocking user interactions after re-renders or sync-complete refreshes.
+- **Event Listener Safety**: `_refreshMacros()` in `diet/index.js` no longer calls the full `_wireEvents()` after DOM updates; it only rebinds the two macro ring click handlers (`calories-ring-wrapper`, `protein-ring-wrapper`). This prevents listener stacking on water buttons and meal rows which would cause duplicate log actions per tap.

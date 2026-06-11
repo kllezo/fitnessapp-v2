@@ -139,46 +139,42 @@ export function render() {
       </div>
 
       <!-- Stats Row -->
-      <div class="home-section">
-        <div class="stat-grid stat-grid-3">
-          <div class="stat-cell" id="streak-stat-cell" style="cursor:pointer;">
-            <div class="stat-value" style="color:var(--aura-amber)">${streak} Days</div>
-            <div class="stat-label">🔥 Current Streak</div>
+      <div class="home-section" style="padding-bottom:10px;">
+        <div class="stat-grid stat-grid-3" style="gap:8px;">
+          <div class="stat-cell home-stat-compact" id="streak-stat-cell" style="cursor:pointer;">
+            <div style="font-size:18px; font-weight:800; color:var(--aura-amber); font-family:var(--font-display); line-height:1;">${streak}</div>
+            <div style="font-size:8px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-top:1px;">Days</div>
+            <div class="stat-label" style="font-size:9px; margin-top:4px;">🔥 Streak</div>
           </div>
-          <div class="stat-cell" id="messages-stat-cell" style="cursor:pointer;">
-            <div class="stat-value" style="color:#42D4FF;">${messagesText}</div>
-            <div class="stat-label">💬 Messages</div>
+          <div class="stat-cell home-stat-compact" id="messages-stat-cell" style="cursor:pointer;">
+            <div style="font-size:18px; line-height:1;">📥</div>
+            <div style="font-size:11px; font-weight:700; color:#42D4FF; font-family:var(--font-display); margin-top:2px;">Inbox</div>
+            <div style="font-size:9px; color:var(--text-muted); margin-top:2px;">${messagesText}</div>
           </div>
-          <div class="stat-cell" id="protein-stat-cell" style="cursor:pointer;">
-            <div class="stat-value" style="color:#00E5A8; font-size: 15px; padding: 2px 0; font-family: var(--font-display); font-weight: 800;">
-              ${proteinConsumed}g<span style="font-size:10px; color:#8E93B8; font-weight:normal;"> / ${proteinTarget}g</span>
-              <div style="font-size:10px; color:#8E93B8; font-weight:500; margin-top:2px;">${proteinPct}%</div>
-            </div>
-            <div class="stat-label">💪 Protein Progress</div>
+          <div class="stat-cell home-stat-compact" id="protein-stat-cell" style="cursor:pointer;">
+            <div style="font-size:15px; font-weight:800; color:#00E5A8; font-family:var(--font-display); line-height:1;">${proteinConsumed}g</div>
+            <div style="font-size:8px; color:var(--text-muted); margin-top:1px;">/ ${proteinTarget}g · ${proteinPct}%</div>
+            <div class="stat-label" style="font-size:9px; margin-top:4px;">💪 Protein</div>
           </div>
         </div>
       </div>
 
-      <!-- Daily Burn Progress Section -->
-      <div class="home-section">
-        <div class="burn-progress-card" id="daily-burn-progress-card" style="cursor:pointer;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-family:var(--font-display); font-size:11px; font-weight:700; letter-spacing:1px; color:#8E93B8; text-transform:uppercase;">🔥 Daily Burn Progress</span>
-            <span style="font-size:11px; color:#00E5A8; font-weight:bold;">${burnPct}%</span>
+      <!-- Daily Burn Progress Strip -->
+      <div class="home-section" style="padding-bottom:14px;">
+        <div id="daily-burn-progress-card" style="cursor:pointer; background:#11121A; border:1px solid #23253A; border-radius:12px; padding:10px 14px; position:relative; overflow:hidden; transition:border-color 0.2s ease;">
+          <div style="position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,#00E5A8,#42D4FF);"></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-size:11px; font-weight:700; color:#8E93B8; text-transform:uppercase; letter-spacing:0.8px;">🔥 Calories Burned</span>
+            <span style="display:flex; align-items:baseline; gap:4px;">
+              <span style="font-size:13px; font-weight:800; color:#FFFFFF;">${burnBreakdown.total}</span>
+              <span style="font-size:10px; color:#8E93B8; font-weight:400;">/ ${burnGoal} kcal</span>
+              <span style="font-size:11px; color:#00E5A8; font-weight:700;">${burnPct}%</span>
+            </span>
           </div>
-          
-          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:4px;">
-            <span style="font-size:24px; font-weight:800; color:#FFFFFF;">${burnBreakdown.total} <span style="font-size:14px; font-weight:normal; color:#8E93B8;">/ ${burnGoal} kcal</span></span>
+          <div style="width:100%; height:5px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden;">
+            <div class="burn-progress-fill" style="width:${burnPct}%; height:100%; border-radius:3px; transition:width 0.8s cubic-bezier(0.1,1,0.1,1);"></div>
           </div>
-          
-          <div class="burn-progress-bar-wrapper" style="width:100%; height:12px; background:rgba(255,255,255,0.04); border-radius:6px; overflow:hidden; position:relative; margin-top:4px;">
-            <div class="burn-progress-fill" style="width:${burnPct}%; height:100%; transition: width 0.8s cubic-bezier(0.1, 1, 0.1, 1);"></div>
-          </div>
-          
-          <div style="font-size:12px; color:#FFFFFF; margin-top:4px; display:flex; align-items:center; gap:6px;">
-            <span>💡</span>
-            <span>${burnInsight}</span>
-          </div>
+          <div style="font-size:10px; color:#8E93B8; margin-top:5px;">💡 ${burnInsight}</div>
         </div>
       </div>
 
@@ -278,6 +274,10 @@ function _renderTodaySession(state) {
 export function onEnter() {
   _syncStep = 0;
   _syncAnswers = {};
+
+  // Defensive: force-close any ghost sheets from prior navigations
+  _forceCloseAllSheets();
+
   _wireEvents();
   _loadAIData();
   _checkDailySync();
@@ -293,6 +293,15 @@ export function onEnter() {
       stepsCircle.style.strokeDashoffset = stepsCircle.dataset.offset;
     }
   }, 100);
+}
+
+function _forceCloseAllSheets() {
+  ['activity-overlay','discipline-overlay','burn-overlay','protein-overlay'].forEach(id => {
+    document.getElementById(id)?.classList.remove('open');
+  });
+  ['activity-sheet','discipline-sheet','burn-sheet','protein-sheet'].forEach(id => {
+    document.getElementById(id)?.classList.remove('open');
+  });
 }
 
 export function onLeave() {

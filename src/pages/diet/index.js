@@ -169,12 +169,23 @@ function _renderMealCard(timeLabel, meal) {
 }
 
 export function onEnter() {
+  // Defensive: force-close any ghost sheets
+  _forceCloseAllDietSheets();
   _wireEvents();
 }
 
 export function onLeave() {
   _closeIntakeSheet();
   _closeProteinSheet();
+}
+
+function _forceCloseAllDietSheets() {
+  ['intake-overlay','protein-overlay'].forEach(id => {
+    document.getElementById(id)?.classList.remove('open');
+  });
+  ['intake-sheet','protein-sheet'].forEach(id => {
+    document.getElementById(id)?.classList.remove('open');
+  });
 }
 
 function _wireEvents() {
@@ -279,7 +290,9 @@ function _refreshMacros() {
     macroGrid.innerHTML = _macroRing('Calories', cal.consumed, cal.target, 'kcal', '#a78bfa', calPct) +
       _macroRing('Protein', prot.consumed, prot.target, 'g', '#10b981', protPct);
   }
-  _wireEvents(); // rebind events
+  // Only re-bind macro ring clicks (not all events — prevents stacked duplicate listeners)
+  document.getElementById('calories-ring-wrapper')?.addEventListener('click', _openIntakeSheet);
+  document.getElementById('protein-ring-wrapper')?.addEventListener('click', _openProteinSheet);
 }
 
 // ── Calorie Intake Analytics Bottom Sheet ──

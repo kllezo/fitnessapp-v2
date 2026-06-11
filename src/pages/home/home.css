@@ -139,40 +139,33 @@
 .pr-meta { font-size: 10px; color: var(--text-muted); }
 .pr-weight { font-family: var(--font-display); font-size: var(--text-md); font-weight: var(--fw-bold); color: var(--aura-amber); }
 
-/* Daily Burn Progress Card */
-.burn-progress-card {
-  background: #11121A;
-  border: 1px solid #23253A;
-  border-radius: 16px;
-  padding: 22px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  position: relative;
-  overflow: hidden;
-  transition: all var(--dur-fast) ease;
-}
-.burn-progress-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, #00E5A8, #42D4FF);
-}
-.burn-progress-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(0, 229, 168, 0.35);
-  box-shadow: 0 12px 40px rgba(0, 229, 168, 0.08);
-}
+/* Daily Burn Progress Strip */
 .burn-progress-fill {
   background: #00E5A8;
-  border-radius: 6px;
-  box-shadow: 0 0 12px rgba(0, 229, 168, 0.6);
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(0, 229, 168, 0.5);
   animation: pulse-glow 3s infinite alternate;
 }
 @keyframes pulse-glow {
-  0% { box-shadow: 0 0 8px rgba(0, 229, 168, 0.35); }
-  100% { box-shadow: 0 0 16px rgba(0, 229, 168, 0.7); }
+  0% { box-shadow: 0 0 6px rgba(0, 229, 168, 0.3); }
+  100% { box-shadow: 0 0 12px rgba(0, 229, 168, 0.6); }
+}
+#daily-burn-progress-card:hover {
+  border-color: rgba(0, 229, 168, 0.35) !important;
+}
+
+/* Compact Stats Row (Home only) */
+.home-stat-compact {
+  padding: 9px 6px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 68px;
+  transition: border-color var(--dur-fast) ease, transform var(--dur-fast) ease;
+}
+.home-stat-compact:active {
+  transform: scale(0.96);
 }
 
 /* Daily Sync Sheet */

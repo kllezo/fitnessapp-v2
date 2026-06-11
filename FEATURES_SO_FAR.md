@@ -112,3 +112,13 @@
 - **No duplicate metrics**: Removed all duplicate Discipline cards, duplicate calorie entries, and Quick Access nav shortcuts from Home.
 - **Calculation Transparency Table** (Diet page): Displays the live Mifflin-St Jeor formula calculation showing how the Maintenance Calories (TDEE) target was derived from the user's onboarding BMI / BMR / profile data.
 - **Ghost-free DOM**: All sheets and modals are properly mounted and unmounted. `onLeave()` closes all five custom bottom sheets (Sync, Activity, Discipline, Burn, Protein) on page navigation. Router `closeModal()` cleans up Global Modal Manager overlays.
+
+## 12. Home Page Polish & Bug Fixes (UX Pass)
+- **Compact Burn Strip**: Replaced oversized `burn-progress-card` dashboard card with a minimal single-row status strip. Shows `🔥 Calories Burned [X] / [Goal] kcal [%]` label row, a thin 5px progress bar, and a small insight line. Padding reduced from 22px to 10px; no giant numbers.
+- **Compact Stats Row**: Reduced stat cell height, padding (`9px 6px`), and font sizes. Streak card shows number + "Days" sub-label + emoji label. Stats row now reads lean and tight.
+- **Messages Card Redesign**: Replaced generic `stat-value / stat-label` text pair with a vertical `📥 icon → Inbox title → count sub-label` layout. Matches visual weight of Streak and Protein cards. Dynamically shows `"No New Messages"` or `"N Unread"` from socials notification state.
+- **Protein Card Navigation Fixed**: `protein-stat-cell` click correctly opens Protein Analytics bottom sheet (7d/30d/90d toggle, trend SVG, sources breakdown, insights).
+- **Diet Protein Ring Navigation Fixed**: Protein ring click in Diet page correctly opens the Protein Details sheet. Fixed a `_refreshMacros()` bug that was calling `_wireEvents()` on the full event set (stacking duplicate listeners on water buttons and meal rows on every macro update). Now only rebinds the two macro ring click handlers after grid refresh.
+- **Ghost Sheet Prevention**: Added `_forceCloseAllSheets()` called at the start of `onEnter()` for both Home and Diet pages. Guarantees all overlay and sheet elements are class-toggled closed before re-binding events — eliminates ghost overlays blocking subsequent taps.
+- **Duplicate Screen Audit**: Confirmed all 5 home sheets (Sync, Activity, Discipline, Burn, Protein) and 2 diet sheets (Intake, Protein) clean up properly on navigation via `onLeave()` and the new `_forceCloseAllDietSheets()` / `_forceCloseAllSheets()` guards.
+- **CSS Cleanup**: Removed oversized `.burn-progress-card` class (no longer applied to HTML). Added `.home-stat-compact` CSS class for scoped compact stat cells with `active` scale transform. `#daily-burn-progress-card:hover` gives subtle green border glow.
