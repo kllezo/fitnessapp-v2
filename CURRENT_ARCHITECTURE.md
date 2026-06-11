@@ -49,3 +49,5 @@ webiste 2/
 ## Global Shell UI Overlay Structure
 - Backdrop and sheet modals are appended inside `div#modal-container` in `index.html` and managed dynamically via `showModal` / `closeModal` from `src/components/shared/ui.js` to ensure a single active modal instance and clean DOM unmounting.
 - Toasts are appended inside `div#toast-container`.
+- Custom bottom sheets (such as Activity Details and Discipline Details sheets in `/home`) use absolute-positioned viewport drawers overlaying the main app shell container, driven by class toggles (`.open`) and custom event handlers.
+

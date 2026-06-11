@@ -7,13 +7,14 @@ import { getState, setState, updateState, getDisciplineScore, getReadinessLabel,
 import { navigate } from '../../router.js';
 import { showToast, showModal, closeModal } from '../../components/shared/ui.js';
 import { computeReadinessScore, generateWeeklyReview, detectHabitPatterns, extractPRFeed } from '../../services/ai-engine.js';
-import { getActivityData, updateActivityGoal, updateActivitySteps } from '../../services/activity-engine.js';
+import { getActivityData, updateActivityGoal, updateActivitySteps, getDisciplineBreakdown, getDayIndexMonSun } from '../../services/activity-engine.js';
 import './home.css';
 
 // Daily sync state
 let _syncStep = 0;
 let _syncAnswers = {};
 let _currentActivityView = 'today';
+let _currentDisciplineView = 'week';
 const SYNC_QUESTIONS = [
   { key: 'sleep', label: 'Sleep Hours', emoji: '😴', opts: ['< 2 Hours', '2–4 Hours', '4–6 Hours', '6–8 Hours', '8+ Hours'] },
   { key: 'energy', label: 'Energy Level', emoji: '⚡', opts: ['🪫 Empty', '😮‍💨 Low', '😐 OK', '💪 Good', '⚡ High'] },
@@ -65,34 +66,59 @@ export function render() {
         </div>
       </div>
 
-      <!-- Readiness Banner -->
-      <div class="home-readiness-banner card card-glow" id="readiness-banner" data-readiness="${rColor}">
-        <div class="readiness-left">
-          <div class="readiness-score-ring">
-            <svg width="72" height="72" viewBox="0 0 72 72">
-              <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
-              <circle cx="36" cy="36" r="30" fill="none" stroke="url(#readGrad)" stroke-width="6"
-                stroke-linecap="round" stroke-dasharray="188.5"
-                stroke-dashoffset="${188.5 - (188.5 * readiness / 100)}"
-                transform="rotate(-90 36 36)"/>
-              <defs>
-                <linearGradient id="readGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/>
-                </linearGradient>
-              </defs>
-            </svg>
-            <div class="readiness-score-label">
-              <span class="readiness-num">${readiness}</span>
-              <span class="readiness-unit">/ 100</span>
+      <!-- Rings Hero Card -->
+      <div class="home-section">
+        <div class="home-hero-card card card-glow" style="background:#11121A; border:1px solid #23253A; padding: 20px; display:flex; flex-direction:column; gap:16px;">
+          <div class="rings-row" style="display:flex; justify-content:space-around; align-items:center;">
+            <!-- Discipline Ring (Left) -->
+            <div class="ring-wrapper" id="discipline-ring-wrapper" style="display:flex; flex-direction:column; align-items:center; cursor:pointer;">
+              <span style="font-family:var(--font-display); font-size:10px; font-weight:700; letter-spacing:1px; color:#8E93B8; text-transform:uppercase; margin-bottom:8px;">Discipline Ring</span>
+              <div style="position:relative; width:96px; height:96px; display:flex; align-items:center; justify-content:center;">
+                <svg width="96" height="96" viewBox="0 0 96 96">
+                  <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
+                  <circle id="disc-ring-circle" cx="48" cy="48" r="40" fill="none" stroke="#5B5CF6" stroke-width="8"
+                    stroke-linecap="round" stroke-dasharray="251.33" stroke-dashoffset="251.33"
+                    data-offset="${251.33 - (251.33 * Math.min(discipline, 100) / 100)}"
+                    transform="rotate(-90 48 48)" style="transition: stroke-dashoffset 1s cubic-bezier(0.1, 1, 0.1, 1);"/>
+                </svg>
+                <div style="position:absolute; display:flex; flex-direction:column; align-items:center;">
+                  <span style="font-size:18px; font-weight:800; color:#FFFFFF; line-height:1;">${discipline}</span>
+                  <span style="font-size:9px; color:#8E93B8; margin-top:2px;">/100</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Steps Ring (Right) -->
+            <div class="ring-wrapper" id="steps-ring-wrapper" style="display:flex; flex-direction:column; align-items:center; cursor:pointer;">
+              <span style="font-family:var(--font-display); font-size:10px; font-weight:700; letter-spacing:1px; color:#8E93B8; text-transform:uppercase; margin-bottom:8px;">Steps Ring</span>
+              <div style="position:relative; width:96px; height:96px; display:flex; align-items:center; justify-content:center;">
+                <svg width="96" height="96" viewBox="0 0 96 96">
+                  <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
+                  <circle id="steps-ring-circle" cx="48" cy="48" r="40" fill="none" stroke="#00E5A8" stroke-width="8"
+                    stroke-linecap="round" stroke-dasharray="251.33" stroke-dashoffset="251.33"
+                    data-offset="${251.33 - (251.33 * Math.min(state.activity?.steps || 0, state.activity?.stepGoal || 10000) / (state.activity?.stepGoal || 10000))}"
+                    transform="rotate(-90 48 48)" style="transition: stroke-dashoffset 1s cubic-bezier(0.1, 1, 0.1, 1);"/>
+                </svg>
+                <div style="position:absolute; display:flex; flex-direction:column; align-items:center;">
+                  <span style="font-size:16px; font-weight:800; color:#FFFFFF; line-height:1;">${(state.activity?.steps || 0) >= 1000 ? ((state.activity?.steps || 0)/1000).toFixed(1) + 'k' : (state.activity?.steps || 0)}</span>
+                  <span style="font-size:9px; color:#8E93B8; margin-top:2px;">/${(state.activity?.stepGoal || 10000).toLocaleString()}</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="readiness-right">
-          <span class="pill pill-${rColor === 'violet' ? 'violet' : rColor === 'mint' ? 'mint' : 'rose'}">${rLabel}</span>
-          <p class="readiness-title">Readiness Score</p>
-          <p class="readiness-sub">${readiness >= 75 ? 'You\'re primed to perform' : readiness >= 50 ? 'Train smart today' : 'Prioritise recovery'}</p>
-          ${!todayDone ? `<button class="btn btn-sm btn-primary" id="sync-btn" style="margin-top:8px">Daily Sync ↗</button>`
-            : `<span style="font-size:11px;color:var(--aura-mint-light)">✓ Synced today</span>`}
+
+          <div style="border-top: 1px solid #23253A; padding-top: 12px; margin-top: 4px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <p style="font-size:12px; color:#8E93B8; margin:0;">${greeting}</p>
+              <h2 style="font-size:20px; font-weight:800; color:#FFFFFF; margin:2px 0 0 0;">${auth?.profileName?.split(' ')[0] || 'Athlete'}</h2>
+            </div>
+            <div style="text-align:right;">
+              <p style="font-size:10px; color:#8E93B8; margin:0; text-transform:uppercase; letter-spacing:0.5px;">Discipline Status</p>
+              <p style="font-size:14px; font-weight:700; color:${discipline >= 80 ? '#a78bfa' : discipline >= 65 ? '#60a5fa' : discipline >= 50 ? '#fbbf24' : '#fda4af'}; margin:2px 0 0 0;">
+                ${discipline >= 80 ? 'Locked In' : discipline >= 65 ? 'Consistent' : discipline >= 50 ? 'Moderate' : 'Starting Out'}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -107,36 +133,9 @@ export function render() {
             <div class="stat-value" style="color:var(--aura-amber)">${streak}</div>
             <div class="stat-label">Day Streak 🔥</div>
           </div>
-          <div class="stat-cell" id="steps-stat-cell" style="cursor: pointer;">
-            <div class="stat-value gradient-text-mint">${(state.activity?.steps || 0).toLocaleString()}</div>
-            <div class="stat-label">Steps 👣</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Activity Ring Card -->
-      <div class="home-section">
-        <div class="activity-ring-card card" id="activity-ring-card" style="background:#11121A; border:1px solid #23253A; cursor:pointer; display:flex; flex-direction:column; align-items:center; padding:16px;">
-          <p style="font-family:var(--font-display); font-size:10px; font-weight:var(--fw-bold); letter-spacing:1.5px; color:#8E93B8; text-transform:uppercase; margin-bottom:12px; margin-top:0;">Activity Ring</p>
-          
-          <!-- Apple inspired Ring -->
-          <div style="position:relative; width:100px; height:100px; display:flex; align-items:center; justify-content:center;">
-            <svg width="100" height="100" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255, 255, 255, 0.04)" stroke-width="8" />
-              <circle cx="50" cy="50" r="42" fill="none" stroke="#00E5A8" stroke-width="8"
-                stroke-linecap="round" stroke-dasharray="263.89"
-                stroke-dashoffset="${263.89 - (263.89 * Math.min(state.activity?.steps || 0, state.activity?.stepGoal || 10000) / (state.activity?.stepGoal || 10000))}"
-                transform="rotate(-90 50 50)" style="transition: stroke-dashoffset 0.5s ease;" />
-            </svg>
-            <div style="position:absolute; font-size:24px;">○</div>
-          </div>
-
-          <div style="text-align:center; margin-top:12px;">
-            <p style="font-size:20px; font-weight:800; color:#FFFFFF; margin:0;">
-              ${(state.activity?.steps || 0).toLocaleString()} <span style="font-size:13px; font-weight:normal; color:#8E93B8;">/ ${(state.activity?.stepGoal || 10000).toLocaleString()}</span>
-            </p>
-            <p style="font-size:12px; font-weight:600; color:#FFFFFF; margin:4px 0 0 0;">Daily Movement</p>
-            <p style="font-size:10px; color:#8E93B8; margin:2px 0 0 0;">Steps Goal Progress</p>
+          <div class="stat-cell" id="calories-stat-cell">
+            <div class="stat-value" style="color:#fda4af">${(state.activity?.caloriesBurned || 0)} kcal</div>
+            <div class="stat-label">Calories Burned</div>
           </div>
         </div>
       </div>
@@ -197,6 +196,13 @@ export function render() {
         <div id="activity-sheet-content"></div>
       </div>
 
+      <!-- Discipline Details Sheet -->
+      <div class="bottom-sheet-overlay" id="discipline-overlay"></div>
+      <div class="bottom-sheet" id="discipline-sheet" style="background:#11121A; border-top:1px solid #23253A; padding: 12px 20px 32px;">
+        <div class="modal-handle"></div>
+        <div id="discipline-sheet-content"></div>
+      </div>
+
     </div>
   `;
 }
@@ -242,11 +248,24 @@ export function onEnter() {
   _wireEvents();
   _loadAIData();
   _checkDailySync();
+
+  // Smooth fill animations for rings
+  setTimeout(() => {
+    const discCircle = document.getElementById('disc-ring-circle');
+    const stepsCircle = document.getElementById('steps-ring-circle');
+    if (discCircle) {
+      discCircle.style.strokeDashoffset = discCircle.dataset.offset;
+    }
+    if (stepsCircle) {
+      stepsCircle.style.strokeDashoffset = stepsCircle.dataset.offset;
+    }
+  }, 100);
 }
 
 export function onLeave() {
   _closeSyncSheet();
   _closeActivitySheet();
+  _closeDisciplineSheet();
 }
 
 function _loadAIData() {
@@ -469,10 +488,230 @@ function _wireEvents() {
   document.getElementById('notif-btn')?.addEventListener('click', () => showToast('No new notifications', 'default'));
   document.getElementById('profile-btn')?.addEventListener('click', () => navigate('/profile'));
 
-  // Activity Ring & Sheet Triggers
-  document.getElementById('activity-ring-card')?.addEventListener('click', _openActivitySheet);
-  document.getElementById('steps-stat-cell')?.addEventListener('click', _openActivitySheet);
+  // Activity & Discipline Ring & Sheet Triggers
+  document.getElementById('discipline-ring-wrapper')?.addEventListener('click', _openDisciplineSheet);
+  document.getElementById('steps-ring-wrapper')?.addEventListener('click', _openActivitySheet);
+  document.getElementById('discipline-overlay')?.addEventListener('click', _closeDisciplineSheet);
   document.getElementById('activity-overlay')?.addEventListener('click', _closeActivitySheet);
+}
+
+// ── Discipline Sheet Controllers ──
+
+function _openDisciplineSheet() {
+  const overlay = document.getElementById('discipline-overlay');
+  const sheet = document.getElementById('discipline-sheet');
+  const content = document.getElementById('discipline-sheet-content');
+  if (!overlay || !sheet || !content) return;
+
+  content.innerHTML = _renderDisciplineSheetContent(_currentDisciplineView);
+  overlay.classList.add('open');
+  sheet.classList.add('open');
+
+  _wireDisciplineSheetEvents();
+}
+
+function _closeDisciplineSheet() {
+  const overlay = document.getElementById('discipline-overlay');
+  const sheet = document.getElementById('discipline-sheet');
+  if (overlay && sheet) {
+    overlay.classList.remove('open');
+    sheet.classList.remove('open');
+  }
+}
+
+function _wireDisciplineSheetEvents() {
+  document.getElementById('disc-toggle-week')?.addEventListener('click', () => {
+    _currentDisciplineView = 'week';
+    const content = document.getElementById('discipline-sheet-content');
+    if (content) content.innerHTML = _renderDisciplineSheetContent('week');
+    _wireDisciplineSheetEvents();
+  });
+
+  document.getElementById('disc-toggle-month')?.addEventListener('click', () => {
+    _currentDisciplineView = 'month';
+    const content = document.getElementById('discipline-sheet-content');
+    if (content) content.innerHTML = _renderDisciplineSheetContent('month');
+    _wireDisciplineSheetEvents();
+  });
+}
+
+function _renderDisciplineSheetContent(view = 'week') {
+  const state = getState();
+  const discipline = getDisciplineScore(state);
+  const streak = state.workout?.streakDays || 0;
+  const status = discipline >= 80 ? 'Locked In' : discipline >= 65 ? 'Consistent' : discipline >= 50 ? 'Moderate' : 'Starting Out';
+  const breakdown = getDisciplineBreakdown(state);
+
+  const weekActive = view === 'week' ? 'active' : '';
+  const monthActive = view === 'month' ? 'active' : '';
+
+  let bodyHtml = '';
+
+  if (view === 'week') {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const baseTrend = [44, 47, 49, 52, 55, 54, 52];
+    const dayIdx = getDayIndexMonSun();
+    const diff = discipline - baseTrend[dayIdx];
+    const trendScores = baseTrend.map((v, idx) => {
+      if (idx <= dayIdx) return Math.min(100, Math.max(35, v + diff));
+      return v;
+    });
+
+    const maxVal = Math.max(...trendScores, 100);
+    const minVal = Math.min(...trendScores, 30);
+    const range = maxVal - minVal || 1;
+    const width = 280;
+    const height = 80;
+    const padding = 15;
+
+    const points = trendScores.map((val, i) => {
+      const x = padding + (i * (width - 2 * padding) / 6);
+      const y = height - padding - ((val - minVal) * (height - 2 * padding) / range);
+      return `${x},${y}`;
+    }).join(' ');
+
+    const trendPointsHtml = trendScores.map((val, i) => {
+      const x = padding + (i * (width - 2 * padding) / 6);
+      const y = height - padding - ((val - minVal) * (height - 2 * padding) / range);
+      return `<circle cx="${x}" cy="${y}" r="3" fill="#5B5CF6" />`;
+    }).join('');
+
+    const insights = [
+      `🔥 Workout consistency is strong (+${breakdown.workout} points).`,
+      breakdown.hydration < 8 
+        ? `💧 Hydration lowered score by 4 points.` 
+        : `💧 Hydration added ${breakdown.hydration} points to your consistency.`,
+      `😴 Sleep quality added ${breakdown.sleep} points.`,
+      `🎯 Reach 60+ by hitting protein targets 3 days straight.`
+    ];
+
+    bodyHtml = `
+      <div style="margin-top:16px;">
+        <!-- Breakdown table -->
+        <span class="section-label" style="display:block; margin-bottom:8px;">Why is my score this?</span>
+        <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px; background:rgba(255,255,255,0.02); padding:12px; border-radius:8px;">
+          <div style="display:flex; justify-content:space-between; padding:4px 0;">
+            <span style="color:#8E93B8;">Workout Consistency</span>
+            <strong style="color:#00E5A8;">+${breakdown.workout}</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:4px 0;">
+            <span style="color:#8E93B8;">Protein Adherence</span>
+            <strong style="color:#00E5A8;">+${breakdown.protein}</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:4px 0;">
+            <span style="color:#8E93B8;">Sleep Quality</span>
+            <strong style="color:#00E5A8;">+${breakdown.sleep}</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:4px 0;">
+            <span style="color:#8E93B8;">Hydration</span>
+            <strong style="color:#00E5A8;">+${breakdown.hydration}</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:4px 0;">
+            <span style="color:#8E93B8;">Missed Sessions</span>
+            <strong style="color:#fda4af;">${breakdown.missed}</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:4px 0;">
+            <span style="color:#8E93B8;">Skipped Recovery</span>
+            <strong style="color:#fda4af;">${breakdown.skipped}</strong>
+          </div>
+          <div style="border-top:1px dashed #23253A; margin-top:8px; padding-top:8px; display:flex; justify-content:space-between;">
+            <span style="color:#FFFFFF; font-weight:bold;">TOTAL</span>
+            <strong style="color:#5B5CF6; font-size:18px;">${breakdown.total}</strong>
+          </div>
+        </div>
+
+        <!-- Line Chart Trend -->
+        <div class="card" style="background:#11121A; border:1px solid #23253A; padding:12px; margin-bottom:16px;">
+          <p style="font-size:11px; color:#8E93B8; font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:8px;">7 Day Trend</p>
+          <svg viewBox="0 0 ${width} ${height}" style="width:100%; height:80px; overflow:visible;">
+            <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="rgba(255,255,255,0.03)" stroke-dasharray="2" />
+            <line x1="${padding}" y1="${height / 2}" x2="${width - padding}" y2="${height / 2}" stroke="rgba(255,255,255,0.03)" stroke-dasharray="2" />
+            <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="rgba(255,255,255,0.06)" />
+            
+            <polyline fill="none" stroke="#5B5CF6" stroke-width="2.5" points="${points}" stroke-linecap="round" stroke-linejoin="round" />
+            ${trendPointsHtml}
+            
+            ${days.map((day, i) => {
+              const x = padding + (i * (width - 2 * padding) / 6);
+              return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="#8E93B8" text-anchor="middle" font-weight="${i === dayIdx ? 'bold' : 'normal'}">${day}</text>`;
+            }).join('')}
+          </svg>
+        </div>
+
+        <!-- Insights -->
+        <span class="section-label" style="display:block; margin-bottom:8px;">Insights</span>
+        <div class="card" style="background:rgba(91, 92, 246, 0.05); border:1px solid rgba(91, 92, 246, 0.15); padding:12px;">
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            ${insights.map(ins => `
+              <div style="display:flex; gap:8px; font-size:12px; color:#FFFFFF; line-height:1.4;">
+                <span>✦</span>
+                <span>${ins}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    // Month View
+    const avgScore = Math.round(discipline * 0.95 + 4);
+    const maxScore = Math.max(discipline + 12, 85);
+    const mock30Days = Array.from({ length: 30 }, (_, i) => {
+      const base = 50 + Math.sin(i / 2) * 15;
+      const final = i === 29 ? discipline : Math.round(base + (Math.random() * 8 - 4));
+      return Math.min(100, Math.max(35, final));
+    });
+
+    bodyHtml = `
+      <div style="margin-top:16px;">
+        <!-- Metrics Row -->
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:16px;">
+          <div class="card" style="padding:10px; text-align:center; background:#11121A; border:1px solid #23253A;">
+            <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Avg Score</span>
+            <strong style="font-size:18px; color:#5B5CF6; display:block; margin-top:4px;">${avgScore}</strong>
+          </div>
+          <div class="card" style="padding:10px; text-align:center; background:#11121A; border:1px solid #23253A;">
+            <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Highest</span>
+            <strong style="font-size:18px; color:#00E5A8; display:block; margin-top:4px;">${maxScore}</strong>
+          </div>
+          <div class="card" style="padding:10px; text-align:center; background:#11121A; border:1px solid #23253A;">
+            <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Streak</span>
+            <strong style="font-size:18px; color:var(--aura-amber); display:block; margin-top:4px;">${streak}d 🔥</strong>
+          </div>
+        </div>
+
+        <!-- 30-Day Grid -->
+        <div class="card" style="background:#11121A; border:1px solid #23253A; padding:12px; margin-bottom:16px;">
+          <p style="font-size:11px; color:#8E93B8; font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:12px;">30 Day History</p>
+          <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; justify-items:center;">
+            ${mock30Days.map((scoreVal, idx) => {
+              const bg = scoreVal >= 80 ? 'rgba(167,139,250,0.3)' : scoreVal >= 65 ? 'rgba(96,165,250,0.3)' : scoreVal >= 50 ? 'rgba(251,191,36,0.3)' : 'rgba(244,63,94,0.3)';
+              const borderCol = scoreVal >= 80 ? '#a78bfa' : scoreVal >= 65 ? '#60a5fa' : scoreVal >= 50 ? '#fbbf24' : '#f43f5e';
+              return `
+                <div style="width:36px; height:36px; border-radius:6px; background:${bg}; border:1px solid ${borderCol}; display:flex; align-items:center; justify-content:center;" title="Day ${idx + 1}: ${scoreVal}">
+                  <span style="font-size:10px; font-weight:bold; color:#FFFFFF;">${scoreVal}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <div>
+        <h3 style="font-family:var(--font-display); font-size:20px; font-weight:700; color:#FFFFFF; margin:0;">Discipline Score</h3>
+        <p style="font-size:11px; color:#8E93B8; margin:2px 0 0 0;">Status: <span style="font-weight:bold; color:#FFFFFF;">${status}</span></p>
+      </div>
+      <div style="display:flex; background:rgba(255,255,255,0.04); padding:3px; border-radius:100px;">
+        <button class="toggle-opt ${weekActive}" id="disc-toggle-week" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === 'week' ? '#FFFFFF' : '#8E93B8'}; background:${view === 'week' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Week</button>
+        <button class="toggle-opt ${monthActive}" id="disc-toggle-month" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === 'month' ? '#FFFFFF' : '#8E93B8'}; background:${view === 'month' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Month</button>
+      </div>
+    </div>
+    ${bodyHtml}
+  `;
 }
 
 // ── Activity Sheet Controllers ──

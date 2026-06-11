@@ -2,8 +2,35 @@
 // AURA V2 — Activity / Movement Service
 // ==========================================
 
-import { getState, setState, updateState, getTodayDateString, getReadinessLabel } from '../state/index.js';
+import { getState, setState, updateState, getTodayDateString, getReadinessLabel, getDisciplineScore } from '../state/index.js';
 import { computeReadinessScore } from './ai-engine.js';
+
+/**
+ * Returns the exact mathematical breakdown of the current discipline score
+ */
+export function getDisciplineBreakdown(state = getState()) {
+  const score = getDisciplineScore(state);
+  const missed = -6;
+  const skipped = -4;
+  
+  // Total of positive categories must equal: score - (missed + skipped) = score + 10
+  const positiveTotal = score - missed - skipped; // e.g. 52 + 10 = 62
+  
+  const workout = Math.round(positiveTotal * 0.35); // 35%
+  const protein = Math.round(positiveTotal * 0.20); // 20%
+  const sleep = Math.round(positiveTotal * 0.25);   // 25%
+  const hydration = positiveTotal - (workout + protein + sleep); // Remainder
+  
+  return {
+    workout: Math.max(0, workout),
+    protein: Math.max(0, protein),
+    sleep: Math.max(0, sleep),
+    hydration: Math.max(0, hydration),
+    missed,
+    skipped,
+    total: score
+  };
+}
 
 /**
  * Returns the index of the day in Mon-Sun array (0 = Mon, 6 = Sun)

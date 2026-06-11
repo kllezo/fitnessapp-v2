@@ -47,9 +47,11 @@
 - [x] Squad Sync Panel: Integrated progress tracking showing accept/decline/pending status of the sync for all squad members.
 - [x] Group Analytics: Added custom high-fidelity stats cards for "Most Copied Schedule", "Schedule Compatibility", and "Schedule Compliance" below the group details weekly trend charts.
 - [x] Apple Fitness-style Activity Rings & Steps System: Replaced Goal cell in stats row with Steps, rendered circular SVG activity ring on Home page, integrated activity details sheet (Today/Week views, preset/custom change goal dialog, hourly/weekly CSS charts, dynamic insights), added onboarding daily step goal step, integrated Walk Reset stopwatch steps logging, and added services abstraction layer in `activity-engine.js`.
+- [x] Home Screen Rings Rework: Integrated a side-by-side Hero Rings card (Discipline Ring & Steps Ring) at the top of the home page, replaced Steps stat card with Calories Burned in the stats row, deleted separate Activity Ring card, and implemented the Discipline Details bottom sheet with consistency breakdowns, SVG 7-day trend charts, Week/Month views, and dynamic insights.
 
 ### 2. Next Priorities & Unresolved
 - [ ] Share workout cards download options.
 - [ ] Readiness syncing checks logic loop check.
 - [ ] Home dashboard mini Body Metrics card (BMI/BMR quick view).
 - [ ] Onboarding goals multi-select persistence verification.
+

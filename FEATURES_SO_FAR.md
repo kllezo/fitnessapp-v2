@@ -86,12 +86,19 @@
 
 ## 10. Activity & Fitness Ring System (`/home`, `/onboarding`, `/recovery`)
 - **Daily Step Goal Onboarding**: Questionnaire step inserted into the onboarding flow, saving step goal presets (5k-20k, default 10k) or custom values to profile and activity.
-- **Dashboard Steps Stat**: Goal card in top dashboard row replaced with live Steps stat showing current daily steps.
-- **Vibrant Fitness Ring Card**: Circular neon success-mint `#00E5A8` SVG progress ring reflecting daily step goal progress.
-- **Draggable Activity Details Bottom Sheet**: Tap-activated modal details sheet tracking Steps, Distance, Calories, Stairs, and Progress percentage.
-- **View Toggle & Custom Charts**: Support for "Today | Week" views, rendering custom mock hourly bar charts and 7-day Mon-Sun distribution charts via CSS/DOM.
-- **Dynamic Activity Insights**: Recommends customized actions (e.g. 15-min walk recommendations) based on current step goal progress.
+- **Hero Rings Card**: Replaced old readiness banner and individual steps/activity cards with a premium, clean side-by-side Hero Rings card containing:
+  - **Discipline Ring (left)**: Colored `#5B5CF6`, displaying current Consistency score (`[score]/100`).
+  - **Steps Ring (right)**: Colored `#00E5A8`, displaying daily movement progress (`[steps]/[goal]`).
+  - Both rings animate smoothly from 0% fill to target percentage over a 1-second duration on page load.
+- **Three-Column Stats Row**: Displays Discipline, Day Streak, and **Calories Burned** (`[calories] kcal`), removing redundant steps/activity stats.
+- **Draggable Discipline Details Bottom Sheet**: Clicking the Discipline Ring opens a bottom sheet showing:
+  - Exact mathematical score breakdown (Workout Consistency, Protein Adherence, Sleep Quality, Hydration, Missed Sessions, and Skipped Recovery penalties) that sums to the exact current score.
+  - Interactive **Week | Month** view toggles.
+  - **Week View**: Shows a 7-Day Trend SVG line chart and dynamic consistency insights.
+  - **Month View**: Shows Average score, Highest score, current streak, and a mini 30-Day Grid representing consistency levels.
+- **Draggable Activity Details Bottom Sheet**: Clicking the Steps Ring opens the activity sheet tracking Steps, Distance, Calories, Stairs, Goal Progress, Hourly/Weekly charts, and step goal configuration.
 - **Readiness Score Signals**: Steps achievement modifiers adjust daily readiness score: Low movement (<3k steps): `-2`, Moderate movement: `+2`, Goal achieved: `+5`.
 - **Walk Reset Integration**: Commits stopwatch steps completed in Recovery Walk directly into daily activity data.
 - **Integration Abstraction Layer**: Exposes future-ready `getActivityData()`, `updateActivitySteps()`, and `updateActivityGoal()` abstraction hooks in `activity-engine.js`.
+
 
