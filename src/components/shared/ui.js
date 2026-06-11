@@ -110,3 +110,77 @@ export function updateModalBody(html) {
   if (body) body.innerHTML = html;
 }
 
+// ==========================================
+// AURA V2 — Bottom Sheet Manager (Singleton)
+// ==========================================
+
+let _activeBottomSheet = null;
+
+export function openBottomSheet({ id, content, onClose }) {
+  // Enforce global singleton
+  closeActiveBottomSheet(true);
+
+  const shell = document.getElementById('phone-shell');
+  if (!shell) {
+    console.warn('[BottomSheet] #phone-shell container not found.');
+    return;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.className = 'bottom-sheet-overlay';
+  overlay.id = `${id}-overlay`;
+
+  const sheet = document.createElement('div');
+  sheet.className = 'bottom-sheet';
+  sheet.id = `${id}-sheet`;
+  sheet.style.background = '#11121A';
+  sheet.style.borderTop = '1px solid #23253A';
+  sheet.style.padding = '12px 20px 32px';
+  sheet.innerHTML = `
+    <div class="modal-handle"></div>
+    <div id="${id}-sheet-content">${content}</div>
+  `;
+
+  shell.appendChild(overlay);
+  shell.appendChild(sheet);
+
+  _activeBottomSheet = { id, overlay, sheet, onClose };
+
+  // Force layout reflow before sliding in
+  requestAnimationFrame(() => {
+    overlay.classList.add('open');
+    sheet.classList.add('open');
+  });
+
+  // Wire backdrop click to close
+  overlay.addEventListener('click', () => {
+    closeActiveBottomSheet();
+  });
+}
+
+export function closeActiveBottomSheet(instant = false) {
+  if (!_activeBottomSheet) return;
+
+  const { overlay, sheet, onClose } = _activeBottomSheet;
+  _activeBottomSheet = null;
+
+  if (instant) {
+    overlay.remove();
+    sheet.remove();
+    if (onClose) {
+      try { onClose(); } catch (e) { console.error(e); }
+    }
+  } else {
+    overlay.classList.remove('open');
+    sheet.classList.remove('open');
+    setTimeout(() => {
+      overlay.remove();
+      sheet.remove();
+      if (onClose) {
+        try { onClose(); } catch (e) { console.error(e); }
+      }
+    }, 300);
+  }
+}
+
+

@@ -4,7 +4,7 @@
 // ==========================================
 
 import { getState, updateState, setState } from '../../state/index.js';
-import { showToast, showModal, closeModal } from '../../components/shared/ui.js';
+import { showToast, showModal, closeModal, openBottomSheet, closeActiveBottomSheet } from '../../components/shared/ui.js';
 import { getFilteredMeals, calculateMacros, getDailyMealPlan, calculateCustomMacros } from '../../services/nutrition-engine.js';
 import './diet.css';
 
@@ -103,20 +103,6 @@ export function render() {
         </div>
       </div>
 
-      <!-- Calorie Intake Details Sheet -->
-      <div class="bottom-sheet-overlay" id="intake-overlay"></div>
-      <div class="bottom-sheet" id="intake-sheet" style="background:#11121A; border-top:1px solid #23253A; padding: 12px 20px 32px;">
-        <div class="modal-handle"></div>
-        <div id="intake-sheet-content"></div>
-      </div>
-
-      <!-- Protein Details Sheet -->
-      <div class="bottom-sheet-overlay" id="protein-overlay"></div>
-      <div class="bottom-sheet" id="protein-sheet" style="background:#11121A; border-top:1px solid #23253A; padding: 12px 20px 32px;">
-        <div class="modal-handle"></div>
-        <div id="protein-sheet-content"></div>
-      </div>
-
     </div>
   `;
 }
@@ -169,23 +155,13 @@ function _renderMealCard(timeLabel, meal) {
 }
 
 export function onEnter() {
-  // Defensive: force-close any ghost sheets
-  _forceCloseAllDietSheets();
+  // Clean active sheet
+  closeActiveBottomSheet(true);
   _wireEvents();
 }
 
 export function onLeave() {
-  _closeIntakeSheet();
-  _closeProteinSheet();
-}
-
-function _forceCloseAllDietSheets() {
-  ['intake-overlay','protein-overlay'].forEach(id => {
-    document.getElementById(id)?.classList.remove('open');
-  });
-  ['intake-sheet','protein-sheet'].forEach(id => {
-    document.getElementById(id)?.classList.remove('open');
-  });
+  closeActiveBottomSheet(true);
 }
 
 function _wireEvents() {
@@ -262,8 +238,6 @@ function _wireEvents() {
   // Rings click events
   document.getElementById('calories-ring-wrapper')?.addEventListener('click', _openIntakeSheet);
   document.getElementById('protein-ring-wrapper')?.addEventListener('click', _openProteinSheet);
-  document.getElementById('intake-overlay')?.addEventListener('click', _closeIntakeSheet);
-  document.getElementById('protein-overlay')?.addEventListener('click', _closeProteinSheet);
 }
 
 function _refreshWater() {
@@ -298,25 +272,15 @@ function _refreshMacros() {
 // ── Calorie Intake Analytics Bottom Sheet ──
 
 function _openIntakeSheet() {
-  const overlay = document.getElementById('intake-overlay');
-  const sheet = document.getElementById('intake-sheet');
-  const content = document.getElementById('intake-sheet-content');
-  if (!overlay || !sheet || !content) return;
-
-  content.innerHTML = _renderIntakeSheetContent(_currentIntakeView);
-  overlay.classList.add('open');
-  sheet.classList.add('open');
-
+  openBottomSheet({
+    id: 'intake',
+    content: _renderIntakeSheetContent(_currentIntakeView)
+  });
   _wireIntakeSheetEvents();
 }
 
 function _closeIntakeSheet() {
-  const overlay = document.getElementById('intake-overlay');
-  const sheet = document.getElementById('intake-sheet');
-  if (overlay && sheet) {
-    overlay.classList.remove('open');
-    sheet.classList.remove('open');
-  }
+  closeActiveBottomSheet();
 }
 
 function _wireIntakeSheetEvents() {
@@ -579,25 +543,16 @@ function _drawIntakeSVG(data, labels, targetLineVal) {
 // ── Protein Details Bottom Sheet (Shared helper logic) ──
 
 function _openProteinSheet() {
-  const overlay = document.getElementById('protein-overlay');
-  const sheet = document.getElementById('protein-sheet');
-  const content = document.getElementById('protein-sheet-content');
-  if (!overlay || !sheet || !content) return;
-
-  content.innerHTML = _renderProteinSheetContent(_currentProteinView);
-  overlay.classList.add('open');
-  sheet.classList.add('open');
-
+  openBottomSheet({
+    id: 'protein',
+    content: _renderProteinSheetContent(_currentProteinView)
+  });
   _wireProteinSheetEvents();
 }
 
+// Keep closeActiveBottomSheet click logic
 function _closeProteinSheet() {
-  const overlay = document.getElementById('protein-overlay');
-  const sheet = document.getElementById('protein-sheet');
-  if (overlay && sheet) {
-    overlay.classList.remove('open');
-    sheet.classList.remove('open');
-  }
+  closeActiveBottomSheet();
 }
 
 function _wireProteinSheetEvents() {

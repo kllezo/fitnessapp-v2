@@ -3,7 +3,7 @@
 // ==========================================
 
 import { getState, setState } from './state/index.js';
-import { closeModal } from './components/shared/ui.js';
+import { closeModal, closeActiveBottomSheet } from './components/shared/ui.js';
 
 const _routes = new Map();
 let _currentRoute = null;
@@ -53,6 +53,8 @@ function _getPathFromHash() {
 async function _handleRoute(path) {
   _transitioning = true;
   closeModal();
+  closeActiveBottomSheet(true);
+
 
   const state = getState();
   const isLoggedIn = state.auth?.isLoggedIn;

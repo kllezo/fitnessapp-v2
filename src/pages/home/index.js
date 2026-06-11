@@ -5,7 +5,7 @@
 
 import { getState, setState, updateState, getDisciplineScore, getReadinessLabel, getTodayDateString } from '../../state/index.js';
 import { navigate } from '../../router.js';
-import { showToast, showModal, closeModal } from '../../components/shared/ui.js';
+import { showToast, showModal, closeModal, openBottomSheet, closeActiveBottomSheet } from '../../components/shared/ui.js';
 import { computeReadinessScore, generateWeeklyReview, detectHabitPatterns, extractPRFeed } from '../../services/ai-engine.js';
 import { getActivityData, updateActivityGoal, updateActivitySteps, getDisciplineBreakdown, getDayIndexMonSun, getDailyBurnGoal, getCalorieBurnBreakdown } from '../../services/activity-engine.js';
 import './home.css';
@@ -54,18 +54,7 @@ export function render() {
   const burnGoal = getDailyBurnGoal(state);
   const burnBreakdown = getCalorieBurnBreakdown(state);
   const burnPct = burnGoal > 0 ? Math.min(100, Math.round((burnBreakdown.total / burnGoal) * 100)) : 0;
-  
-  const burnRemaining = burnGoal - burnBreakdown.total;
-  let burnInsight = '';
-  if (burnRemaining <= 0) {
-    burnInsight = '🏆 Target achieved!';
-  } else {
-    if (burnRemaining <= 120) {
-      burnInsight = '🚶 A 20 minute walk completes today\'s target.';
-    } else {
-      burnInsight = `🎯 ${burnRemaining} kcal remaining today.`;
-    }
-  }
+  // Dynamic calorie burn estimation: remaining burn details handled in details sheet
 
   // Active unread messages & notification checks
   const unreadCount = state.socials?.notifications?.length || 0;
@@ -164,7 +153,7 @@ export function render() {
         <div id="daily-burn-progress-card" style="cursor:pointer; background:#11121A; border:1px solid #23253A; border-radius:12px; padding:10px 14px; position:relative; overflow:hidden; transition:border-color 0.2s ease;">
           <div style="position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,#00E5A8,#42D4FF);"></div>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <span style="font-size:11px; font-weight:700; color:#8E93B8; text-transform:uppercase; letter-spacing:0.8px;">🔥 Calories Burned</span>
+            <span style="font-size:11px; font-weight:700; color:#8E93B8; text-transform:uppercase; letter-spacing:0.8px;">🔥 Daily Burn Progress</span>
             <span style="display:flex; align-items:baseline; gap:4px;">
               <span style="font-size:13px; font-weight:800; color:#FFFFFF;">${burnBreakdown.total}</span>
               <span style="font-size:10px; color:#8E93B8; font-weight:400;">/ ${burnGoal} kcal</span>
@@ -174,7 +163,6 @@ export function render() {
           <div style="width:100%; height:5px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden;">
             <div class="burn-progress-fill" style="width:${burnPct}%; height:100%; border-radius:3px; transition:width 0.8s cubic-bezier(0.1,1,0.1,1);"></div>
           </div>
-          <div style="font-size:10px; color:#8E93B8; margin-top:5px;">💡 ${burnInsight}</div>
         </div>
       </div>
 
@@ -202,34 +190,6 @@ export function render() {
       <div class="home-section" id="pr-section">
         <div class="section-label">Personal Records 🏅</div>
         <div id="pr-feed"></div>
-      </div>
-
-      <!-- Activity Details Sheet -->
-      <div class="bottom-sheet-overlay" id="activity-overlay"></div>
-      <div class="bottom-sheet" id="activity-sheet" style="background:#11121A; border-top:1px solid #23253A; padding: 12px 20px 32px;">
-        <div class="modal-handle"></div>
-        <div id="activity-sheet-content"></div>
-      </div>
-
-      <!-- Discipline Details Sheet -->
-      <div class="bottom-sheet-overlay" id="discipline-overlay"></div>
-      <div class="bottom-sheet" id="discipline-sheet" style="background:#11121A; border-top:1px solid #23253A; padding: 12px 20px 32px;">
-        <div class="modal-handle"></div>
-        <div id="discipline-sheet-content"></div>
-      </div>
-
-      <!-- Burn Details Sheet -->
-      <div class="bottom-sheet-overlay" id="burn-overlay"></div>
-      <div class="bottom-sheet" id="burn-sheet" style="background:#11121A; border-top:1px solid #23253A; padding: 12px 20px 32px;">
-        <div class="modal-handle"></div>
-        <div id="burn-sheet-content"></div>
-      </div>
-
-      <!-- Protein Details Sheet -->
-      <div class="bottom-sheet-overlay" id="protein-overlay"></div>
-      <div class="bottom-sheet" id="protein-sheet" style="background:#11121A; border-top:1px solid #23253A; padding: 12px 20px 32px;">
-        <div class="modal-handle"></div>
-        <div id="protein-sheet-content"></div>
       </div>
 
     </div>
@@ -275,8 +235,8 @@ export function onEnter() {
   _syncStep = 0;
   _syncAnswers = {};
 
-  // Defensive: force-close any ghost sheets from prior navigations
-  _forceCloseAllSheets();
+  // Clean active sheet
+  closeActiveBottomSheet(true);
 
   _wireEvents();
   _loadAIData();
@@ -295,21 +255,9 @@ export function onEnter() {
   }, 100);
 }
 
-function _forceCloseAllSheets() {
-  ['activity-overlay','discipline-overlay','burn-overlay','protein-overlay'].forEach(id => {
-    document.getElementById(id)?.classList.remove('open');
-  });
-  ['activity-sheet','discipline-sheet','burn-sheet','protein-sheet'].forEach(id => {
-    document.getElementById(id)?.classList.remove('open');
-  });
-}
-
 export function onLeave() {
   _closeSyncSheet();
-  _closeActivitySheet();
-  _closeDisciplineSheet();
-  _closeBurnSheet();
-  _closeProteinSheet();
+  closeActiveBottomSheet(true);
 }
 
 function _loadAIData() {
@@ -531,14 +479,10 @@ function _wireEvents() {
   // Activity & Discipline Ring & Sheet Triggers
   document.getElementById('discipline-ring-wrapper')?.addEventListener('click', _openDisciplineSheet);
   document.getElementById('steps-ring-wrapper')?.addEventListener('click', _openActivitySheet);
-  document.getElementById('discipline-overlay')?.addEventListener('click', _closeDisciplineSheet);
-  document.getElementById('activity-overlay')?.addEventListener('click', _closeActivitySheet);
 
   // New Triggers
   document.getElementById('daily-burn-progress-card')?.addEventListener('click', _openBurnSheet);
   document.getElementById('protein-stat-cell')?.addEventListener('click', _openProteinSheet);
-  document.getElementById('burn-overlay')?.addEventListener('click', _closeBurnSheet);
-  document.getElementById('protein-overlay')?.addEventListener('click', _closeProteinSheet);
   document.getElementById('messages-stat-cell')?.addEventListener('click', () => {
     updateState('socials', { openInboxOnEnter: true });
     navigate('/socials');
@@ -548,25 +492,15 @@ function _wireEvents() {
 // ── Discipline Sheet Controllers ──
 
 function _openDisciplineSheet() {
-  const overlay = document.getElementById('discipline-overlay');
-  const sheet = document.getElementById('discipline-sheet');
-  const content = document.getElementById('discipline-sheet-content');
-  if (!overlay || !sheet || !content) return;
-
-  content.innerHTML = _renderDisciplineSheetContent(_currentDisciplineView);
-  overlay.classList.add('open');
-  sheet.classList.add('open');
-
+  openBottomSheet({
+    id: 'discipline',
+    content: _renderDisciplineSheetContent(_currentDisciplineView)
+  });
   _wireDisciplineSheetEvents();
 }
 
 function _closeDisciplineSheet() {
-  const overlay = document.getElementById('discipline-overlay');
-  const sheet = document.getElementById('discipline-sheet');
-  if (overlay && sheet) {
-    overlay.classList.remove('open');
-    sheet.classList.remove('open');
-  }
+  closeActiveBottomSheet();
 }
 
 function _wireDisciplineSheetEvents() {
@@ -856,25 +790,15 @@ function _renderDisciplineSheetContent(view = '7d') {
 // ── Activity Sheet Controllers ──
 
 function _openActivitySheet() {
-  const overlay = document.getElementById('activity-overlay');
-  const sheet = document.getElementById('activity-sheet');
-  const content = document.getElementById('activity-sheet-content');
-  if (!overlay || !sheet || !content) return;
-
-  content.innerHTML = _renderActivitySheetContent(_currentActivityView);
-  overlay.classList.add('open');
-  sheet.classList.add('open');
-
+  openBottomSheet({
+    id: 'activity',
+    content: _renderActivitySheetContent(_currentActivityView)
+  });
   _wireActivitySheetEvents();
 }
 
 function _closeActivitySheet() {
-  const overlay = document.getElementById('activity-overlay');
-  const sheet = document.getElementById('activity-sheet');
-  if (overlay && sheet) {
-    overlay.classList.remove('open');
-    sheet.classList.remove('open');
-  }
+  closeActiveBottomSheet();
 }
 
 function _wireActivitySheetEvents() {
@@ -1138,25 +1062,15 @@ function _openChangeGoalModal() {
 // ── Burn Sheet Controllers ──
 
 function _openBurnSheet() {
-  const overlay = document.getElementById('burn-overlay');
-  const sheet = document.getElementById('burn-sheet');
-  const content = document.getElementById('burn-sheet-content');
-  if (!overlay || !sheet || !content) return;
-
-  content.innerHTML = _renderBurnSheetContent(_currentBurnView);
-  overlay.classList.add('open');
-  sheet.classList.add('open');
-
+  openBottomSheet({
+    id: 'burn',
+    content: _renderBurnSheetContent(_currentBurnView)
+  });
   _wireBurnSheetEvents();
 }
 
 function _closeBurnSheet() {
-  const overlay = document.getElementById('burn-overlay');
-  const sheet = document.getElementById('burn-sheet');
-  if (overlay && sheet) {
-    overlay.classList.remove('open');
-    sheet.classList.remove('open');
-  }
+  closeActiveBottomSheet();
 }
 
 function _wireBurnSheetEvents() {
@@ -1430,25 +1344,15 @@ function _openEditBurnGoalModal() {
 // ── Protein Sheet Controllers ──
 
 function _openProteinSheet() {
-  const overlay = document.getElementById('protein-overlay');
-  const sheet = document.getElementById('protein-sheet');
-  const content = document.getElementById('protein-sheet-content');
-  if (!overlay || !sheet || !content) return;
-
-  content.innerHTML = _renderProteinSheetContent(_currentProteinView);
-  overlay.classList.add('open');
-  sheet.classList.add('open');
-
+  openBottomSheet({
+    id: 'protein',
+    content: _renderProteinSheetContent(_currentProteinView)
+  });
   _wireProteinSheetEvents();
 }
 
 function _closeProteinSheet() {
-  const overlay = document.getElementById('protein-overlay');
-  const sheet = document.getElementById('protein-sheet');
-  if (overlay && sheet) {
-    overlay.classList.remove('open');
-    sheet.classList.remove('open');
-  }
+  closeActiveBottomSheet();
 }
 
 function _wireProteinSheetEvents() {

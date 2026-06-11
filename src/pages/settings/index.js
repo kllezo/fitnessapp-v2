@@ -5,7 +5,7 @@
 
 import { getState, setState, updateState, resetState } from '../../state/index.js';
 import { navigate } from '../../router.js';
-import { showToast, showModal } from '../../components/shared/ui.js';
+import { showToast, showModal, openBottomSheet, closeActiveBottomSheet } from '../../components/shared/ui.js';
 import './settings.css';
 
 export function render() {
@@ -110,10 +110,13 @@ function _toggleRow(id, icon, label, checked) {
 }
 
 export function onEnter() {
+  closeActiveBottomSheet(true);
   _wireEvents();
 }
 
-export function onLeave() {}
+export function onLeave() {
+  closeActiveBottomSheet(true);
+}
 
 function _wireEvents() {
   document.getElementById('back-btn')?.addEventListener('click', () => navigate('/home'));
@@ -218,29 +221,16 @@ function _openDaysSheet() {
 }
 
 function _openInlineSheet(title, optionsHtml, stateKey) {
-  // Use body as modal since settings page may not have sheets
-  let sheet = document.getElementById('settings-inline-sheet');
-  let overlay = document.getElementById('settings-inline-overlay');
-  if (!sheet) {
-    overlay = document.createElement('div');
-    overlay.id = 'settings-inline-overlay';
-    overlay.className = 'bottom-sheet-overlay';
-    sheet = document.createElement('div');
-    sheet.id = 'settings-inline-sheet';
-    sheet.className = 'bottom-sheet';
-    sheet.innerHTML = `<div class="modal-handle"></div><div id="settings-inline-content"></div>`;
-    document.getElementById('app-container')?.appendChild(overlay);
-    document.getElementById('app-container')?.appendChild(sheet);
-  }
-
-  document.getElementById('settings-inline-content').innerHTML = `
+  const content = `
     <h3 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;margin-bottom:16px">${title}</h3>
     <div class="setting-options-grid">${optionsHtml}</div>
     <button class="btn btn-ghost btn-sm btn-full" id="close-inline-sheet" style="margin-top:12px">Close</button>
   `;
 
-  overlay.classList.add('open');
-  sheet.classList.add('open');
+  openBottomSheet({
+    id: 'settings-inline',
+    content: content
+  });
 
   document.querySelectorAll('.setting-option-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -250,14 +240,13 @@ function _openInlineSheet(title, optionsHtml, stateKey) {
       document.querySelectorAll('.setting-option-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       showToast('Setting updated ✓', 'success');
-      overlay.classList.remove('open');
-      sheet.classList.remove('open');
+      closeActiveBottomSheet();
     });
   });
 
-  const close = () => { overlay.classList.remove('open'); sheet.classList.remove('open'); };
-  overlay.addEventListener('click', close);
-  document.getElementById('close-inline-sheet')?.addEventListener('click', close);
+  document.getElementById('close-inline-sheet')?.addEventListener('click', () => {
+    closeActiveBottomSheet();
+  });
 }
 
 function _exportData() {

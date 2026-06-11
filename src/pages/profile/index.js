@@ -4,7 +4,7 @@
 // ==========================================
 
 import { getState, setState, updateState, getDisciplineScore } from '../../state/index.js';
-import { showToast } from '../../components/shared/ui.js';
+import { showToast, openBottomSheet, closeActiveBottomSheet } from '../../components/shared/ui.js';
 import { navigate } from '../../router.js';
 import './profile.css';
 
@@ -159,13 +159,6 @@ export function render() {
         `;
       })()}
     </div>
-
-    <!-- Edit Profile Sheet -->
-    <div class="bottom-sheet-overlay" id="edit-overlay"></div>
-    <div class="bottom-sheet" id="edit-sheet">
-      <div class="modal-handle"></div>
-      <div id="edit-content"></div>
-    </div>
   `;
 }
 
@@ -181,18 +174,17 @@ function _infoRow(icon, label, value) {
 }
 
 export function onEnter() {
+  closeActiveBottomSheet(true);
   _wireEvents();
 }
 
 export function onLeave() {
-  document.getElementById('edit-overlay')?.classList.remove('open');
-  document.getElementById('edit-sheet')?.classList.remove('open');
+  closeActiveBottomSheet(true);
 }
 
 function _wireEvents() {
   document.getElementById('settings-btn')?.addEventListener('click', () => navigate('/settings'));
   document.getElementById('edit-profile-btn')?.addEventListener('click', _openEditSheet);
-  document.getElementById('edit-overlay')?.addEventListener('click', _closeEditSheet);
 
   // Avatar upload
   document.getElementById('avatar-edit-btn')?.addEventListener('click', () => {
@@ -222,10 +214,7 @@ function _wireEvents() {
 function _openEditSheet() {
   const state = getState();
   const auth = state.auth;
-  const content = document.getElementById('edit-content');
-  if (!content) return;
-
-  content.innerHTML = `
+  const sheetContent = `
     <h3 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;margin-bottom:16px">Edit Profile</h3>
     <div class="edit-fields">
       <div class="field-group">
@@ -260,8 +249,10 @@ function _openEditSheet() {
     </div>
   `;
 
-  document.getElementById('edit-overlay')?.classList.add('open');
-  document.getElementById('edit-sheet')?.classList.add('open');
+  openBottomSheet({
+    id: 'edit',
+    content: sheetContent
+  });
 
   document.getElementById('save-profile-btn')?.addEventListener('click', () => {
     const name = document.getElementById('edit-name')?.value?.trim();
@@ -287,6 +278,5 @@ function _openEditSheet() {
 }
 
 function _closeEditSheet() {
-  document.getElementById('edit-overlay')?.classList.remove('open');
-  document.getElementById('edit-sheet')?.classList.remove('open');
+  closeActiveBottomSheet();
 }
