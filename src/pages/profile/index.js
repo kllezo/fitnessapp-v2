@@ -103,6 +103,7 @@ export function render() {
           ${_infoRow('💪', 'Primary Focus', ob?.primaryMuscle || '—')}
           ${_infoRow('🍽️', 'Diet', ob?.dietType === 'veg' ? 'Vegetarian' : ob?.dietType === 'egg' ? 'Eggitarian' : 'Non-Veg')}
           ${ob?.weight ? _infoRow('⚖️', 'Body Stats', `${ob.weight}kg · ${ob.height}cm · Age ${ob.age}`) : ''}
+          ${_infoRow('👣', 'Steps Goal', ob?.stepGoal ? `${ob.stepGoal.toLocaleString()} steps` : '—')}
         </div>
       </div>
 

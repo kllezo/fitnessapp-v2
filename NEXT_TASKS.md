@@ -46,6 +46,7 @@
 - [x] Admin Schedule Sync: Allowed admin to apply/sync their schedule to the squad, with a confirmation modal previewing daily splits. Sends accepted/pending sync invites.
 - [x] Squad Sync Panel: Integrated progress tracking showing accept/decline/pending status of the sync for all squad members.
 - [x] Group Analytics: Added custom high-fidelity stats cards for "Most Copied Schedule", "Schedule Compatibility", and "Schedule Compliance" below the group details weekly trend charts.
+- [x] Apple Fitness-style Activity Rings & Steps System: Replaced Goal cell in stats row with Steps, rendered circular SVG activity ring on Home page, integrated activity details sheet (Today/Week views, preset/custom change goal dialog, hourly/weekly CSS charts, dynamic insights), added onboarding daily step goal step, integrated Walk Reset stopwatch steps logging, and added services abstraction layer in `activity-engine.js`.
 
 ### 2. Next Priorities & Unresolved
 - [ ] Share workout cards download options.

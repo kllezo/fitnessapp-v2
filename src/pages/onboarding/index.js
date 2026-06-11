@@ -60,7 +60,7 @@ function _getPrevStep(from) {
 }
 
 let _step = 0;
-const TOTAL_STEPS = 12;
+const TOTAL_STEPS = 13;
 
 const STEPS = [
   { id: 'personal', title: 'About You', subtitle: 'Let\'s personalise your experience' },
@@ -74,6 +74,7 @@ const STEPS = [
   { id: 'lifestyle', title: 'Lifestyle', subtitle: 'Budget & living situation' },
   { id: 'muscles', title: 'Muscle Focus', subtitle: 'What do you want to prioritise?' },
   { id: 'accountability', title: 'Accountability', subtitle: 'Do you want a training partner?' },
+  { id: 'step_goal', title: 'Daily Step Goal', subtitle: 'How active do you want to be?' },
   { id: 'complete', title: 'You\'re all set', subtitle: 'AURA is ready for you' },
 ];
 
@@ -114,9 +115,39 @@ function _renderStep(step) {
     case 8: return _stepLifestyle();
     case 9: return _stepMuscles();
     case 10: return _stepAccountability();
-    case 11: return _stepComplete();
+    case 11: return _stepStepGoal();
+    case 12: return _stepComplete();
     default: return _stepPersonal();
   }
+}
+
+function _stepStepGoal() {
+  const s = getState().onboarding;
+  const val = s.stepGoal || 10000;
+  const opts = [
+    { id: 5000, label: '5k', sub: 'Light Activity' },
+    { id: 7500, label: '7.5k', sub: 'Moderate Activity' },
+    { id: 10000, label: '10k', sub: 'Recommended' },
+    { id: 12500, label: '12.5k', sub: 'Active Lifestyle' },
+    { id: 15000, label: '15k', sub: 'Highly Active' },
+    { id: 20000, label: '20k', sub: 'Elite Movement' },
+  ];
+  return `
+    <div class="ob-step anim-fade-in">
+      <h2 class="ob-title">${STEPS[11].title}</h2>
+      <p class="ob-subtitle">${STEPS[11].subtitle}</p>
+      <div class="selector-grid selector-grid-2" id="step-goal-grid">
+        ${opts.map(o => `
+          <button class="selector-card ob-select ${val === o.id ? 'selected' : ''}"
+            data-field="stepGoal" data-val="${o.id}">
+            <span class="card-emoji" style="font-size:32px;font-weight:800;color:var(--text-primary)">${o.label}</span>
+            <span class="card-label">steps/day</span>
+            <span class="card-sub">${o.sub}</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
 }
 
 function _stepPersonal() {
@@ -592,7 +623,7 @@ function _wireEvents() {
       setState(`onboarding.${field}`, parsedVal);
 
       // Auto-advance if single-select step
-      const autoAdvanceSteps = [2, 3, 5, 6, 7, 10];
+      const autoAdvanceSteps = [2, 3, 5, 6, 7, 10, 11];
       if (autoAdvanceSteps.includes(_step)) {
         setTimeout(() => {
           _goToStep(_getNextStep(_step));
@@ -692,7 +723,22 @@ function _completeOnboarding() {
 
   // Calculate and save BMI/BMR/TDEE to profile state
   const { bmi, bmiCat, bmr, tdee, leanMass } = _calcBMIBMR(state.onboarding);
-  updateState('profile', { bmi, bmiCat, bmr, tdee, leanMass, proteinTarget: macros.protein, waterTarget: macros.water, maintenanceCalories: tdee });
+  const stepGoal = state.onboarding?.stepGoal || 10000;
+  
+  updateState('profile', { 
+    bmi, 
+    bmiCat, 
+    bmr, 
+    tdee, 
+    leanMass, 
+    proteinTarget: macros.protein, 
+    waterTarget: macros.water, 
+    maintenanceCalories: tdee,
+    stepGoal: stepGoal
+  });
+
+  // Save to activity state
+  setState('activity.stepGoal', stepGoal);
 
   setState('onboarding.completed', true);
   saveState();

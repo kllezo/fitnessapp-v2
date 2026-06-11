@@ -7,11 +7,13 @@ import { getState, setState, updateState, getDisciplineScore, getReadinessLabel,
 import { navigate } from '../../router.js';
 import { showToast, showModal, closeModal } from '../../components/shared/ui.js';
 import { computeReadinessScore, generateWeeklyReview, detectHabitPatterns, extractPRFeed } from '../../services/ai-engine.js';
+import { getActivityData, updateActivityGoal, updateActivitySteps } from '../../services/activity-engine.js';
 import './home.css';
 
 // Daily sync state
 let _syncStep = 0;
 let _syncAnswers = {};
+let _currentActivityView = 'today';
 const SYNC_QUESTIONS = [
   { key: 'sleep', label: 'Sleep Hours', emoji: '😴', opts: ['< 2 Hours', '2–4 Hours', '4–6 Hours', '6–8 Hours', '8+ Hours'] },
   { key: 'energy', label: 'Energy Level', emoji: '⚡', opts: ['🪫 Empty', '😮‍💨 Low', '😐 OK', '💪 Good', '⚡ High'] },
@@ -105,9 +107,36 @@ export function render() {
             <div class="stat-value" style="color:var(--aura-amber)">${streak}</div>
             <div class="stat-label">Day Streak 🔥</div>
           </div>
-          <div class="stat-cell">
-            <div class="stat-value gradient-text-mint">${goalLabel.split(' ')[0]}</div>
-            <div class="stat-label">Goal</div>
+          <div class="stat-cell" id="steps-stat-cell" style="cursor: pointer;">
+            <div class="stat-value gradient-text-mint">${(state.activity?.steps || 0).toLocaleString()}</div>
+            <div class="stat-label">Steps 👣</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity Ring Card -->
+      <div class="home-section">
+        <div class="activity-ring-card card" id="activity-ring-card" style="background:#11121A; border:1px solid #23253A; cursor:pointer; display:flex; flex-direction:column; align-items:center; padding:16px;">
+          <p style="font-family:var(--font-display); font-size:10px; font-weight:var(--fw-bold); letter-spacing:1.5px; color:#8E93B8; text-transform:uppercase; margin-bottom:12px; margin-top:0;">Activity Ring</p>
+          
+          <!-- Apple inspired Ring -->
+          <div style="position:relative; width:100px; height:100px; display:flex; align-items:center; justify-content:center;">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255, 255, 255, 0.04)" stroke-width="8" />
+              <circle cx="50" cy="50" r="42" fill="none" stroke="#00E5A8" stroke-width="8"
+                stroke-linecap="round" stroke-dasharray="263.89"
+                stroke-dashoffset="${263.89 - (263.89 * Math.min(state.activity?.steps || 0, state.activity?.stepGoal || 10000) / (state.activity?.stepGoal || 10000))}"
+                transform="rotate(-90 50 50)" style="transition: stroke-dashoffset 0.5s ease;" />
+            </svg>
+            <div style="position:absolute; font-size:24px;">○</div>
+          </div>
+
+          <div style="text-align:center; margin-top:12px;">
+            <p style="font-size:20px; font-weight:800; color:#FFFFFF; margin:0;">
+              ${(state.activity?.steps || 0).toLocaleString()} <span style="font-size:13px; font-weight:normal; color:#8E93B8;">/ ${(state.activity?.stepGoal || 10000).toLocaleString()}</span>
+            </p>
+            <p style="font-size:12px; font-weight:600; color:#FFFFFF; margin:4px 0 0 0;">Daily Movement</p>
+            <p style="font-size:10px; color:#8E93B8; margin:2px 0 0 0;">Steps Goal Progress</p>
           </div>
         </div>
       </div>
@@ -161,6 +190,13 @@ export function render() {
         </div>
       </div>
 
+      <!-- Activity Details Sheet -->
+      <div class="bottom-sheet-overlay" id="activity-overlay"></div>
+      <div class="bottom-sheet" id="activity-sheet" style="background:#11121A; border-top:1px solid #23253A; padding: 12px 20px 32px;">
+        <div class="modal-handle"></div>
+        <div id="activity-sheet-content"></div>
+      </div>
+
     </div>
   `;
 }
@@ -210,6 +246,7 @@ export function onEnter() {
 
 export function onLeave() {
   _closeSyncSheet();
+  _closeActivitySheet();
 }
 
 function _loadAIData() {
@@ -431,4 +468,271 @@ function _wireEvents() {
   document.getElementById('qn-socials')?.addEventListener('click', () => navigate('/socials'));
   document.getElementById('notif-btn')?.addEventListener('click', () => showToast('No new notifications', 'default'));
   document.getElementById('profile-btn')?.addEventListener('click', () => navigate('/profile'));
+
+  // Activity Ring & Sheet Triggers
+  document.getElementById('activity-ring-card')?.addEventListener('click', _openActivitySheet);
+  document.getElementById('steps-stat-cell')?.addEventListener('click', _openActivitySheet);
+  document.getElementById('activity-overlay')?.addEventListener('click', _closeActivitySheet);
+}
+
+// ── Activity Sheet Controllers ──
+
+function _openActivitySheet() {
+  const overlay = document.getElementById('activity-overlay');
+  const sheet = document.getElementById('activity-sheet');
+  const content = document.getElementById('activity-sheet-content');
+  if (!overlay || !sheet || !content) return;
+
+  content.innerHTML = _renderActivitySheetContent(_currentActivityView);
+  overlay.classList.add('open');
+  sheet.classList.add('open');
+
+  _wireActivitySheetEvents();
+}
+
+function _closeActivitySheet() {
+  const overlay = document.getElementById('activity-overlay');
+  const sheet = document.getElementById('activity-sheet');
+  if (overlay && sheet) {
+    overlay.classList.remove('open');
+    sheet.classList.remove('open');
+  }
+}
+
+function _wireActivitySheetEvents() {
+  document.getElementById('act-toggle-today')?.addEventListener('click', () => {
+    _currentActivityView = 'today';
+    const content = document.getElementById('activity-sheet-content');
+    if (content) content.innerHTML = _renderActivitySheetContent('today');
+    _wireActivitySheetEvents();
+  });
+
+  document.getElementById('act-toggle-week')?.addEventListener('click', () => {
+    _currentActivityView = 'week';
+    const content = document.getElementById('activity-sheet-content');
+    if (content) content.innerHTML = _renderActivitySheetContent('week');
+    _wireActivitySheetEvents();
+  });
+
+  document.getElementById('change-goal-btn')?.addEventListener('click', () => {
+    _openChangeGoalModal();
+  });
+}
+
+function _renderActivitySheetContent(view = 'today') {
+  const state = getState();
+  const activity = state.activity || {};
+  const steps = activity.steps || 0;
+  const goal = activity.stepGoal || 10000;
+  const distance = activity.distanceKm || 0.0;
+  const calories = activity.caloriesBurned || 0;
+  const stairs = activity.stairsClimbed || 0;
+  const pct = Math.round((steps / goal) * 100);
+
+  const todayActive = view === 'today' ? 'active' : '';
+  const weekActive = view === 'week' ? 'active' : '';
+
+  let bodyHtml = '';
+
+  if (view === 'today') {
+    let insightText = '';
+    if (pct >= 100) {
+      insightText = `🏆 Goal achieved! You're at ${pct}% of your steps target.`;
+    } else if (steps < 5000) {
+      insightText = `🚶 A 15-minute walk will push you above 5,000 steps.`;
+    } else if (goal - steps <= 2000) {
+      insightText = `🎯 You're only ${(goal - steps).toLocaleString()} steps away from today's target!`;
+    } else {
+      insightText = `💪 Consistent movement improves recovery readiness.`;
+    }
+
+    const hourlyData = [120, 50, 0, 300, 1100, 850, 420, 200, 680, 1200, 800, 200];
+    const maxVal = Math.max(...hourlyData);
+
+    bodyHtml = `
+      <div style="margin-top:16px;">
+        <!-- Stats list -->
+        <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #23253A;">
+            <span style="color:#8E93B8;">Steps</span>
+            <strong style="color:#FFFFFF;">${steps.toLocaleString()} / ${goal.toLocaleString()}</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #23253A;">
+            <span style="color:#8E93B8;">Distance</span>
+            <strong style="color:#FFFFFF;">${distance} km</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #23253A;">
+            <span style="color:#8E93B8;">Calories Burned</span>
+            <strong style="color:#FFFFFF;">${calories} kcal</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #23253A;">
+            <span style="color:#8E93B8;">Stairs Climbed</span>
+            <strong style="color:#FFFFFF;">${stairs}</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #23253A;">
+            <span style="color:#8E93B8;">Goal Progress</span>
+            <strong style="color:#00E5A8;">${pct}%</strong>
+          </div>
+        </div>
+
+        <!-- Hourly Mini Chart -->
+        <div class="card" style="background:#11121A; border:1px solid #23253A; padding:12px; margin-bottom:16px;">
+          <p style="font-size:11px; color:#8E93B8; font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:8px;">Hourly Activity</p>
+          <div style="display:flex; justify-content:space-between; align-items:flex-end; height:60px; padding:0 4px;">
+            ${hourlyData.map((val, idx) => {
+              const h = maxVal > 0 ? (val / maxVal) * 100 : 0;
+              return `
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; height:100%; justify-content:flex-end;">
+                  <div style="width:8px; height:${Math.max(4, h)}%; background:#00E5A8; border-radius:2px;"></div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:8px; color:#8E93B8; margin-top:4px; padding:0 2px;">
+            <span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>11 PM</span>
+          </div>
+        </div>
+
+        <!-- Today's Insight -->
+        <div class="card" style="background:rgba(0, 229, 168, 0.05); border:1px solid rgba(0, 229, 168, 0.15); padding:12px; margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+          <span style="font-size:16px;">💡</span>
+          <p style="font-size:12px; color:#FFFFFF; margin:0; line-height:1.4;">${insightText}</p>
+        </div>
+
+        <button class="btn btn-primary btn-full" id="change-goal-btn">Change Goal</button>
+      </div>
+    `;
+  } else {
+    // Week View
+    const weeklySteps = activity.weeklySteps || [0,0,0,0,0,0,0];
+    const weeklyDistance = activity.weeklyDistance || [0,0,0,0,0,0,0];
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    
+    const activeDays = weeklySteps.filter(s => s > 0).length || 1;
+    const totalSteps = weeklySteps.reduce((sum, s) => sum + s, 0);
+    const avgSteps = Math.round(totalSteps / activeDays);
+
+    const maxSteps = Math.max(...weeklySteps, 1);
+
+    bodyHtml = `
+      <div style="margin-top:16px;">
+        <!-- Weekly average -->
+        <div class="card" style="background:#11121A; border:1px solid #23253A; padding:12px; margin-bottom:16px; text-align:center;">
+          <span style="font-size:10px; color:#8E93B8; text-transform:uppercase;">Weekly Average</span>
+          <strong style="font-size:24px; color:#FFFFFF; display:block; margin-top:2px;">${avgSteps.toLocaleString()} <span style="font-size:12px; font-weight:normal; color:#8E93B8;">steps/day</span></strong>
+        </div>
+
+        <!-- Weekly Mini Chart -->
+        <div class="card" style="background:#11121A; border:1px solid #23253A; padding:12px; margin-bottom:16px;">
+          <p style="font-size:11px; color:#8E93B8; font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:8px;">Weekly Step Distribution</p>
+          <div style="display:flex; justify-content:space-between; align-items:flex-end; height:70px; padding:0 8px;">
+            ${weeklySteps.map((val, idx) => {
+              const h = (val / maxSteps) * 100;
+              return `
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; height:100%; justify-content:flex-end;">
+                  <span style="font-size:8px; color:#8E93B8; font-weight:bold;">${val > 0 ? (val >= 1000 ? (val/1000).toFixed(1) + 'k' : val) : '0'}</span>
+                  <div style="width:14px; height:${Math.max(4, h)}%; background:${val >= goal ? '#00E5A8' : '#5B5CF6'}; border-radius:3px 3px 0 0;"></div>
+                  <span style="font-size:9px; color:#8E93B8; margin-top:2px;">${days[idx]}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- Daily details list -->
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <p style="font-size:11px; color:#8E93B8; font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:4px;">Daily Breakdown</p>
+          ${days.map((day, idx) => {
+            const stepVal = weeklySteps[idx] || 0;
+            const distVal = weeklyDistance[idx] || 0.0;
+            return `
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(255,255,255,0.02); border-radius:8px;">
+                <span style="font-weight:600; color:#FFFFFF;">${day}</span>
+                <div style="text-align:right;">
+                  <span style="font-weight:bold; color:#FFFFFF; display:block;">${stepVal.toLocaleString()} steps</span>
+                  <span style="font-size:10px; color:#8E93B8;">${distVal} km</span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h3 style="font-family:var(--font-display); font-size:20px; font-weight:700; color:#FFFFFF; margin:0;">Activity</h3>
+      <div style="display:flex; background:rgba(255,255,255,0.04); padding:3px; border-radius:100px;">
+        <button class="toggle-opt ${todayActive}" id="act-toggle-today" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === 'today' ? '#FFFFFF' : '#8E93B8'}; background:${view === 'today' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Today</button>
+        <button class="toggle-opt ${weekActive}" id="act-toggle-week" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === 'week' ? '#FFFFFF' : '#8E93B8'}; background:${view === 'week' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Week</button>
+      </div>
+    </div>
+    ${bodyHtml}
+  `;
+}
+
+function _openChangeGoalModal() {
+  const currentGoal = getState().activity?.stepGoal || 10000;
+  const options = [5000, 7500, 10000, 12500, 15000, 20000];
+  
+  const content = `
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <p style="font-size:12px; color:#8E93B8;">Select a daily steps target:</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        ${options.map(opt => `
+          <button class="btn btn-secondary change-goal-opt ${currentGoal === opt ? 'active' : ''}" 
+            data-val="${opt}" style="padding:10px; font-size:14px; background:${currentGoal === opt ? 'rgba(91,92,246,0.15)' : ''}; border-color:${currentGoal === opt ? '#5B5CF6' : ''}; color:${currentGoal === opt ? '#5B5CF6' : ''};">
+            ${opt.toLocaleString()}
+          </button>
+        `).join('')}
+      </div>
+      <div style="margin-top:8px;">
+        <label style="font-size:11px; color:#8E93B8; display:block; margin-bottom:4px;">Custom Goal</label>
+        <input class="input" type="number" id="custom-goal-input" placeholder="Enter steps (e.g. 12000)" style="padding:10px 14px;" />
+      </div>
+      <button class="btn btn-primary btn-full" id="save-goal-btn" style="margin-top:8px;">Save Goal</button>
+    </div>
+  `;
+
+  showModal({
+    title: 'Change Step Goal',
+    content: content,
+    onClose: () => {}
+  });
+
+  document.querySelectorAll('.change-goal-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = Number(btn.dataset.val);
+      updateActivityGoal(val);
+      closeModal();
+      showToast(`Daily steps goal updated to ${val.toLocaleString()} ✓`, 'success');
+      
+      const container = document.getElementById('page-content');
+      if (container) {
+        container.innerHTML = render();
+        onEnter();
+        _openActivitySheet();
+      }
+    });
+  });
+
+  document.getElementById('save-goal-btn')?.addEventListener('click', () => {
+    const customInput = document.getElementById('custom-goal-input');
+    const val = Number(customInput?.value?.trim());
+    if (val && val >= 1000) {
+      updateActivityGoal(val);
+      closeModal();
+      showToast(`Daily steps goal updated to ${val.toLocaleString()} ✓`, 'success');
+      
+      const container = document.getElementById('page-content');
+      if (container) {
+        container.innerHTML = render();
+        onEnter();
+        _openActivitySheet();
+      }
+    } else {
+      showToast('Please enter a valid step count (min 1,000)', 'error');
+    }
+  });
 }

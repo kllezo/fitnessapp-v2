@@ -35,7 +35,8 @@ webiste 2/
     ├── services/
     │   ├── ai-engine.js     # Readiness, PR extracts, habits detection, compatibility calculations
     │   ├── nutrition-engine.js # Calorie target calculations, meal catalogs, logging
-    │   └── workout-engine.js # Plan generation, history persistence, volume calculations
+    │   ├── workout-engine.js # Plan generation, history persistence, volume calculations
+    │   └── activity-engine.js # Step tracking abstraction layer, goal updates, steps calculations
     └── state/
         └── index.js         # Single reactive store with localStorage serialization
 ```

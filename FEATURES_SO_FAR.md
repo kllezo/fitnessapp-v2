@@ -83,3 +83,15 @@
 - Export all data to JSON format.
 - Reset/Delete account modal confirmation.
 - Interactive toggle settings.
+
+## 10. Activity & Fitness Ring System (`/home`, `/onboarding`, `/recovery`)
+- **Daily Step Goal Onboarding**: Questionnaire step inserted into the onboarding flow, saving step goal presets (5k-20k, default 10k) or custom values to profile and activity.
+- **Dashboard Steps Stat**: Goal card in top dashboard row replaced with live Steps stat showing current daily steps.
+- **Vibrant Fitness Ring Card**: Circular neon success-mint `#00E5A8` SVG progress ring reflecting daily step goal progress.
+- **Draggable Activity Details Bottom Sheet**: Tap-activated modal details sheet tracking Steps, Distance, Calories, Stairs, and Progress percentage.
+- **View Toggle & Custom Charts**: Support for "Today | Week" views, rendering custom mock hourly bar charts and 7-day Mon-Sun distribution charts via CSS/DOM.
+- **Dynamic Activity Insights**: Recommends customized actions (e.g. 15-min walk recommendations) based on current step goal progress.
+- **Readiness Score Signals**: Steps achievement modifiers adjust daily readiness score: Low movement (<3k steps): `-2`, Moderate movement: `+2`, Goal achieved: `+5`.
+- **Walk Reset Integration**: Commits stopwatch steps completed in Recovery Walk directly into daily activity data.
+- **Integration Abstraction Layer**: Exposes future-ready `getActivityData()`, `updateActivitySteps()`, and `updateActivityGoal()` abstraction hooks in `activity-engine.js`.
+

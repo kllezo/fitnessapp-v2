@@ -19,7 +19,24 @@ export function computeReadinessScore(answers) {
     (6 - stress) * 14 +   // inverted (low stress = good)
     motivation * 12;
 
-  const raw = Math.round(score / 5); // normalize ~35-100
+  let raw = Math.round(score / 5); // normalize ~35-100
+
+  // Movement affects readiness
+  const state = getState();
+  const activity = state.activity || {};
+  const steps = activity.steps || 0;
+  const goal = activity.stepGoal || 10000;
+
+  let modifier = 0;
+  if (steps >= goal) {
+    modifier = 5;
+  } else if (steps >= 3000) {
+    modifier = 2;
+  } else {
+    modifier = -2;
+  }
+
+  raw += modifier;
   return Math.min(100, Math.max(35, raw));
 }
 

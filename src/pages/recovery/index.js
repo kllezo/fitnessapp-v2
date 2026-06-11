@@ -6,6 +6,7 @@
 import { getState, setState, updateState } from '../../state/index.js';
 import { showToast, showModal, closeModal, updateModalBody } from '../../components/shared/ui.js';
 import { calculateRecoveryScore, calculateRecoveryStreak, calculateSleepDebt, getReadinessTrend } from '../../services/ai-engine.js';
+import { updateActivitySteps } from '../../services/activity-engine.js';
 import './recovery.css';
 
 // Audio Context State
@@ -578,8 +579,10 @@ function _finishWalk() {
   const state = getState();
   const loggedCals = Math.round(_walkSteps * 0.05);
   
-  // Add walk data to diagnostics / logs in state
-  const checklist = state.checkIn || {};
+  // Add walk data to activity state
+  const currentSteps = state.activity?.steps || 0;
+  updateActivitySteps(currentSteps + _walkSteps);
+  
   showToast(`Walk completed! +${_walkSteps} steps | +${loggedCals} kcal burned!`, 'success');
   closeModal();
 }

@@ -96,6 +96,21 @@ const defaultState = {
     lastMealDate: null,
     groceryList: [],
   },
+  activity: {
+    steps: 4238,
+    distanceKm: 3.4,
+    caloriesBurned: 218,
+    stairsClimbed: 12,
+    stepGoal: 10000,
+    weeklySteps: [8432, 6512, 11200, 4238, 0, 0, 0], // Mon-Sun
+    weeklyDistance: [6.2, 4.8, 8.9, 3.4, 0, 0, 0],
+    activityHistory: [
+      { date: '2026-06-08', steps: 8432, distanceKm: 6.2, caloriesBurned: 420, stairsClimbed: 18 },
+      { date: '2026-06-09', steps: 6512, distanceKm: 4.8, caloriesBurned: 310, stairsClimbed: 14 },
+      { date: '2026-06-10', steps: 11200, distanceKm: 8.9, caloriesBurned: 580, stairsClimbed: 25 },
+      { date: '2026-06-11', steps: 4238, distanceKm: 3.4, caloriesBurned: 218, stairsClimbed: 12 }
+    ]
+  },
   recovery: {
     sleepHours: null,
     soreness: null,
