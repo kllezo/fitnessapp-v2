@@ -186,11 +186,13 @@ export function calculateMacros(state = getState()) {
     case 'build_muscle': calories = tdee + 300; break;
     case 'lose_fat': calories = tdee - 400; break;
     case 'endurance': calories = tdee + 100; break;
+    case 'aggressive_bulk': calories = tdee + 500; break;
+    case 'recomposition': calories = tdee - 150; break;
     default: calories = tdee;
   }
 
   // Protein target
-  const proteinMultiplier = goal === 'build_muscle' ? 2.2 : goal === 'lose_fat' ? 2.0 : 1.8;
+  const proteinMultiplier = goal === 'build_muscle' ? 2.2 : goal === 'lose_fat' ? 2.0 : goal === 'aggressive_bulk' ? 2.3 : goal === 'recomposition' ? 2.1 : 1.8;
   const protein = Math.round(weight * proteinMultiplier);
 
   // Water target (ml → litres)

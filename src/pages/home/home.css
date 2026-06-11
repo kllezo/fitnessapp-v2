@@ -139,24 +139,41 @@
 .pr-meta { font-size: 10px; color: var(--text-muted); }
 .pr-weight { font-family: var(--font-display); font-size: var(--text-md); font-weight: var(--fw-bold); color: var(--aura-amber); }
 
-/* Quick Nav */
-.quick-nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.quick-nav-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-card);
-  border-radius: var(--radius-lg);
-  padding: 14px 8px;
+/* Daily Burn Progress Card */
+.burn-progress-card {
+  background: #11121A;
+  border: 1px solid #23253A;
+  border-radius: 16px;
+  padding: 22px 20px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: all var(--dur-fast) var(--ease-spring);
-  border: none;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--dur-fast) ease;
 }
-.quick-nav-card:active { transform: scale(0.9); }
-.quick-nav-icon { font-size: 22px; }
-.quick-nav-label { font-size: 10px; font-weight: var(--fw-medium); color: var(--text-secondary); }
+.burn-progress-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #00E5A8, #42D4FF);
+}
+.burn-progress-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 229, 168, 0.35);
+  box-shadow: 0 12px 40px rgba(0, 229, 168, 0.08);
+}
+.burn-progress-fill {
+  background: #00E5A8;
+  border-radius: 6px;
+  box-shadow: 0 0 12px rgba(0, 229, 168, 0.6);
+  animation: pulse-glow 3s infinite alternate;
+}
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 8px rgba(0, 229, 168, 0.35); }
+  100% { box-shadow: 0 0 16px rgba(0, 229, 168, 0.7); }
+}
 
 /* Daily Sync Sheet */
 .sync-progress {

@@ -609,6 +609,12 @@ function _renderFindTab() {
 export function onEnter() {
   _wireEvents();
   _checkResumeSearch();
+
+  const state = getState();
+  if (state.socials?.openInboxOnEnter) {
+    setState('socials.openInboxOnEnter', false);
+    _openInboxModal();
+  }
 }
 
 export function onLeave() {

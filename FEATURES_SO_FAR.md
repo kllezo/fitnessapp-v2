@@ -90,15 +90,25 @@
   - **Discipline Ring (left)**: Colored `#5B5CF6`, displaying current Consistency score (`[score]/100`).
   - **Steps Ring (right)**: Colored `#00E5A8`, displaying daily movement progress (`[steps]/[goal]`).
   - Both rings animate smoothly from 0% fill to target percentage over a 1-second duration on page load.
-- **Three-Column Stats Row**: Displays **Current Streak** (`[streak] Days`), **Calories Burned** (`[calories] kcal`), and **Protein Progress** (`[consumed]g / [target]g` and progress percentage), completely eliminating duplicate Discipline scores from the main home page.
+- **Three-Column Stats Row**: Displays **Current Streak** (`[streak] Days`), **Messages** (unread count from Socials), and **Protein Progress** (`[consumed]g / [target]g` and progress percentage), completely eliminating duplicate Discipline scores from the main home page.
 - **Draggable Discipline Details Bottom Sheet**: Clicking the Discipline Ring opens a bottom sheet showing:
   - Exact mathematical score breakdown (Workout Consistency, Protein Adherence, Sleep Quality, Hydration, Missed Sessions, and Skipped Recovery penalties) that sums to the exact current score.
-  - Interactive **Week | Month** view toggles.
-  - **Week View**: Shows a 7-Day Trend SVG line chart, dynamic consistency insights, and actionable **Improvement Suggestions** (Workout, Protein, Sleep, and Hydration checklists).
-  - **Month View**: Shows Average score, Highest score, current streak, and a mini 30-Day Grid representing consistency levels.
-- **Draggable Activity Details Bottom Sheet**: Clicking the Steps Ring opens the activity sheet tracking Steps, Distance, Calories, Stairs, Goal Progress, Hourly/Weekly charts, and step goal configuration.
+  - Interactive **7 Days | 30 Days | 90 Days** view toggles.
+  - **7-Day View**: Shows a 7-Day Trend SVG line chart, dynamic consistency insights, and Daily Score Changes log (`*` positive, `-` negative entries).
+  - **30-Day View**: Shows Average score, Highest score, current streak, and a colour-coded 30-Day Grid representing consistency levels.
+  - **90-Day View**: Shows 90-day average, Consistency Rating label, and a weekly averages block list.
+- **Draggable Activity Details Bottom Sheet**: Clicking the Steps Ring opens the activity sheet tracking Steps, Distance, Calories, Stairs, Goal Progress, with a **Steps / Distance / Calories** metric toggle, switchable 7d / 30d / 90d trend SVG charts, and step goal configuration via preset/custom modal.
+- **Daily Burn Progress Card**: Full-width card below the stats row showing today's active calorie burn progress bar (total / goal), percentage, and a dynamic insight line. Clicking opens the **Calorie Burn Analytics Sheet**.
+- **Calorie Burn Analytics Sheet**: Detailed burn breakdown (Gym calories from workout history, Walking calories from steps, NEAT estimation), Week / Month / 90d SVG trend charts, burn insights, and an **Edit Burn Goal** button supporting preset or custom targets.
+- **Protein Progress Sheet**: Clicking the Protein stat cell opens a detailed protein tracking sheet with 7d / 30d / 90d toggle, trend charts, macro adherence breakdown, and actionable protein tips.
+- **Dynamic Daily Burn Goal Engine** (`activity-engine.js`): `getDailyBurnGoal(state)` uses the Mifflin-St Jeor BMR formula combined with onboarding profile data (goal, weight, height, age, gender, activity level, workout frequency) to compute a personalised daily active calorie target. Falls back to sensible defaults if profile data is missing.
 - **Readiness Score Signals**: Steps achievement modifiers adjust daily readiness score: Low movement (<3k steps): `-2`, Moderate movement: `+2`, Goal achieved: `+5`.
 - **Walk Reset Integration**: Commits stopwatch steps completed in Recovery Walk directly into daily activity data.
-- **Integration Abstraction Layer**: Exposes future-ready `getActivityData()`, `updateActivitySteps()`, and `updateActivityGoal()` abstraction hooks in `activity-engine.js`.
+- **Integration Abstraction Layer**: Exposes future-ready `getActivityData()`, `updateActivitySteps()`, `updateActivityGoal()`, `getDailyBurnGoal()`, and `getCalorieBurnBreakdown()` abstraction hooks in `activity-engine.js`.
 
-
+## 11. Home / Diet Separation — Output vs Input (`/home`, `/diet`)
+- **Home = Output**: The Home dashboard exclusively tracks what the body burns and outputs — Discipline Ring, Steps Ring, Daily Burn Progress, Streak, Messages, Protein Progress.
+- **Diet = Input**: The Diet page exclusively tracks what the body consumes — macro intake, hydration, meal logs, calorie intake progress.
+- **No duplicate metrics**: Removed all duplicate Discipline cards, duplicate calorie entries, and Quick Access nav shortcuts from Home.
+- **Calculation Transparency Table** (Diet page): Displays the live Mifflin-St Jeor formula calculation showing how the Maintenance Calories (TDEE) target was derived from the user's onboarding BMI / BMR / profile data.
+- **Ghost-free DOM**: All sheets and modals are properly mounted and unmounted. `onLeave()` closes all five custom bottom sheets (Sync, Activity, Discipline, Burn, Protein) on page navigation. Router `closeModal()` cleans up Global Modal Manager overlays.
