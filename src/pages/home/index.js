@@ -42,6 +42,11 @@ export function render() {
   };
   const goalLabel = getGoalLabel(ob?.goal);
 
+  // Fetch actual protein tracking values
+  const proteinConsumed = state.nutrition?.protein?.consumed || 0;
+  const proteinTarget = state.nutrition?.protein?.target || 150;
+  const proteinPct = proteinTarget > 0 ? Math.round((proteinConsumed / proteinTarget) * 100) : 0;
+
   return `
     <div class="home-page">
       <!-- Header -->
@@ -126,16 +131,19 @@ export function render() {
       <div class="home-section">
         <div class="stat-grid stat-grid-3">
           <div class="stat-cell">
-            <div class="stat-value gradient-text">${discipline}</div>
-            <div class="stat-label">Discipline</div>
-          </div>
-          <div class="stat-cell">
-            <div class="stat-value" style="color:var(--aura-amber)">${streak}</div>
-            <div class="stat-label">Day Streak 🔥</div>
+            <div class="stat-value" style="color:var(--aura-amber)">${streak} Days</div>
+            <div class="stat-label">🔥 Current Streak</div>
           </div>
           <div class="stat-cell" id="calories-stat-cell">
-            <div class="stat-value" style="color:#fda4af">${(state.activity?.caloriesBurned || 0)} kcal</div>
-            <div class="stat-label">Calories Burned</div>
+            <div class="stat-value" style="color:#fda4af">${state.activity?.caloriesBurned || 0} kcal</div>
+            <div class="stat-label">🔥 Calories Burned</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-value" style="color:#42D4FF; font-size: 15px; padding: 2px 0; font-family: var(--font-display); font-weight: 800;">
+              ${proteinConsumed}g<span style="font-size:10px; color:#8E93B8; font-weight:normal;"> / ${proteinTarget}g</span>
+              <div style="font-size:10px; color:#8E93B8; font-weight:500; margin-top:2px;">${proteinPct}%</div>
+            </div>
+            <div class="stat-label">💪 Protein Progress</div>
           </div>
         </div>
       </div>
@@ -542,6 +550,10 @@ function _renderDisciplineSheetContent(view = 'week') {
   const status = discipline >= 80 ? 'Locked In' : discipline >= 65 ? 'Consistent' : discipline >= 50 ? 'Moderate' : 'Starting Out';
   const breakdown = getDisciplineBreakdown(state);
 
+  const proteinConsumed = state.nutrition?.protein?.consumed || 0;
+  const proteinTarget = state.nutrition?.protein?.target || 150;
+  const proteinPct = proteinTarget > 0 ? Math.round((proteinConsumed / proteinTarget) * 100) : 0;
+
   const weekActive = view === 'week' ? 'active' : '';
   const monthActive = view === 'month' ? 'active' : '';
 
@@ -640,7 +652,7 @@ function _renderDisciplineSheetContent(view = 'week') {
 
         <!-- Insights -->
         <span class="section-label" style="display:block; margin-bottom:8px;">Insights</span>
-        <div class="card" style="background:rgba(91, 92, 246, 0.05); border:1px solid rgba(91, 92, 246, 0.15); padding:12px;">
+        <div class="card" style="background:rgba(91, 92, 246, 0.05); border:1px solid rgba(91, 92, 246, 0.15); padding:12px; margin-bottom:16px;">
           <div style="display:flex; flex-direction:column; gap:8px;">
             ${insights.map(ins => `
               <div style="display:flex; gap:8px; font-size:12px; color:#FFFFFF; line-height:1.4;">
@@ -648,6 +660,29 @@ function _renderDisciplineSheetContent(view = 'week') {
                 <span>${ins}</span>
               </div>
             `).join('')}
+          </div>
+        </div>
+
+        <!-- Improvement Suggestions -->
+        <span class="section-label" style="display:block; margin-bottom:8px;">Improvement Suggestions</span>
+        <div class="card" style="background:rgba(0, 229, 168, 0.05); border:1px solid rgba(0, 229, 168, 0.15); padding:12px;">
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; gap:8px; font-size:12px; color:#FFFFFF; line-height:1.4;">
+              <span>✦</span>
+              <span>${breakdown.workout < 15 ? '🏋️ <strong>Workout:</strong> Complete today\'s session to improve consistency.' : '🏋️ <strong>Workout:</strong> Maintain your streak to lock in consistency.'}</span>
+            </div>
+            <div style="display:flex; gap:8px; font-size:12px; color:#FFFFFF; line-height:1.4;">
+              <span>✦</span>
+              <span>${proteinPct < 90 ? `🥩 <strong>Protein:</strong> Get more protein (${proteinConsumed}g / ${proteinTarget}g) to hit daily targets.` : '🥩 <strong>Protein:</strong> Excellent work meeting your protein targets.'}</span>
+            </div>
+            <div style="display:flex; gap:8px; font-size:12px; color:#FFFFFF; line-height:1.4;">
+              <span>✦</span>
+              <span>😴 <strong>Sleep:</strong> Aim for 8+ hours of sleep tonight to boost tomorrow\'s scores.</span>
+            </div>
+            <div style="display:flex; gap:8px; font-size:12px; color:#FFFFFF; line-height:1.4;">
+              <span>✦</span>
+              <span>💧 <strong>Hydration:</strong> Hit your daily water intake goal to avoid hydration penalties.</span>
+            </div>
           </div>
         </div>
       </div>

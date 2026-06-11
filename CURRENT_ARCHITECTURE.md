@@ -50,4 +50,6 @@ webiste 2/
 - Backdrop and sheet modals are appended inside `div#modal-container` in `index.html` and managed dynamically via `showModal` / `closeModal` from `src/components/shared/ui.js` to ensure a single active modal instance and clean DOM unmounting.
 - Toasts are appended inside `div#toast-container`.
 - Custom bottom sheets (such as Activity Details and Discipline Details sheets in `/home`) use absolute-positioned viewport drawers overlaying the main app shell container, driven by class toggles (`.open`) and custom event handlers.
+- **Orphan / Ghost Node Prevention**: The SPA router (`src/router.js`) explicitly imports and executes `closeModal()` at the beginning of page transitions to clean up backdrop and modal wrappers from previous page states, ensuring zero orphaned elements or duplicate rendering.
+
 

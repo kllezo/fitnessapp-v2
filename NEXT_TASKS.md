@@ -48,6 +48,7 @@
 - [x] Group Analytics: Added custom high-fidelity stats cards for "Most Copied Schedule", "Schedule Compatibility", and "Schedule Compliance" below the group details weekly trend charts.
 - [x] Apple Fitness-style Activity Rings & Steps System: Replaced Goal cell in stats row with Steps, rendered circular SVG activity ring on Home page, integrated activity details sheet (Today/Week views, preset/custom change goal dialog, hourly/weekly CSS charts, dynamic insights), added onboarding daily step goal step, integrated Walk Reset stopwatch steps logging, and added services abstraction layer in `activity-engine.js`.
 - [x] Home Screen Rings Rework: Integrated a side-by-side Hero Rings card (Discipline Ring & Steps Ring) at the top of the home page, replaced Steps stat card with Calories Burned in the stats row, deleted separate Activity Ring card, and implemented the Discipline Details bottom sheet with consistency breakdowns, SVG 7-day trend charts, Week/Month views, and dynamic insights.
+- [x] Home Page Cleanup & Stats Rework: Completely eliminated the duplicate Discipline card from the home page. Replaced the stats row layout with [ Current Streak ] → [ Calories Burned ] → [ Protein Progress ] (fetching active data from the streak, activity, and protein trackers). Added dynamic Improvement Suggestions to the Discipline Details Sheet and global modal cleaning hooks to prevent dynamic ghost components and duplicate render cycles.
 
 ### 2. Next Priorities & Unresolved
 - [ ] Share workout cards download options.
