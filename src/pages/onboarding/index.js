@@ -1,5 +1,5 @@
 // ==========================================
-// AURA V2 — Onboarding Page (12 Steps)
+// AURA V2 — Onboarding Page (14 Steps)
 // ==========================================
 
 import { getState, updateState, setState, saveState } from '../../state/index.js';
@@ -7,6 +7,7 @@ import { navigate } from '../../router.js';
 import { showToast } from '../../components/shared/ui.js';
 import { generateWeeklyPlan } from '../../services/workout-engine.js';
 import { calculateMacros } from '../../services/nutrition-engine.js';
+import { themeManager, THEMES, THEME_ORDER } from '../../services/theme-engine.js';
 import './onboarding.css';
 
 // ── Calculation Helpers ──
@@ -60,22 +61,23 @@ function _getPrevStep(from) {
 }
 
 let _step = 0;
-const TOTAL_STEPS = 13;
+const TOTAL_STEPS = 14;
 
 const STEPS = [
-  { id: 'personal', title: 'About You', subtitle: 'Let\'s personalise your experience' },
-  { id: 'goals', title: 'Your Goal', subtitle: 'What are you training for?' },
-  { id: 'experience', title: 'Your Level', subtitle: 'Where are you right now?' },
-  { id: 'mode', title: 'Workout Mode', subtitle: 'Where do you train?' },
-  { id: 'equipment', title: 'Your Equipment', subtitle: 'What do you have access to?' },
-  { id: 'training_days', title: 'Training Days', subtitle: 'How many days per week?' },
-  { id: 'split', title: 'Split Style', subtitle: 'How do you want to structure training?' },
-  { id: 'diet', title: 'Diet & Nutrition', subtitle: 'Your food preferences' },
-  { id: 'lifestyle', title: 'Lifestyle', subtitle: 'Budget & living situation' },
-  { id: 'muscles', title: 'Muscle Focus', subtitle: 'What do you want to prioritise?' },
-  { id: 'accountability', title: 'Accountability', subtitle: 'Do you want a training partner?' },
-  { id: 'step_goal', title: 'Daily Step Goal', subtitle: 'How active do you want to be?' },
-  { id: 'complete', title: 'You\'re all set', subtitle: 'AURA is ready for you' },
+  { id: 'personal',       title: 'About You',         subtitle: 'Let\'s personalise your experience' },
+  { id: 'goals',          title: 'Your Goal',          subtitle: 'What are you training for?' },
+  { id: 'experience',     title: 'Your Level',         subtitle: 'Where are you right now?' },
+  { id: 'mode',           title: 'Workout Mode',       subtitle: 'Where do you train?' },
+  { id: 'equipment',      title: 'Your Equipment',     subtitle: 'What do you have access to?' },
+  { id: 'training_days',  title: 'Training Days',      subtitle: 'How many days per week?' },
+  { id: 'split',          title: 'Split Style',        subtitle: 'How do you want to structure training?' },
+  { id: 'diet',           title: 'Diet & Nutrition',   subtitle: 'Your food preferences' },
+  { id: 'lifestyle',      title: 'Lifestyle',          subtitle: 'Budget & living situation' },
+  { id: 'muscles',        title: 'Muscle Focus',       subtitle: 'What do you want to prioritise?' },
+  { id: 'accountability', title: 'Accountability',     subtitle: 'Do you want a training partner?' },
+  { id: 'step_goal',      title: 'Daily Step Goal',    subtitle: 'How active do you want to be?' },
+  { id: 'choose_aura',    title: 'Choose Your Aura',  subtitle: 'Select the visual style that motivates you most.' },
+  { id: 'complete',       title: 'You\'re all set',    subtitle: 'AURA is ready for you' },
 ];
 
 export function render() {
@@ -104,19 +106,20 @@ export function render() {
 
 function _renderStep(step) {
   switch (step) {
-    case 0: return _stepPersonal();
-    case 1: return _stepGoals();
-    case 2: return _stepExperience();
-    case 3: return _stepMode();
-    case 4: return _stepEquipment();
-    case 5: return _stepTrainingDays();
-    case 6: return _stepSplit();
-    case 7: return _stepDiet();
-    case 8: return _stepLifestyle();
-    case 9: return _stepMuscles();
+    case 0:  return _stepPersonal();
+    case 1:  return _stepGoals();
+    case 2:  return _stepExperience();
+    case 3:  return _stepMode();
+    case 4:  return _stepEquipment();
+    case 5:  return _stepTrainingDays();
+    case 6:  return _stepSplit();
+    case 7:  return _stepDiet();
+    case 8:  return _stepLifestyle();
+    case 9:  return _stepMuscles();
     case 10: return _stepAccountability();
     case 11: return _stepStepGoal();
-    case 12: return _stepComplete();
+    case 12: return _stepChooseAura();
+    case 13: return _stepComplete();
     default: return _stepPersonal();
   }
 }
@@ -505,6 +508,155 @@ function _stepAccountability() {
   `;
 }
 
+// ── Choose Your Aura Step ──
+function _stepChooseAura() {
+  const currentThemeId = themeManager.currentTheme;
+
+  const themeCards = THEME_ORDER.map(id => {
+    const t = THEMES[id];
+    const c = t.colors;
+    const isSelected = currentThemeId === id;
+    return `
+      <div class="aura-theme-card ${isSelected ? 'selected' : ''}" data-theme-id="${id}" style="
+        background:${c.background};
+        border:2px solid ${isSelected ? c.primary : c.border};
+        border-radius:16px;
+        overflow:hidden;
+        cursor:pointer;
+        flex-shrink:0;
+        width:200px;
+        transition:border-color 0.2s ease, transform 0.2s ease;
+        position:relative;
+        box-shadow: ${isSelected ? `0 0 0 3px ${c.primary}55, 0 8px 24px ${c.primary}33` : '0 4px 16px rgba(0,0,0,0.2)'};
+      ">
+        ${isSelected ? `<div style="position:absolute;top:8px;right:8px;background:${c.primary};color:${t.dark ? '#fff' : '#fff'};border-radius:100px;padding:2px 8px;font-size:10px;font-weight:700;z-index:10;">✓ Selected</div>` : ''}
+
+        <!-- Mini App Preview: Status bar -->
+        <div style="background:${c.background};padding:6px 10px 4px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:9px;font-weight:700;color:${c.textPrimary}">9:41</span>
+          <div style="display:flex;gap:3px;align-items:center;">
+            <div style="width:12px;height:5px;border:1px solid ${c.textSecondary};border-radius:1px;">
+              <div style="width:70%;height:100%;background:${c.textSecondary};border-radius:1px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mini App Preview: Home header -->
+        <div style="padding:8px 10px 4px;background:${c.background};">
+          <p style="font-size:7px;color:${c.textSecondary};margin:0;">Good morning</p>
+          <p style="font-size:11px;font-weight:800;color:${c.textPrimary};margin:0 0 8px;">Athlete</p>
+
+          <!-- Mini Hero Card -->
+          <div style="background:${c.card};border:1px solid ${c.border};border-radius:10px;padding:8px;margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-around;align-items:center;">
+              <!-- Discipline Ring -->
+              <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+                <span style="font-size:6px;color:${c.textSecondary};text-transform:uppercase;letter-spacing:0.5px;">Discipline</span>
+                <svg width="40" height="40" viewBox="0 0 40 40">
+                  <circle cx="20" cy="20" r="16" fill="none" stroke="${c.border}" stroke-width="4"/>
+                  <circle cx="20" cy="20" r="16" fill="none" stroke="${c.primary}" stroke-width="4"
+                    stroke-linecap="round" stroke-dasharray="100.5" stroke-dashoffset="30"
+                    transform="rotate(-90 20 20)"/>
+                  <text x="20" y="24" text-anchor="middle" fill="${c.textPrimary}" font-size="8" font-weight="700">72</text>
+                </svg>
+              </div>
+              <!-- Steps Ring -->
+              <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+                <span style="font-size:6px;color:${c.textSecondary};text-transform:uppercase;letter-spacing:0.5px;">Steps</span>
+                <svg width="40" height="40" viewBox="0 0 40 40">
+                  <circle cx="20" cy="20" r="16" fill="none" stroke="${c.border}" stroke-width="4"/>
+                  <circle cx="20" cy="20" r="16" fill="none" stroke="${c.success}" stroke-width="4"
+                    stroke-linecap="round" stroke-dasharray="100.5" stroke-dashoffset="55"
+                    transform="rotate(-90 20 20)"/>
+                  <text x="20" y="24" text-anchor="middle" fill="${c.textPrimary}" font-size="7" font-weight="700">4.2k</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mini Stats Row -->
+          <div style="display:flex;gap:4px;margin-bottom:6px;">
+            <div style="flex:1;background:${c.card};border:1px solid ${c.border};border-radius:6px;padding:4px;text-align:center;">
+              <div style="font-size:9px;font-weight:800;color:${c.warning}">7</div>
+              <div style="font-size:5px;color:${c.textMuted}">🔥 Streak</div>
+            </div>
+            <div style="flex:1;background:${c.card};border:1px solid ${c.border};border-radius:6px;padding:4px;text-align:center;">
+              <div style="font-size:8px;font-weight:800;color:${c.primary}">📥</div>
+              <div style="font-size:5px;color:${c.textMuted}">Inbox</div>
+            </div>
+            <div style="flex:1;background:${c.card};border:1px solid ${c.border};border-radius:6px;padding:4px;text-align:center;">
+              <div style="font-size:9px;font-weight:800;color:${c.success}">92g</div>
+              <div style="font-size:5px;color:${c.textMuted}">💪 Protein</div>
+            </div>
+          </div>
+
+          <!-- Mini Mission Card -->
+          <div style="background:${c.card};border:1px solid ${c.border};border-radius:8px;padding:6px;">
+            <div style="font-size:6px;color:${c.textSecondary};text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Today's Mission</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-size:9px;font-weight:700;color:${c.textPrimary}">Push Day</div>
+                <div style="font-size:6px;color:${c.textSecondary}">6 exercises · ~60min</div>
+              </div>
+              <div style="background:${c.primary};color:#fff;font-size:7px;font-weight:700;padding:3px 8px;border-radius:100px;">Start →</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mini Nav bar -->
+        <div style="background:${c.surface};border-top:1px solid ${c.border};padding:5px 8px;display:flex;justify-content:space-around;">
+          ${['🏠','💪','🥗','💤','👥'].map((ico, i) => `
+            <div style="display:flex;flex-direction:column;align-items:center;gap:1px;">
+              <span style="font-size:11px;${i === 0 ? `filter:drop-shadow(0 0 3px ${c.primary}80);` : 'opacity:0.4;'}">${ico}</span>
+              ${i === 0 ? `<div style="width:3px;height:3px;border-radius:50%;background:${c.primary};"></div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Theme name label -->
+        <div style="padding:8px 10px;background:${c.card};border-top:1px solid ${c.border};">
+          <div style="font-size:11px;font-weight:700;color:${c.textPrimary};">${t.name}</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px;">
+            ${t.tags.slice(0, 2).map(tag => `
+              <span style="font-size:8px;padding:1px 5px;border-radius:100px;background:${c.primary}22;color:${c.primary};font-weight:600;">${tag}</span>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="ob-step anim-fade-in">
+      <h2 class="ob-title">${STEPS[12].title}</h2>
+      <p class="ob-subtitle">${STEPS[12].subtitle}</p>
+      <p class="ob-hint" style="margin-bottom:12px;">Swipe to explore themes. Tap to preview live.</p>
+
+      <!-- Horizontal scrollable theme cards -->
+      <div id="aura-theme-scroll" style="
+        display:flex;
+        gap:12px;
+        overflow-x:auto;
+        padding:4px 4px 16px;
+        scroll-snap-type:x mandatory;
+        -webkit-overflow-scrolling:touch;
+        scrollbar-width:none;
+        margin:0 -4px;
+      ">
+        ${themeCards}
+      </div>
+
+      <!-- Theme name indicator -->
+      <div style="text-align:center;margin-top:4px;">
+        <span id="selected-theme-label" style="font-size:13px;font-weight:700;color:var(--text-primary);">
+          ${THEMES[currentThemeId]?.name || 'Deep Indigo'}
+        </span>
+        <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;">Live preview active — your app already looks like this</p>
+      </div>
+    </div>
+  `;
+}
+
 function _stepComplete() {
   const s = getState().onboarding;
   const macros = calculateMacros(getState());
@@ -629,6 +781,48 @@ function _wireEvents() {
           _goToStep(_getNextStep(_step));
         }, 300);
       }
+    });
+  });
+
+  // Theme cards — Choose Your Aura step
+  document.querySelectorAll('.aura-theme-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const themeId = card.dataset.themeId;
+      if (!themeId) return;
+
+      // Apply live preview
+      themeManager.setTheme(themeId, true);
+
+      // Update selected state visuals
+      document.querySelectorAll('.aura-theme-card').forEach(c => {
+        const t = THEMES[c.dataset.themeId];
+        if (!t) return;
+        const isNowSelected = c.dataset.themeId === themeId;
+        c.style.border = `2px solid ${isNowSelected ? t.colors.primary : t.colors.border}`;
+        c.style.boxShadow = isNowSelected
+          ? `0 0 0 3px ${t.colors.primary}55, 0 8px 24px ${t.colors.primary}33`
+          : '0 4px 16px rgba(0,0,0,0.2)';
+        c.classList.toggle('selected', isNowSelected);
+
+        // Update/remove selected badge
+        const existingBadge = c.querySelector('.theme-selected-badge');
+        if (existingBadge) existingBadge.remove();
+        if (isNowSelected) {
+          const badge = document.createElement('div');
+          badge.className = 'theme-selected-badge';
+          badge.textContent = '✓ Selected';
+          badge.style.cssText = `position:absolute;top:8px;right:8px;background:${t.colors.primary};color:#fff;border-radius:100px;padding:2px 8px;font-size:10px;font-weight:700;z-index:10;`;
+          c.style.position = 'relative';
+          c.prepend(badge);
+        }
+      });
+
+      // Update label
+      const label = document.getElementById('selected-theme-label');
+      if (label) label.textContent = THEMES[themeId]?.name || themeId;
+
+      // Scroll card into center view
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     });
   });
 

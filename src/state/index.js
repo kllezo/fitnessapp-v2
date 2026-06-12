@@ -10,6 +10,7 @@ const defaultState = {
     currentRoute: '/auth',
     readiness: 'high', // 'high' | 'medium' | 'low'
     theme: 'dark',
+    selectedTheme: 'deep-indigo',
     lastSync: null,
   },
   auth: {

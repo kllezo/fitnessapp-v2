@@ -140,3 +140,22 @@
 .anim-float { animation: float 3s ease-in-out infinite; }
 .anim-glow { animation: glow 2s ease-in-out infinite; }
 .anim-bounce { animation: bounce 1s ease-in-out infinite; }
+
+/* ── Theme Transition ── */
+@keyframes themeSwitch {
+  0% { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+.theme-switching {
+  animation: themeSwitch 300ms var(--ease-out) forwards;
+}
+
+/* ── Theme Card Swipe ── */
+@keyframes cardSwipeIn {
+  from { transform: translateX(40px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.theme-card-in {
+  animation: cardSwipeIn 280ms var(--ease-spring) forwards;
+}
+

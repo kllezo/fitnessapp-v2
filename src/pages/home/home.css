@@ -141,17 +141,17 @@
 
 /* Daily Burn Progress Strip */
 .burn-progress-fill {
-  background: #00E5A8;
+  background: var(--aura-mint);
   border-radius: 3px;
-  box-shadow: 0 0 8px rgba(0, 229, 168, 0.5);
+  box-shadow: 0 0 8px var(--aura-mint-glow);
   animation: pulse-glow 3s infinite alternate;
 }
 @keyframes pulse-glow {
-  0% { box-shadow: 0 0 6px rgba(0, 229, 168, 0.3); }
-  100% { box-shadow: 0 0 12px rgba(0, 229, 168, 0.6); }
+  0% { box-shadow: 0 0 6px var(--aura-mint-glow); }
+  100% { box-shadow: 0 0 12px var(--aura-mint-glow); }
 }
 #daily-burn-progress-card:hover {
-  border-color: rgba(0, 229, 168, 0.35) !important;
+  border-color: var(--aura-mint-glow) !important;
 }
 
 /* Compact Stats Row (Home only) */
@@ -207,8 +207,8 @@
 
 /* ── Activity Ring Card Styles ── */
 .activity-ring-card {
-  background: #11121A !important;
-  border: 1px solid #23253A !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-card) !important;
   transition: transform var(--dur-fast) var(--ease-spring), border-color var(--dur-fast) ease;
 }
 .activity-ring-card:active {
@@ -241,8 +241,8 @@
   transition: all var(--dur-fast) ease;
 }
 .change-goal-opt.active {
-  background: rgba(91,92,246,0.15) !important;
-  border-color: #5B5CF6 !important;
-  color: #FFFFFF !important;
+  background: var(--aura-violet-glow) !important;
+  border-color: var(--aura-violet) !important;
+  color: var(--text-primary) !important;
 }
 

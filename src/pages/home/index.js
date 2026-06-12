@@ -86,11 +86,11 @@ export function render() {
 
       <!-- Rings Hero Card -->
       <div class="home-section">
-        <div class="home-hero-card card card-glow" style="background:#11121A; border:1px solid #23253A; padding: 20px; display:flex; flex-direction:column; gap:16px;">
+        <div class="home-hero-card card card-glow" style="background:var(--bg-card); border:1px solid var(--border-card); padding: 20px; display:flex; flex-direction:column; gap:16px;">
           <div class="rings-row" style="display:flex; justify-content:space-around; align-items:center;">
             <!-- Discipline Ring (Left) -->
             <div class="ring-wrapper" id="discipline-ring-wrapper" style="display:flex; flex-direction:column; align-items:center; cursor:pointer;">
-              <span style="font-family:var(--font-display); font-size:10px; font-weight:700; letter-spacing:1px; color:#8E93B8; text-transform:uppercase; margin-bottom:8px;">Discipline Ring</span>
+              <span style="font-family:var(--font-display); font-size:10px; font-weight:700; letter-spacing:1px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Discipline Ring</span>
               <div style="position:relative; width:96px; height:96px; display:flex; align-items:center; justify-content:center;">
                 <svg width="96" height="96" viewBox="0 0 96 96">
                   <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
@@ -101,14 +101,14 @@ export function render() {
                 </svg>
                 <div style="position:absolute; display:flex; flex-direction:column; align-items:center;">
                   <span style="font-size:18px; font-weight:800; color:#FFFFFF; line-height:1;">${discipline}</span>
-                  <span style="font-size:9px; color:#8E93B8; margin-top:2px;">/100</span>
+                  <span style="font-size:9px; color:var(--text-muted); margin-top:2px;">/100</span>
                 </div>
               </div>
             </div>
 
             <!-- Steps Ring (Right) -->
             <div class="ring-wrapper" id="steps-ring-wrapper" style="display:flex; flex-direction:column; align-items:center; cursor:pointer;">
-              <span style="font-family:var(--font-display); font-size:10px; font-weight:700; letter-spacing:1px; color:#8E93B8; text-transform:uppercase; margin-bottom:8px;">Steps Ring</span>
+              <span style="font-family:var(--font-display); font-size:10px; font-weight:700; letter-spacing:1px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Steps Ring</span>
               <div style="position:relative; width:96px; height:96px; display:flex; align-items:center; justify-content:center;">
                 <svg width="96" height="96" viewBox="0 0 96 96">
                   <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
@@ -119,7 +119,7 @@ export function render() {
                 </svg>
                 <div style="position:absolute; display:flex; flex-direction:column; align-items:center;">
                   <span style="font-size:16px; font-weight:800; color:#FFFFFF; line-height:1;">${(state.activity?.steps || 0) >= 1000 ? ((state.activity?.steps || 0)/1000).toFixed(1) + 'k' : (state.activity?.steps || 0)}</span>
-                  <span style="font-size:9px; color:#8E93B8; margin-top:2px;">/${(state.activity?.stepGoal || 10000).toLocaleString()}</span>
+                  <span style="font-size:9px; color:var(--text-muted); margin-top:2px;">/${(state.activity?.stepGoal || 10000).toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -150,13 +150,13 @@ export function render() {
 
       <!-- Daily Burn Progress Strip -->
       <div class="home-section" style="padding-bottom:14px;">
-        <div id="daily-burn-progress-card" style="cursor:pointer; background:#11121A; border:1px solid #23253A; border-radius:12px; padding:10px 14px; position:relative; overflow:hidden; transition:border-color 0.2s ease;">
+        <div id="daily-burn-progress-card" style="cursor:pointer; background:var(--bg-card); border:1px solid var(--border-card); border-radius:12px; padding:10px 14px; position:relative; overflow:hidden; transition:border-color 0.2s ease;">
           <div style="position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,#00E5A8,#42D4FF);"></div>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <span style="font-size:11px; font-weight:700; color:#8E93B8; text-transform:uppercase; letter-spacing:0.8px;">🔥 Daily Burn Progress</span>
+            <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.8px;">🔥 Daily Burn Progress</span>
             <span style="display:flex; align-items:baseline; gap:4px;">
               <span style="font-size:13px; font-weight:800; color:#FFFFFF;">${burnBreakdown.total}</span>
-              <span style="font-size:10px; color:#8E93B8; font-weight:400;">/ ${burnGoal} kcal</span>
+              <span style="font-size:10px; color:var(--text-muted); font-weight:400;">/ ${burnGoal} kcal</span>
               <span style="font-size:11px; color:#00E5A8; font-weight:700;">${burnPct}%</span>
             </span>
           </div>
@@ -598,46 +598,46 @@ function _renderDisciplineSheetContent(view = '7d') {
         <span class="section-label" style="display:block; margin-bottom:8px;">Why is my score this?</span>
         <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px; background:rgba(255,255,255,0.02); padding:12px; border-radius:8px;">
           <div style="display:flex; justify-content:space-between; padding:4px 0;">
-            <span style="color:#8E93B8;">Workout Consistency</span>
+            <span style="color:var(--text-muted);">Workout Consistency</span>
             <strong style="color:#00E5A8;">+${breakdown.workout}</strong>
           </div>
           <div style="display:flex; justify-content:space-between; padding:4px 0;">
-            <span style="color:#8E93B8;">Protein Adherence</span>
+            <span style="color:var(--text-muted);">Protein Adherence</span>
             <strong style="color:#00E5A8;">+${breakdown.protein}</strong>
           </div>
           <div style="display:flex; justify-content:space-between; padding:4px 0;">
-            <span style="color:#8E93B8;">Hydration</span>
+            <span style="color:var(--text-muted);">Hydration</span>
             <strong style="color:#00E5A8;">+${breakdown.hydration}</strong>
           </div>
           <div style="display:flex; justify-content:space-between; padding:4px 0;">
-            <span style="color:#8E93B8;">Recovery</span>
+            <span style="color:var(--text-muted);">Recovery</span>
             <strong style="color:#00E5A8;">+${breakdown.recovery}</strong>
           </div>
           <div style="display:flex; justify-content:space-between; padding:4px 0;">
-            <span style="color:#8E93B8;">Sleep</span>
+            <span style="color:var(--text-muted);">Sleep</span>
             <strong style="color:#00E5A8;">+${breakdown.sleep}</strong>
           </div>
           <div style="display:flex; justify-content:space-between; padding:4px 0;">
-            <span style="color:#8E93B8;">Step Goal Adherence</span>
+            <span style="color:var(--text-muted);">Step Goal Adherence</span>
             <strong style="color:#00E5A8;">+${breakdown.stepGoal}</strong>
           </div>
           <div style="display:flex; justify-content:space-between; padding:4px 0;">
-            <span style="color:#8E93B8;">Missed Workouts</span>
+            <span style="color:var(--text-muted);">Missed Workouts</span>
             <strong style="color:#fda4af;">${breakdown.missed}</strong>
           </div>
           <div style="display:flex; justify-content:space-between; padding:4px 0;">
-            <span style="color:#8E93B8;">Missed Recovery</span>
+            <span style="color:var(--text-muted);">Missed Recovery</span>
             <strong style="color:#fda4af;">${breakdown.skipped}</strong>
           </div>
-          <div style="border-top:1px dashed #23253A; margin-top:8px; padding-top:8px; display:flex; justify-content:space-between;">
+          <div style="border-top:1px dashed var(--border-card); margin-top:8px; padding-top:8px; display:flex; justify-content:space-between;">
             <span style="color:#FFFFFF; font-weight:bold;">TOTAL</span>
             <strong style="color:#5B5CF6; font-size:18px;">${breakdown.total}</strong>
           </div>
         </div>
 
         <!-- Line Chart Trend -->
-        <div class="card" style="background:#11121A; border:1px solid #23253A; padding:12px; margin-bottom:16px;">
-          <p style="font-size:11px; color:#8E93B8; font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:8px;">7 Day Trend</p>
+        <div class="card" style="background:var(--bg-card); border:1px solid var(--border-card); padding:12px; margin-bottom:16px;">
+          <p style="font-size:11px; color:var(--text-muted); font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:8px;">7 Day Trend</p>
           <svg viewBox="0 0 ${width} ${height}" style="width:100%; height:80px; overflow:visible;">
             <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="rgba(255,255,255,0.03)" stroke-dasharray="2" />
             <line x1="${padding}" y1="${height / 2}" x2="${width - padding}" y2="${height / 2}" stroke="rgba(255,255,255,0.03)" stroke-dasharray="2" />
@@ -648,14 +648,14 @@ function _renderDisciplineSheetContent(view = '7d') {
             
             ${days.map((day, i) => {
               const x = padding + (i * (width - 2 * padding) / 6);
-              return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="#8E93B8" text-anchor="middle" font-weight="${i === dayIdx ? 'bold' : 'normal'}">${day}</text>`;
+              return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="var(--text-muted)" text-anchor="middle" font-weight="${i === dayIdx ? 'bold' : 'normal'}">${day}</text>`;
             }).join('')}
           </svg>
         </div>
 
         <!-- Score Changes / Explanations -->
         <span class="section-label" style="display:block; margin-bottom:8px;">Daily Score Changes</span>
-        <div class="card" style="background:rgba(255,255,255,0.02); border:1px solid #23253A; padding:12px; margin-bottom:16px; display:flex; flex-direction:column; gap:8px;">
+        <div class="card" style="background:rgba(255,255,255,0.02); border:1px solid var(--border-card); padding:12px; margin-bottom:16px; display:flex; flex-direction:column; gap:8px;">
           <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Mon</span><span style="color:#00E5A8;">* Workout completed</span></div>
           <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Tue</span><span style="color:#00E5A8;">* Protein target hit</span></div>
           <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Wed</span><span style="color:#00E5A8;">* Sleep target hit</span></div>
@@ -690,23 +690,23 @@ function _renderDisciplineSheetContent(view = '7d') {
       <div style="margin-top:16px;">
         <!-- Metrics Row -->
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:16px;">
-          <div class="card" style="padding:10px; text-align:center; background:#11121A; border:1px solid #23253A;">
-            <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Avg Score</span>
+          <div class="card" style="padding:10px; text-align:center; background:var(--bg-card); border:1px solid var(--border-card);">
+            <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Avg Score</span>
             <strong style="font-size:18px; color:#5B5CF6; display:block; margin-top:4px;">${avgScore}</strong>
           </div>
-          <div class="card" style="padding:10px; text-align:center; background:#11121A; border:1px solid #23253A;">
-            <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Highest</span>
+          <div class="card" style="padding:10px; text-align:center; background:var(--bg-card); border:1px solid var(--border-card);">
+            <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Highest</span>
             <strong style="font-size:18px; color:#00E5A8; display:block; margin-top:4px;">${maxScore}</strong>
           </div>
-          <div class="card" style="padding:10px; text-align:center; background:#11121A; border:1px solid #23253A;">
-            <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Streak</span>
+          <div class="card" style="padding:10px; text-align:center; background:var(--bg-card); border:1px solid var(--border-card);">
+            <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Streak</span>
             <strong style="font-size:18px; color:var(--aura-amber); display:block; margin-top:4px;">${streak}d 🔥</strong>
           </div>
         </div>
 
         <!-- 30-Day Grid -->
-        <div class="card" style="background:#11121A; border:1px solid #23253A; padding:12px; margin-bottom:16px;">
-          <p style="font-size:11px; color:#8E93B8; font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:12px;">30 Day History</p>
+        <div class="card" style="background:var(--bg-card); border:1px solid var(--border-card); padding:12px; margin-bottom:16px;">
+          <p style="font-size:11px; color:var(--text-muted); font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:12px;">30 Day History</p>
           <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; justify-items:center;">
             ${mock30Days.map((scoreVal, idx) => {
               const bg = scoreVal >= 80 ? 'rgba(167,139,250,0.3)' : scoreVal >= 65 ? 'rgba(96,165,250,0.3)' : scoreVal >= 50 ? 'rgba(251,191,36,0.3)' : 'rgba(244,63,94,0.3)';
@@ -722,7 +722,7 @@ function _renderDisciplineSheetContent(view = '7d') {
 
         <!-- Score Changes / Explanations -->
         <span class="section-label" style="display:block; margin-bottom:8px;">Recent Key Changes</span>
-        <div class="card" style="background:rgba(255,255,255,0.02); border:1px solid #23253A; padding:12px; display:flex; flex-direction:column; gap:8px;">
+        <div class="card" style="background:rgba(255,255,255,0.02); border:1px solid var(--border-card); padding:12px; display:flex; flex-direction:column; gap:8px;">
           <div style="display:flex; justify-content:space-between; font-size:12px;"><span>June 10</span><span style="color:#00E5A8;">🏋️ Gym session completed (+15)</span></div>
           <div style="display:flex; justify-content:space-between; font-size:12px;"><span>June 9</span><span style="color:#00E5A8;">🥩 Protein target achieved (+10)</span></div>
           <div style="display:flex; justify-content:space-between; font-size:12px;"><span>June 8</span><span style="color:#fda4af;">🚫 Missed workout (-6)</span></div>
@@ -743,12 +743,12 @@ function _renderDisciplineSheetContent(view = '7d') {
       <div style="margin-top:16px;">
         <!-- Metrics Row -->
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px;">
-          <div class="card" style="padding:10px; text-align:center; background:#11121A; border:1px solid #23253A;">
-            <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">90-day Avg Score</span>
+          <div class="card" style="padding:10px; text-align:center; background:var(--bg-card); border:1px solid var(--border-card);">
+            <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">90-day Avg Score</span>
             <strong style="font-size:18px; color:#5B5CF6; display:block; margin-top:4px;">${avgScore}</strong>
           </div>
-          <div class="card" style="padding:10px; text-align:center; background:#11121A; border:1px solid #23253A;">
-            <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Consistency Rating</span>
+          <div class="card" style="padding:10px; text-align:center; background:var(--bg-card); border:1px solid var(--border-card);">
+            <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Consistency Rating</span>
             <strong style="font-size:15px; color:#00E5A8; display:block; margin-top:4px;">Elite Stable</strong>
           </div>
         </div>
@@ -760,7 +760,7 @@ function _renderDisciplineSheetContent(view = '7d') {
             <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(255,255,255,0.02); border-radius:8px;">
               <div>
                 <span style="font-weight:600; color:#FFFFFF; display:block;">${w.lbl}</span>
-                <span style="font-size:10px; color:#8E93B8;">Status: ${w.status}</span>
+                <span style="font-size:10px; color:var(--text-muted);">Status: ${w.status}</span>
               </div>
               <strong style="color:#5B5CF6; font-size:16px;">${w.val}</strong>
             </div>
@@ -774,12 +774,12 @@ function _renderDisciplineSheetContent(view = '7d') {
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <div>
         <h3 style="font-family:var(--font-display); font-size:20px; font-weight:700; color:#FFFFFF; margin:0;">Discipline Score</h3>
-        <p style="font-size:11px; color:#8E93B8; margin:2px 0 0 0;">Status: <span style="font-weight:bold; color:${statusColor};">${status}</span></p>
+        <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0;">Status: <span style="font-weight:bold; color:${statusColor};">${status}</span></p>
       </div>
       <div style="display:flex; background:rgba(255,255,255,0.04); padding:3px; border-radius:100px;">
-        <button class="toggle-opt ${sevenActive}" id="disc-toggle-7d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '7d' ? '#FFFFFF' : '#8E93B8'}; background:${view === '7d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">7 Days</button>
-        <button class="toggle-opt ${thirtyActive}" id="disc-toggle-30d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '30d' ? '#FFFFFF' : '#8E93B8'}; background:${view === '30d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">30 Days</button>
-        <button class="toggle-opt ${ninetyActive}" id="disc-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? '#FFFFFF' : '#8E93B8'}; background:${view === '90d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90 Days</button>
+        <button class="toggle-opt ${sevenActive}" id="disc-toggle-7d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '7d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '7d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">7 Days</button>
+        <button class="toggle-opt ${thirtyActive}" id="disc-toggle-30d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '30d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '30d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">30 Days</button>
+        <button class="toggle-opt ${ninetyActive}" id="disc-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '90d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90 Days</button>
       </div>
     </div>
     ${bodyHtml}
@@ -883,9 +883,9 @@ function _renderActivitySheetContent(view = '7d') {
 
   const metricSelectorHtml = `
     <div style="display:flex; gap:6px; background:rgba(255,255,255,0.02); padding:3px; border-radius:100px; margin-bottom:14px; justify-content:center;">
-      <button class="toggle-opt ${stepsMetricActive}" id="act-metric-steps" style="flex:1; border:none; background:transparent; padding:6px 12px; border-radius:100px; color:${_currentMovementMetric === 'steps' ? '#FFFFFF' : '#8E93B8'}; background:${_currentMovementMetric === 'steps' ? '#00E5A8' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Steps</button>
-      <button class="toggle-opt ${distMetricActive}" id="act-metric-dist" style="flex:1; border:none; background:transparent; padding:6px 12px; border-radius:100px; color:${_currentMovementMetric === 'distance' ? '#FFFFFF' : '#8E93B8'}; background:${_currentMovementMetric === 'distance' ? '#42D4FF' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Distance</button>
-      <button class="toggle-opt ${calMetricActive}" id="act-metric-calories" style="flex:1; border:none; background:transparent; padding:6px 12px; border-radius:100px; color:${_currentMovementMetric === 'calories' ? '#FFFFFF' : '#8E93B8'}; background:${_currentMovementMetric === 'calories' ? '#FF8A00' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Calories</button>
+      <button class="toggle-opt ${stepsMetricActive}" id="act-metric-steps" style="flex:1; border:none; background:transparent; padding:6px 12px; border-radius:100px; color:${_currentMovementMetric === 'steps' ? '#FFFFFF' : 'var(--text-muted)'}; background:${_currentMovementMetric === 'steps' ? '#00E5A8' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Steps</button>
+      <button class="toggle-opt ${distMetricActive}" id="act-metric-dist" style="flex:1; border:none; background:transparent; padding:6px 12px; border-radius:100px; color:${_currentMovementMetric === 'distance' ? '#FFFFFF' : 'var(--text-muted)'}; background:${_currentMovementMetric === 'distance' ? '#42D4FF' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Distance</button>
+      <button class="toggle-opt ${calMetricActive}" id="act-metric-calories" style="flex:1; border:none; background:transparent; padding:6px 12px; border-radius:100px; color:${_currentMovementMetric === 'calories' ? '#FFFFFF' : 'var(--text-muted)'}; background:${_currentMovementMetric === 'calories' ? '#FF8A00' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Calories</button>
     </div>
   `;
 
@@ -938,34 +938,34 @@ function _renderActivitySheetContent(view = '7d') {
     <div style="margin-top:16px;">
       <!-- Stats list -->
       <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
-        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #23253A;">
-          <span style="color:#8E93B8;">Today's Steps</span>
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-card);">
+          <span style="color:var(--text-muted);">Today's Steps</span>
           <strong style="color:#FFFFFF;">${steps.toLocaleString()} steps</strong>
         </div>
-        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #23253A;">
-          <span style="color:#8E93B8;">Distance</span>
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-card);">
+          <span style="color:var(--text-muted);">Distance</span>
           <strong style="color:#FFFFFF;">${distance} km</strong>
         </div>
-        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #23253A;">
-          <span style="color:#8E93B8;">Calories Burned From Walking</span>
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-card);">
+          <span style="color:var(--text-muted);">Calories Burned From Walking</span>
           <strong style="color:#FFFFFF;">${calories} kcal</strong>
         </div>
-        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #23253A;">
-          <span style="color:#8E93B8;">Stairs Climbed</span>
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-card);">
+          <span style="color:var(--text-muted);">Stairs Climbed</span>
           <strong style="color:#FFFFFF;">${stairs}</strong>
         </div>
-        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #23253A;">
-          <span style="color:#8E93B8;">Current Step Goal</span>
+        <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-card);">
+          <span style="color:var(--text-muted);">Current Step Goal</span>
           <strong style="color:#00E5A8;">${goal.toLocaleString()} steps</strong>
         </div>
       </div>
 
       <!-- Metric Selector & Trend Graph -->
       <span class="section-label" style="display:block; margin-bottom:8px;">Movement Trends</span>
-      <div class="card" style="background:#11121A; border:1px solid #23253A; padding:12px; margin-bottom:16px;">
+      <div class="card" style="background:var(--bg-card); border:1px solid var(--border-card); padding:12px; margin-bottom:16px;">
         ${metricSelectorHtml}
         ${graphHtml}
-        <div style="display:flex; justify-content:space-around; font-size:9px; color:#8E93B8; margin-top:8px; border-top:1px dashed #23253A; padding-top:8px;">
+        <div style="display:flex; justify-content:space-around; font-size:9px; color:var(--text-muted); margin-top:8px; border-top:1px dashed var(--border-card); padding-top:8px;">
           <div>Average: <strong>${averageVal.toLocaleString()}${valUnit}</strong></div>
           <div>Highest: <strong>${highestVal.toLocaleString()}${valUnit}</strong></div>
         </div>
@@ -985,9 +985,9 @@ function _renderActivitySheetContent(view = '7d') {
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <h3 style="font-family:var(--font-display); font-size:20px; font-weight:700; color:#FFFFFF; margin:0;">Movement Analytics</h3>
       <div style="display:flex; background:rgba(255,255,255,0.04); padding:3px; border-radius:100px;">
-        <button class="toggle-opt ${sevenActive}" id="act-toggle-7d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '7d' ? '#FFFFFF' : '#8E93B8'}; background:${view === '7d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">7d</button>
-        <button class="toggle-opt ${thirtyActive}" id="act-toggle-30d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '30d' ? '#FFFFFF' : '#8E93B8'}; background:${view === '30d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">30d</button>
-        <button class="toggle-opt ${ninetyActive}" id="act-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? '#FFFFFF' : '#8E93B8'}; background:${view === '90d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90d</button>
+        <button class="toggle-opt ${sevenActive}" id="act-toggle-7d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '7d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '7d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">7d</button>
+        <button class="toggle-opt ${thirtyActive}" id="act-toggle-30d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '30d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '30d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">30d</button>
+        <button class="toggle-opt ${ninetyActive}" id="act-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '90d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90d</button>
       </div>
     </div>
     ${bodyHtml}
@@ -1000,7 +1000,7 @@ function _openChangeGoalModal() {
   
   const content = `
     <div style="display:flex; flex-direction:column; gap:12px;">
-      <p style="font-size:12px; color:#8E93B8;">Select a daily steps target:</p>
+      <p style="font-size:12px; color:var(--text-muted);">Select a daily steps target:</p>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
         ${options.map(opt => `
           <button class="btn btn-secondary change-goal-opt ${currentGoal === opt ? 'active' : ''}" 
@@ -1010,7 +1010,7 @@ function _openChangeGoalModal() {
         `).join('')}
       </div>
       <div style="margin-top:8px;">
-        <label style="font-size:11px; color:#8E93B8; display:block; margin-bottom:4px;">Custom Goal</label>
+        <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Custom Goal</label>
         <input class="input" type="number" id="custom-goal-input" placeholder="Enter steps (e.g. 12000)" style="padding:10px 14px;" />
       </div>
       <button class="btn btn-primary btn-full" id="save-goal-btn" style="margin-top:8px;">Save Goal</button>
@@ -1156,13 +1156,13 @@ function _renderBurnSheetContent(view = 'week') {
             <span style="color:#FFFFFF; font-weight:600;">🏋️ ${w.label || 'Workout Session'}</span>
             <span style="color:#00E5A8; font-weight:bold;">${c} kcal</span>
           </div>
-          <span style="font-size:10px; color:#8E93B8;">${duration} mins · ${intensity} Intensity</span>
+          <span style="font-size:10px; color:var(--text-muted);">${duration} mins · ${intensity} Intensity</span>
         </div>
       `;
     });
   } else {
     gymDetailsHtml = `
-      <div style="font-size:11px; color:#8E93B8;">
+      <div style="font-size:11px; color:var(--text-muted);">
         No active gym workouts logged today. Gym calories are calculated based on exercises, sets, reps, and duration recorded in the Train tab.
       </div>
     `;
@@ -1172,12 +1172,12 @@ function _renderBurnSheetContent(view = 'week') {
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <div>
         <h3 style="font-family:var(--font-display); font-size:20px; font-weight:700; color:#FFFFFF; margin:0;">Calorie Burn</h3>
-        <p style="font-size:11px; color:#8E93B8; margin:2px 0 0 0;">Today's Target: <span style="font-weight:bold; color:#00E5A8;">${burnGoal} kcal</span></p>
+        <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0;">Today's Target: <span style="font-weight:bold; color:#00E5A8;">${burnGoal} kcal</span></p>
       </div>
       <div style="display:flex; background:rgba(255,255,255,0.04); padding:3px; border-radius:100px;">
-        <button class="toggle-opt ${weekActive}" id="burn-toggle-week" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === 'week' ? '#FFFFFF' : '#8E93B8'}; background:${view === 'week' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Week</button>
-        <button class="toggle-opt ${monthActive}" id="burn-toggle-month" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === 'month' ? '#FFFFFF' : '#8E93B8'}; background:${view === 'month' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Month</button>
-        <button class="toggle-opt ${ninetyActive}" id="burn-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? '#FFFFFF' : '#8E93B8'}; background:${view === '90d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90d</button>
+        <button class="toggle-opt ${weekActive}" id="burn-toggle-week" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === 'week' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === 'week' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Week</button>
+        <button class="toggle-opt ${monthActive}" id="burn-toggle-month" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === 'month' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === 'month' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Month</button>
+        <button class="toggle-opt ${ninetyActive}" id="burn-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '90d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90d</button>
       </div>
     </div>
 
@@ -1185,11 +1185,11 @@ function _renderBurnSheetContent(view = 'week') {
     <div class="card" style="background:rgba(255,255,255,0.02); padding:16px; margin-bottom:16px; border-radius:8px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
-          <span style="font-size:12px; color:#8E93B8;">Today's Burn</span>
-          <strong style="font-size:24px; color:#FFFFFF; display:block; margin-top:2px;">${burnBreakdown.total} <span style="font-size:14px; font-weight:normal; color:#8E93B8;">kcal</span></strong>
+          <span style="font-size:12px; color:var(--text-muted);">Today's Burn</span>
+          <strong style="font-size:24px; color:#FFFFFF; display:block; margin-top:2px;">${burnBreakdown.total} <span style="font-size:14px; font-weight:normal; color:var(--text-muted);">kcal</span></strong>
         </div>
         <div style="text-align:right;">
-          <span style="font-size:12px; color:#8E93B8;">Progress</span>
+          <span style="font-size:12px; color:var(--text-muted);">Progress</span>
           <strong style="font-size:20px; color:#00E5A8; display:block; margin-top:2px;">${burnPct}%</strong>
         </div>
       </div>
@@ -1203,22 +1203,22 @@ function _renderBurnSheetContent(view = 'week') {
     <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px; background:rgba(255,255,255,0.02); padding:16px; border-radius:8px;">
       <div style="padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.03);">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="color:#8E93B8; font-size:13px;">🏋️ Gym Calories</span>
+          <span style="color:var(--text-muted); font-size:13px;">🏋️ Gym Calories</span>
           <strong style="color:#FFFFFF;">${burnBreakdown.gym} kcal</strong>
         </div>
         ${gymDetailsHtml}
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.03);">
         <div>
-          <span style="color:#8E93B8; font-size:13px; display:block;">👣 Walking Calories</span>
-          <span style="font-size:10px; color:#8E93B8;">Based on: Steps, Distance, Pace</span>
+          <span style="color:var(--text-muted); font-size:13px; display:block;">👣 Walking Calories</span>
+          <span style="font-size:10px; color:var(--text-muted);">Based on: Steps, Distance, Pace</span>
         </div>
         <strong style="color:#FFFFFF;">${burnBreakdown.walking} kcal</strong>
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.03);">
         <div>
-          <span style="color:#8E93B8; font-size:13px; display:block;">🚶 Daily Activity</span>
-          <span style="font-size:10px; color:#8E93B8;">Estimated NEAT</span>
+          <span style="color:var(--text-muted); font-size:13px; display:block;">🚶 Daily Activity</span>
+          <span style="font-size:10px; color:var(--text-muted);">Estimated NEAT</span>
         </div>
         <strong style="color:#FFFFFF;">${burnBreakdown.neat} kcal</strong>
       </div>
@@ -1229,10 +1229,10 @@ function _renderBurnSheetContent(view = 'week') {
     </div>
 
     <!-- Trend Graph -->
-    <div class="card" style="background:#11121A; border:1px solid #23253A; padding:12px; margin-bottom:16px;">
-      <p style="font-size:11px; color:#8E93B8; font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:8px;">Burn Trends</p>
+    <div class="card" style="background:var(--bg-card); border:1px solid var(--border-card); padding:12px; margin-bottom:16px;">
+      <p style="font-size:11px; color:var(--text-muted); font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:8px;">Burn Trends</p>
       ${graphHtml}
-      <div style="display:flex; justify-content:space-around; font-size:9px; color:#8E93B8; margin-top:8px; border-top:1px dashed #23253A; padding-top:8px;">
+      <div style="display:flex; justify-content:space-around; font-size:9px; color:var(--text-muted); margin-top:8px; border-top:1px dashed var(--border-card); padding-top:8px;">
         <div>Weekly Average: <strong>${weeklyAvg} kcal</strong></div>
         <div>Monthly Average: <strong>${monthlyAvg} kcal</strong></div>
         <div>Highest Burn Day: <strong>${highestBurn} kcal</strong></div>
@@ -1270,7 +1270,7 @@ function _openEditBurnGoalModal() {
   
   const content = `
     <div style="display:flex; flex-direction:column; gap:12px;">
-      <p style="font-size:12px; color:#8E93B8;">Select daily burn target (active calories):</p>
+      <p style="font-size:12px; color:var(--text-muted);">Select daily burn target (active calories):</p>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
         <button class="btn btn-secondary edit-burn-opt ${!state.activity?.burnGoal ? 'active' : ''}" 
           data-val="auto" style="padding:10px; font-size:13px;">
@@ -1284,7 +1284,7 @@ function _openEditBurnGoalModal() {
         `).join('')}
       </div>
       <div style="margin-top:8px;">
-        <label style="font-size:11px; color:#8E93B8; display:block; margin-bottom:4px;">Custom Goal (kcal)</label>
+        <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Custom Goal (kcal)</label>
         <input class="input" type="number" id="custom-burn-input" placeholder="e.g. 450" style="padding:10px 14px;" />
       </div>
       <button class="btn btn-primary btn-full" id="save-burn-btn" style="margin-top:8px;">Save Goal</button>
@@ -1431,12 +1431,12 @@ function _renderProteinSheetContent(view = '7d') {
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <div>
         <h3 style="font-family:var(--font-display); font-size:20px; font-weight:700; color:#FFFFFF; margin:0;">Protein Analytics</h3>
-        <p style="font-size:11px; color:#8E93B8; margin:2px 0 0 0;">Daily Goal: <span style="font-weight:bold; color:#00E5A8;">${proteinTarget}g</span></p>
+        <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0;">Daily Goal: <span style="font-weight:bold; color:#00E5A8;">${proteinTarget}g</span></p>
       </div>
       <div style="display:flex; background:rgba(255,255,255,0.04); padding:3px; border-radius:100px;">
-        <button class="toggle-opt ${sevenActive}" id="prot-toggle-7d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '7d' ? '#FFFFFF' : '#8E93B8'}; background:${view === '7d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">7d</button>
-        <button class="toggle-opt ${thirtyActive}" id="prot-toggle-30d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '30d' ? '#FFFFFF' : '#8E93B8'}; background:${view === '30d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">30d</button>
-        <button class="toggle-opt ${ninetyActive}" id="prot-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? '#FFFFFF' : '#8E93B8'}; background:${view === '90d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90d</button>
+        <button class="toggle-opt ${sevenActive}" id="prot-toggle-7d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '7d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '7d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">7d</button>
+        <button class="toggle-opt ${thirtyActive}" id="prot-toggle-30d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '30d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '30d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">30d</button>
+        <button class="toggle-opt ${ninetyActive}" id="prot-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '90d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90d</button>
       </div>
     </div>
 
@@ -1444,11 +1444,11 @@ function _renderProteinSheetContent(view = '7d') {
     <div class="card" style="background:rgba(255,255,255,0.02); padding:16px; margin-bottom:16px; border-radius:8px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
-          <span style="font-size:12px; color:#8E93B8;">Today's Protein</span>
-          <strong style="font-size:24px; color:#FFFFFF; display:block; margin-top:2px;">${proteinConsumed} <span style="font-size:14px; font-weight:normal; color:#8E93B8;">g</span></strong>
+          <span style="font-size:12px; color:var(--text-muted);">Today's Protein</span>
+          <strong style="font-size:24px; color:#FFFFFF; display:block; margin-top:2px;">${proteinConsumed} <span style="font-size:14px; font-weight:normal; color:var(--text-muted);">g</span></strong>
         </div>
         <div style="text-align:right;">
-          <span style="font-size:12px; color:#8E93B8;">Goal Adherence</span>
+          <span style="font-size:12px; color:var(--text-muted);">Goal Adherence</span>
           <strong style="font-size:20px; color:#00E5A8; display:block; margin-top:2px;">${proteinPct}%</strong>
         </div>
       </div>
@@ -1460,32 +1460,32 @@ function _renderProteinSheetContent(view = '7d') {
     <!-- Target Breakdown -->
     <span class="section-label" style="display:block; margin-bottom:8px;">Target Breakdown</span>
     <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:8px; margin-bottom:16px;">
-      <div class="card" style="padding:10px; background:#11121A; border:1px solid #23253A;">
-        <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Weight</span>
+      <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
+        <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Weight</span>
         <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px;">${weight} ${weightUnit}</strong>
       </div>
-      <div class="card" style="padding:10px; background:#11121A; border:1px solid #23253A;">
-        <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Goal</span>
+      <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
+        <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Goal</span>
         <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px; text-transform:capitalize;">${goal.replace('_', ' ')}</strong>
       </div>
-      <div class="card" style="padding:10px; background:#11121A; border:1px solid #23253A;">
-        <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Activity Level</span>
+      <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
+        <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Activity Level</span>
         <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px; text-transform:capitalize;">${activityLevel.replace('_', ' ')}</strong>
       </div>
-      <div class="card" style="padding:10px; background:#11121A; border:1px solid #23253A;">
-        <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Experience</span>
+      <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
+        <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Experience</span>
         <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px; text-transform:capitalize;">${onboarding.experience || 'Intermediate'}</strong>
       </div>
-      <div class="card" style="padding:10px; background:#11121A; border:1px solid #23253A;">
-        <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Body Fat %</span>
+      <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
+        <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Body Fat %</span>
         <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px;">${onboarding.bodyFatPct || 18}%</strong>
       </div>
-      <div class="card" style="padding:10px; background:#11121A; border:1px solid #23253A;">
-        <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Protein Multiplier</span>
+      <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
+        <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Protein Multiplier</span>
         <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px;">${proteinMultiplier} g/kg</strong>
       </div>
-      <div class="card" style="padding:10px; background:#11121A; border:1px solid #23253A; grid-column: span 2;">
-        <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Target Protein</span>
+      <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card); grid-column: span 2;">
+        <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Target Protein</span>
         <strong style="font-size:14px; color:#00E5A8; display:block; margin-top:2px;">${proteinTarget} g</strong>
       </div>
     </div>
@@ -1497,22 +1497,22 @@ function _renderProteinSheetContent(view = '7d') {
         <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:rgba(255,255,255,0.02); border-radius:8px;">
           <div>
             <span style="font-weight:600; color:#FFFFFF; display:block; font-size:13px;">${m.name}</span>
-            <span style="font-size:10px; color:#8E93B8;">${m.details}</span>
+            <span style="font-size:10px; color:var(--text-muted);">${m.details}</span>
           </div>
           <strong style="color:#00E5A8; font-size:14px;">${m.val}g</strong>
         </div>
       `).join('')}
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:rgba(255,255,255,0.02); border-radius:8px; border-top:1px dashed #23253A;">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:rgba(255,255,255,0.02); border-radius:8px; border-top:1px dashed var(--border-card);">
         <span style="font-weight:bold; color:#FFFFFF; font-size:13px;">Total</span>
         <strong style="color:#00E5A8; font-size:14px;">${proteinConsumed}g</strong>
       </div>
     </div>
 
     <!-- Trend Graph -->
-    <div class="card" style="background:#11121A; border:1px solid #23253A; padding:12px; margin-bottom:16px;">
-      <p style="font-size:11px; color:#8E93B8; font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:8px;">Protein Intake Trends</p>
+    <div class="card" style="background:var(--bg-card); border:1px solid var(--border-card); padding:12px; margin-bottom:16px;">
+      <p style="font-size:11px; color:var(--text-muted); font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:8px;">Protein Intake Trends</p>
       ${graphHtml}
-      <div style="display:flex; justify-content:space-around; font-size:9px; color:#8E93B8; margin-top:8px; border-top:1px dashed #23253A; padding-top:8px;">
+      <div style="display:flex; justify-content:space-around; font-size:9px; color:var(--text-muted); margin-top:8px; border-top:1px dashed var(--border-card); padding-top:8px;">
         <div>Protein Goal: <strong>${proteinTarget}g</strong></div>
         <div>Protein Intake: <strong>${weeklyAvg}g</strong></div>
         <div>Adherence: <strong>${Math.round((weeklyAvg / proteinTarget) * 100)}%</strong></div>
@@ -1585,7 +1585,7 @@ function _drawMovementSVG(data, labels, targetLineVal, metric) {
       
       ${labels.map((lbl, i) => {
         const x = padding + (i * (width - 2 * padding) / (labels.length - 1 || 1));
-        return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="#8E93B8" text-anchor="middle">${lbl}</text>`;
+        return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="var(--text-muted)" text-anchor="middle">${lbl}</text>`;
       }).join('')}
     </svg>
   `;
@@ -1628,7 +1628,7 @@ function _drawBurnSVG(data, labels, targetLineVal) {
       
       ${labels.map((lbl, i) => {
         const x = padding + (i * (width - 2 * padding) / (labels.length - 1 || 1));
-        return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="#8E93B8" text-anchor="middle">${lbl}</text>`;
+        return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="var(--text-muted)" text-anchor="middle">${lbl}</text>`;
       }).join('')}
     </svg>
   `;
@@ -1671,7 +1671,7 @@ function _drawProteinSVG(data, labels, targetLineVal) {
       
       ${labels.map((lbl, i) => {
         const x = padding + (i * (width - 2 * padding) / (labels.length - 1 || 1));
-        return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="#8E93B8" text-anchor="middle">${lbl}</text>`;
+        return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="var(--text-muted)" text-anchor="middle">${lbl}</text>`;
       }).join('')}
     </svg>
   `;

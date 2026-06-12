@@ -111,3 +111,15 @@
 - **Unified Bottom Sheet Manager**: Home (Discipline, Activity, Burn, Protein), Diet (Intake, Protein), Profile, and Settings use a centralized bottom-sheet singleton structure. This guarantees a maximum of one open bottom sheet at any time and automatically handles DOM removal.
 - **Calorie Burn Progress Polish**: Daily active burn progress card displays calorie burn achievements with absolute minimum visual clutter, omitting the insight text line.
 - **CSS Rework**: Cleaned up legacy styles and integrated smooth animation keyframes for sliding dynamic sheets.
+
+## 12. Theme System (`src/services/theme-engine.js`)
+- **6 Built-in Themes**: Slate Blue (light), Elite Green (dark), Deep Indigo (dark, default), Dusty Rose (light), Deep Blue & Silver (dark), Forest & Stone (dark).
+- **Centralized `themeManager`** in `src/services/theme-engine.js` — single source of truth for theme state, apply, load, and save.
+- **CSS Variable Override Engine**: `themeManager.applyInstant()` / `setTheme()` inject CSS custom property overrides onto `#phone-shell` at runtime, covering all tokens: `--bg-base`, `--bg-card`, `--text-primary`, `--aura-violet`, `--aura-mint`, `--grad-violet`, `--shadow-violet`, and 30+ more.
+- **Root propagation**: Key variables also applied to `:root` so modals and bottom sheets (rendered outside `#phone-shell`) inherit the correct theme.
+- **Persistence**: Theme saved to `localStorage` key `aura_theme_v2` and `state.app.selectedTheme`. Loaded on every app boot via `themeManager.loadTheme()` in `main.js`.
+- **Onboarding "Choose Your Aura" Step** (Step 13 of 14): Horizontal swipeable card row of all 6 themes. Each card is a **real mini AURA app preview** showing rings, stats row, mission card, and bottom nav — all styled with the actual theme's colors. Tapping a card instantly applies the live theme to the running app without page reload.
+- **Settings Appearance Section**: New section in `/settings` showing circular swatch buttons for all 6 themes. Active theme is highlighted. Tapping switches immediately with animated scale feedback and a success toast.
+- **Hardcoded Color Removal**: All `#11121A`, `#23253A`, `#8E93B8`, `#0d0d15`, and other hardcoded hex values in `home/index.js`, `diet/index.js`, `home/home.css`, `train/train.css`, `recovery/recovery.css` replaced with CSS variable references (`var(--bg-card)`, `var(--border-card)`, `var(--text-muted)`, `var(--bg-base)`, `var(--aura-violet-light)`).
+- **Bottom Sheet Theme Fix**: `ui.js` bottom sheet no longer hardcodes `#11121A` background — uses `var(--bg-elevated)` from `global.css`.
+

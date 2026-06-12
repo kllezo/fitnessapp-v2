@@ -51,9 +51,14 @@
 - [x] Home Page Cleanup & Stats Rework: Completely eliminated the duplicate Discipline card from the home page. Replaced the stats row layout with [ Current Streak ] → [ Calories Burned ] → [ Protein Progress ] (fetching active data from the streak, activity, and protein trackers). Added dynamic Improvement Suggestions to the Discipline Details Sheet and global modal cleaning hooks to prevent dynamic ghost components and duplicate render cycles.
 - [x] Home Page Polish & Bug Fixes (UX Pass): compact burn strip, compact stats row, messages card redesign (📥 Inbox), protein card navigation fixed, diet protein ring navigation fixed, ghost sheet prevention with `_forceCloseAllSheets()`, duplicate event listener stacking in `_refreshMacros` fixed.
 - [x] Unified Dynamic Bottom Sheet Architecture: Created the global `openBottomSheet` and `closeActiveBottomSheet` singleton manager inside `ui.js` dynamically creating DOM overlay and sheet elements. Refactored Home (Discipline, Steps, Burn, Protein), Diet (Intake, Protein), Profile, and Settings page sheet triggers. Integrated sheet destruction inside `router.js` for seamless navigation cleanup without orphaned or ghost DOM boxes.
+- [x] **AURA V2 Theme System**: Full centralized theme engine (`theme-engine.js`) with 6 built-in themes (Slate Blue, Elite Green, Deep Indigo, Dusty Rose, Deep Blue & Silver, Forest & Stone). Onboarding "Choose Your Aura" step (step 13 of 14) with horizontal swipeable real mini-app preview cards. Settings Appearance section with circular swatch picker. CSS variable override engine covering 40+ tokens per theme switch. localStorage + state persistence. Hardcoded color removal across home, diet, train, recovery CSS/JS.
 
 ### 2. Next Priorities & Unresolved
 - [ ] Share workout cards download options.
 - [ ] Readiness syncing checks logic loop check.
 - [ ] Home dashboard mini Body Metrics card (BMI/BMR quick view).
 - [ ] Onboarding goals multi-select persistence verification.
+- [ ] Theme-aware chart export (share cards should use current theme's primary color instead of hardcoded violet).
+- [ ] Per-theme micro-animation variants (e.g. Forest theme uses slower, more nature-paced transitions).
+- [ ] Analytics sheets / modals: verify all dynamic sheets inherit theme correctly through root propagation.
+

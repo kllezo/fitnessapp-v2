@@ -296,7 +296,7 @@
 
 /* Share Card Styles */
 .share-card {
-  background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.22) 0%, transparent 60%), #0d0d15;
+  background: radial-gradient(ellipse at 50% 0%, rgba(91,92,246,0.22) 0%, transparent 60%), var(--bg-base);
   border: 1.5px solid rgba(124, 58, 237, 0.4);
   border-radius: var(--radius-xl);
   padding: 20px;

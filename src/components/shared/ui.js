@@ -133,9 +133,6 @@ export function openBottomSheet({ id, content, onClose }) {
   const sheet = document.createElement('div');
   sheet.className = 'bottom-sheet';
   sheet.id = `${id}-sheet`;
-  sheet.style.background = '#11121A';
-  sheet.style.borderTop = '1px solid #23253A';
-  sheet.style.padding = '12px 20px 32px';
   sheet.innerHTML = `
     <div class="modal-handle"></div>
     <div id="${id}-sheet-content">${content}</div>

@@ -102,3 +102,17 @@
   padding: 8px 16px;
   letter-spacing: 0.5px;
 }
+
+/* ── Theme Swatches ── */
+.theme-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 200ms var(--ease-spring), outline 200ms ease;
+  flex-shrink: 0;
+}
+.theme-swatch:hover { transform: scale(1.1); }
+.theme-swatch.active { transform: scale(1.15); }
+.theme-swatch:active { transform: scale(0.95); }
+

@@ -6,6 +6,7 @@
 import { getState, setState, updateState, resetState } from '../../state/index.js';
 import { navigate } from '../../router.js';
 import { showToast, showModal, openBottomSheet, closeActiveBottomSheet } from '../../components/shared/ui.js';
+import { themeManager, THEMES, THEME_ORDER } from '../../services/theme-engine.js';
 import './settings.css';
 
 export function render() {
@@ -79,6 +80,38 @@ export function render() {
         </div>
       </div>
 
+      <!-- Appearance -->
+      <div class="settings-section">
+        <div class="settings-section-title">Appearance</div>
+        <div class="settings-group card">
+          <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:12px;padding:14px 16px;">
+            <div style="display:flex;align-items:center;gap:10px;width:100%;">
+              <span class="setting-icon">🎨</span>
+              <div class="setting-info">
+                <span class="setting-label">App Theme</span>
+                <span class="setting-value" id="current-theme-name">${THEMES[themeManager.currentTheme]?.name || 'Deep Indigo'}</span>
+              </div>
+            </div>
+            <!-- Theme swatch grid -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap;width:100%;padding-left:36px;">
+              ${THEME_ORDER.map(id => {
+                const t = THEMES[id];
+                const isActive = themeManager.currentTheme === id;
+                return `
+                  <button id="theme-swatch-${id}" data-theme="${id}" class="theme-swatch ${isActive ? 'active' : ''}" aria-label="${t.name}" title="${t.name}" style="
+                    width:32px;height:32px;border-radius:50%;
+                    background:linear-gradient(135deg, ${t.colors.primary}, ${t.colors.background});
+                    border:2px solid ${isActive ? t.colors.primary : 'transparent'};
+                    outline:${isActive ? `3px solid ${t.colors.primary}44` : 'none'};
+                    cursor:pointer;padding:0;transition:transform 200ms ease,outline 200ms ease;
+                  "></button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <p class="settings-version">AURA V2 · Adaptive Fitness OS</p>
     </div>
   `;
@@ -120,6 +153,30 @@ export function onLeave() {
 
 function _wireEvents() {
   document.getElementById('back-btn')?.addEventListener('click', () => navigate('/home'));
+
+  // Theme swatches
+  document.querySelectorAll('.theme-swatch').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const themeId = btn.dataset.theme;
+      themeManager.setTheme(themeId, true);
+
+      // Update active swatch states
+      document.querySelectorAll('.theme-swatch').forEach(b => {
+        const t = THEMES[b.dataset.theme];
+        const isNowActive = b.dataset.theme === themeId;
+        b.style.border = `2px solid ${isNowActive ? t.colors.primary : 'transparent'}`;
+        b.style.outline = isNowActive ? `3px solid ${t.colors.primary}44` : 'none';
+        b.style.transform = isNowActive ? 'scale(1.15)' : 'scale(1)';
+        b.classList.toggle('active', isNowActive);
+      });
+
+      // Update label
+      const label = document.getElementById('current-theme-name');
+      if (label) label.textContent = THEMES[themeId]?.name || themeId;
+
+      showToast(`Theme: ${THEMES[themeId]?.name} applied`, 'success');
+    });
+  });
 
   // Nav rows that open sub-sheets
   document.getElementById('profile-row')?.addEventListener('click', () => navigate('/profile'));

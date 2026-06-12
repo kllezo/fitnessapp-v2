@@ -147,7 +147,7 @@
   inset: 0;
   border-radius: 50%;
   border: 2px solid transparent;
-  background: linear-gradient(135deg, #a78bfa, #7c3aed) border-box;
+  background: linear-gradient(135deg, var(--aura-violet-light), #7c3aed) border-box;
   -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: destination-out;
   mask-composite: exclude;
@@ -214,3 +214,32 @@
   align-items: center;
   gap: 8px;
 }
+
+/* ── Choose Your Aura ── */
+#aura-theme-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+#aura-theme-scroll::-webkit-scrollbar { display: none; }
+
+.aura-theme-card {
+  scroll-snap-align: center;
+  flex-shrink: 0;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transform: scale(1);
+  transition: transform 200ms var(--ease-spring), border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.aura-theme-card:active {
+  transform: scale(0.97);
+}
+
+.aura-theme-card.selected {
+  transform: scale(1.02);
+}
+
+.aura-theme-card:hover:not(.selected) {
+  transform: translateY(-3px);
+}
+

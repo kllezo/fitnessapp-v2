@@ -410,12 +410,12 @@ function _renderIntakeSheetContent(view = '7d') {
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <div>
         <h3 style="font-family:var(--font-display); font-size:20px; font-weight:700; color:#FFFFFF; margin:0;">Calorie Intake</h3>
-        <p style="font-size:11px; color:#8E93B8; margin:2px 0 0 0;">Intake target: <span style="font-weight:bold; color:#a78bfa;">${cal.target} kcal</span></p>
+        <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0;">Intake target: <span style="font-weight:bold; color:#a78bfa;">${cal.target} kcal</span></p>
       </div>
       <div style="display:flex; background:rgba(255,255,255,0.04); padding:3px; border-radius:100px;">
-        <button class="toggle-opt ${sevenActive}" id="intake-toggle-7d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '7d' ? '#FFFFFF' : '#8E93B8'}; background:${view === '7d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">7d</button>
-        <button class="toggle-opt ${thirtyActive}" id="intake-toggle-30d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '30d' ? '#FFFFFF' : '#8E93B8'}; background:${view === '30d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">30d</button>
-        <button class="toggle-opt ${ninetyActive}" id="intake-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? '#FFFFFF' : '#8E93B8'}; background:${view === '90d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90d</button>
+        <button class="toggle-opt ${sevenActive}" id="intake-toggle-7d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '7d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '7d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">7d</button>
+        <button class="toggle-opt ${thirtyActive}" id="intake-toggle-30d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '30d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '30d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">30d</button>
+        <button class="toggle-opt ${ninetyActive}" id="intake-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '90d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90d</button>
       </div>
     </div>
 
@@ -423,18 +423,18 @@ function _renderIntakeSheetContent(view = '7d') {
     <div class="card" style="background:rgba(255,255,255,0.02); padding:16px; margin-bottom:16px; border-radius:8px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
-          <span style="font-size:12px; color:#8E93B8;">Consumed Calories</span>
-          <strong style="font-size:24px; color:#FFFFFF; display:block; margin-top:2px;">${cal.consumed} <span style="font-size:14px; font-weight:normal; color:#8E93B8;">kcal</span></strong>
+          <span style="font-size:12px; color:var(--text-muted);">Consumed Calories</span>
+          <strong style="font-size:24px; color:#FFFFFF; display:block; margin-top:2px;">${cal.consumed} <span style="font-size:14px; font-weight:normal; color:var(--text-muted);">kcal</span></strong>
         </div>
         <div style="text-align:right;">
-          <span style="font-size:12px; color:#8E93B8;">Target Goal</span>
+          <span style="font-size:12px; color:var(--text-muted);">Target Goal</span>
           <strong style="font-size:20px; color:#a78bfa; display:block; margin-top:2px;">${calPct}%</strong>
         </div>
       </div>
       <div style="width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden; margin-top:10px;">
         <div style="width:${calPct}%; height:100%; background:#a78bfa; border-radius:4px;"></div>
       </div>
-      <div style="font-size:11px; color:#8E93B8; margin-top:10px;">
+      <div style="font-size:11px; color:var(--text-muted); margin-top:10px;">
         ${calRemaining > 0 ? `🎯 ${calRemaining} kcal remaining today.` : '🏆 Daily calorie budget completed!'}
       </div>
     </div>
@@ -455,27 +455,27 @@ function _renderIntakeSheetContent(view = '7d') {
     <span class="section-label" style="display:block; margin-bottom:8px;">Mifflin-St Jeor Calculation Transparency</span>
     <div style="display:flex; flex-direction:column; gap:12px; background:rgba(255,255,255,0.02); padding:16px; border-radius:8px; margin-bottom:16px;">
       <div style="display:flex; justify-content:space-between; font-size:12px;">
-        <span style="color:#8E93B8;">Weight / Height</span>
+        <span style="color:var(--text-muted);">Weight / Height</span>
         <strong style="color:#FFFFFF;">${weight} kg / ${height} cm</strong>
       </div>
       <div style="display:flex; justify-content:space-between; font-size:12px;">
-        <span style="color:#8E93B8;">Age / Gender</span>
+        <span style="color:var(--text-muted);">Age / Gender</span>
         <strong style="color:#FFFFFF;">${age} yrs / ${gender}</strong>
       </div>
       <div style="display:flex; justify-content:space-between; font-size:12px;">
-        <span style="color:#8E93B8;">Body Fat % / BMI</span>
+        <span style="color:var(--text-muted);">Body Fat % / BMI</span>
         <strong style="color:#FFFFFF;">${bodyFat}% / ${bmi}</strong>
       </div>
       <div style="display:flex; justify-content:space-between; font-size:12px;">
-        <span style="color:#8E93B8;">Calculated BMR</span>
+        <span style="color:var(--text-muted);">Calculated BMR</span>
         <strong style="color:#FFFFFF;">${bmr} kcal</strong>
       </div>
       <div style="display:flex; justify-content:space-between; font-size:12px;">
-        <span style="color:#8E93B8;">Activity Multiplier (TDEE)</span>
+        <span style="color:var(--text-muted);">Activity Multiplier (TDEE)</span>
         <strong style="color:#FFFFFF;">${tdee} kcal (${activityLevel})</strong>
       </div>
-      <div style="display:flex; justify-content:space-between; font-size:12px; padding-bottom:8px; border-bottom:1px dashed #23253A;">
-        <span style="color:#8E93B8;">Goal Adjustment</span>
+      <div style="display:flex; justify-content:space-between; font-size:12px; padding-bottom:8px; border-bottom:1px dashed var(--border-card);">
+        <span style="color:var(--text-muted);">Goal Adjustment</span>
         <strong style="color:${goalAdj < 0 ? '#fda4af' : '#00E5A8'};">${goalAdj >= 0 ? '+' : ''}${goalAdj} kcal</strong>
       </div>
       <div style="display:flex; justify-content:space-between;">
@@ -485,10 +485,10 @@ function _renderIntakeSheetContent(view = '7d') {
     </div>
 
     <!-- Trend Graph -->
-    <div class="card" style="background:#11121A; border:1px solid #23253A; padding:12px;">
-      <p style="font-size:11px; color:#8E93B8; font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:8px;">Consumed Calorie Trends</p>
+    <div class="card" style="background:var(--bg-card); border:1px solid var(--border-card); padding:12px;">
+      <p style="font-size:11px; color:var(--text-muted); font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:8px;">Consumed Calorie Trends</p>
       ${graphHtml}
-      <div style="display:flex; justify-content:space-around; font-size:9px; color:#8E93B8; margin-top:8px; border-top:1px dashed #23253A; padding-top:8px;">
+      <div style="display:flex; justify-content:space-around; font-size:9px; color:var(--text-muted); margin-top:8px; border-top:1px dashed var(--border-card); padding-top:8px;">
         <div>Target Calories: <strong>${cal.target} kcal</strong></div>
         <div>Calories Consumed: <strong>${weeklyAvg} kcal</strong></div>
         <div>Adherence: <strong>${Math.round((weeklyAvg / cal.target) * 100)}%</strong></div>
@@ -534,7 +534,7 @@ function _drawIntakeSVG(data, labels, targetLineVal) {
       
       ${labels.map((lbl, i) => {
         const x = padding + (i * (width - 2 * padding) / (labels.length - 1 || 1));
-        return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="#8E93B8" text-anchor="middle">${lbl}</text>`;
+        return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="var(--text-muted)" text-anchor="middle">${lbl}</text>`;
       }).join('')}
     </svg>
   `;
@@ -631,12 +631,12 @@ function _renderProteinSheetContent(view = '7d') {
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <div>
         <h3 style="font-family:var(--font-display); font-size:20px; font-weight:700; color:#FFFFFF; margin:0;">Protein Analytics</h3>
-        <p style="font-size:11px; color:#8E93B8; margin:2px 0 0 0;">Daily Goal: <span style="font-weight:bold; color:#00E5A8;">${proteinTarget}g</span></p>
+        <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0;">Daily Goal: <span style="font-weight:bold; color:#00E5A8;">${proteinTarget}g</span></p>
       </div>
       <div style="display:flex; background:rgba(255,255,255,0.04); padding:3px; border-radius:100px;">
-        <button class="toggle-opt ${sevenActive}" id="prot-toggle-7d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '7d' ? '#FFFFFF' : '#8E93B8'}; background:${view === '7d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">7d</button>
-        <button class="toggle-opt ${thirtyActive}" id="prot-toggle-30d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '30d' ? '#FFFFFF' : '#8E93B8'}; background:${view === '30d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">30d</button>
-        <button class="toggle-opt ${ninetyActive}" id="prot-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? '#FFFFFF' : '#8E93B8'}; background:${view === '90d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90d</button>
+        <button class="toggle-opt ${sevenActive}" id="prot-toggle-7d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '7d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '7d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">7d</button>
+        <button class="toggle-opt ${thirtyActive}" id="prot-toggle-30d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '30d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '30d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">30d</button>
+        <button class="toggle-opt ${ninetyActive}" id="prot-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '90d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90d</button>
       </div>
     </div>
 
@@ -644,11 +644,11 @@ function _renderProteinSheetContent(view = '7d') {
     <div class="card" style="background:rgba(255,255,255,0.02); padding:16px; margin-bottom:16px; border-radius:8px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
-          <span style="font-size:12px; color:#8E93B8;">Today's Protein</span>
-          <strong style="font-size:24px; color:#FFFFFF; display:block; margin-top:2px;">${proteinConsumed} <span style="font-size:14px; font-weight:normal; color:#8E93B8;">g</span></strong>
+          <span style="font-size:12px; color:var(--text-muted);">Today's Protein</span>
+          <strong style="font-size:24px; color:#FFFFFF; display:block; margin-top:2px;">${proteinConsumed} <span style="font-size:14px; font-weight:normal; color:var(--text-muted);">g</span></strong>
         </div>
         <div style="text-align:right;">
-          <span style="font-size:12px; color:#8E93B8;">Goal Adherence</span>
+          <span style="font-size:12px; color:var(--text-muted);">Goal Adherence</span>
           <strong style="font-size:20px; color:#00E5A8; display:block; margin-top:2px;">${proteinPct}%</strong>
         </div>
       </div>
@@ -660,32 +660,32 @@ function _renderProteinSheetContent(view = '7d') {
     <!-- Target Breakdown -->
     <span class="section-label" style="display:block; margin-bottom:8px;">Target Breakdown</span>
     <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:8px; margin-bottom:16px;">
-      <div class="card" style="padding:10px; background:#11121A; border:1px solid #23253A;">
-        <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Weight</span>
+      <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
+        <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Weight</span>
         <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px;">${weight} ${weightUnit}</strong>
       </div>
-      <div class="card" style="padding:10px; background:#11121A; border:1px solid #23253A;">
-        <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Goal</span>
+      <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
+        <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Goal</span>
         <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px; text-transform:capitalize;">${goal.replace('_', ' ')}</strong>
       </div>
-      <div class="card" style="padding:10px; background:#11121A; border:1px solid #23253A;">
-        <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Activity Level</span>
+      <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
+        <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Activity Level</span>
         <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px; text-transform:capitalize;">${activityLevel.replace('_', ' ')}</strong>
       </div>
-      <div class="card" style="padding:10px; background:#11121A; border:1px solid #23253A;">
-        <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Experience</span>
+      <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
+        <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Experience</span>
         <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px; text-transform:capitalize;">${onboarding.experience || 'Intermediate'}</strong>
       </div>
-      <div class="card" style="padding:10px; background:#11121A; border:1px solid #23253A;">
-        <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Body Fat %</span>
+      <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
+        <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Body Fat %</span>
         <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px;">${onboarding.bodyFatPct || 18}%</strong>
       </div>
-      <div class="card" style="padding:10px; background:#11121A; border:1px solid #23253A;">
-        <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Protein Multiplier</span>
+      <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
+        <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Protein Multiplier</span>
         <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px;">${proteinMultiplier} g/kg</strong>
       </div>
-      <div class="card" style="padding:10px; background:#11121A; border:1px solid #23253A; grid-column: span 2;">
-        <span style="font-size:9px; color:#8E93B8; display:block; text-transform:uppercase;">Target Protein</span>
+      <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card); grid-column: span 2;">
+        <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Target Protein</span>
         <strong style="font-size:14px; color:#00E5A8; display:block; margin-top:2px;">${proteinTarget} g</strong>
       </div>
     </div>
@@ -697,22 +697,22 @@ function _renderProteinSheetContent(view = '7d') {
         <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:rgba(255,255,255,0.02); border-radius:8px;">
           <div>
             <span style="font-weight:600; color:#FFFFFF; display:block; font-size:13px;">${m.name}</span>
-            <span style="font-size:10px; color:#8E93B8;">${m.details}</span>
+            <span style="font-size:10px; color:var(--text-muted);">${m.details}</span>
           </div>
           <strong style="color:#00E5A8; font-size:14px;">${m.val}g</strong>
         </div>
       `).join('')}
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:rgba(255,255,255,0.02); border-radius:8px; border-top:1px dashed #23253A;">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:rgba(255,255,255,0.02); border-radius:8px; border-top:1px dashed var(--border-card);">
         <span style="font-weight:bold; color:#FFFFFF; font-size:13px;">Total</span>
         <strong style="color:#00E5A8; font-size:14px;">${proteinConsumed}g</strong>
       </div>
     </div>
 
     <!-- Trend Graph -->
-    <div class="card" style="background:#11121A; border:1px solid #23253A; padding:12px; margin-bottom:16px;">
-      <p style="font-size:11px; color:#8E93B8; font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:8px;">Protein Intake Trends</p>
+    <div class="card" style="background:var(--bg-card); border:1px solid var(--border-card); padding:12px; margin-bottom:16px;">
+      <p style="font-size:11px; color:var(--text-muted); font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:8px;">Protein Intake Trends</p>
       ${graphHtml}
-      <div style="display:flex; justify-content:space-around; font-size:9px; color:#8E93B8; margin-top:8px; border-top:1px dashed #23253A; padding-top:8px;">
+      <div style="display:flex; justify-content:space-around; font-size:9px; color:var(--text-muted); margin-top:8px; border-top:1px dashed var(--border-card); padding-top:8px;">
         <div>Protein Goal: <strong>${proteinTarget}g</strong></div>
         <div>Protein Intake: <strong>${weeklyAvg}g</strong></div>
         <div>Adherence: <strong>${Math.round((weeklyAvg / proteinTarget) * 100)}%</strong></div>
@@ -779,7 +779,7 @@ function _drawProteinSVG(data, labels, targetLineVal) {
       
       ${labels.map((lbl, i) => {
         const x = padding + (i * (width - 2 * padding) / (labels.length - 1 || 1));
-        return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="#8E93B8" text-anchor="middle">${lbl}</text>`;
+        return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="var(--text-muted)" text-anchor="middle">${lbl}</text>`;
       }).join('')}
     </svg>
   `;

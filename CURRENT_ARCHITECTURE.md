@@ -24,7 +24,7 @@ webiste 2/
     │       └── bottom-nav.js # Global mobile bottom navigation mount
     ├── pages/
     │   ├── auth/            # Lock screen authentication and demo triggers
-    │   ├── onboarding/      # 12-step configuration wizard
+    │   ├── onboarding/      # 14-step configuration wizard (now includes Choose Your Aura theme step)
     │   ├── home/            # Dashboard stats, AI reviews, sync sheet modal
     │   ├── train/           # Day chips, set completion log sheets, rest timer
     │   ├── diet/            # Hydration bars, food logs, meal detail sheets
@@ -33,10 +33,11 @@ webiste 2/
     │   ├── profile/         # Avatar uploads, bio, stats
     │   └── settings/        # Preferences, data export, account delete modal
     ├── services/
-    │   ├── ai-engine.js     # Readiness, PR extracts, habits detection, compatibility calculations
+    │   ├── ai-engine.js        # Readiness, PR extracts, habits detection, compatibility calculations
     │   ├── nutrition-engine.js # Calorie target calculations, meal catalogs, logging
-    │   ├── workout-engine.js # Plan generation, history persistence, volume calculations
-    │   └── activity-engine.js # Step tracking abstraction layer, goal updates, steps calculations
+    │   ├── workout-engine.js   # Plan generation, history persistence, volume calculations
+    │   ├── activity-engine.js  # Step tracking abstraction layer, goal updates, steps calculations
+    │   └── theme-engine.js     # Centralized theme manager: 6 theme presets, CSS var injection, persistence
     └── state/
         └── index.js         # Single reactive store with localStorage serialization
 ```
@@ -53,3 +54,12 @@ webiste 2/
 - **Single Active Sheet Enforced**: The dynamic bottom sheet manager uses a global singleton pointer `_activeBottomSheet`. Opening any sheet immediately triggers `closeActiveBottomSheet(true)` which removes any existing bottom sheet and backdrop instantly from the DOM.
 - **Route Transition Cleanup**: The SPA router (`src/router.js`) calls `closeActiveBottomSheet(true)` and `closeModal()` on every route change, guaranteeing a completely clean DOM state when moving between screens.
 - **Event Listener Safety**: `_refreshMacros()` in `diet/index.js` only re-binds macro ring handlers (`calories-ring-wrapper`, `protein-ring-wrapper`) after DOM refreshes, avoiding stacked event listener warnings or duplicate executions.
+
+## Theme System Architecture
+- **Engine**: `src/services/theme-engine.js` exports `THEMES`, `THEME_ORDER`, `DEFAULT_THEME`, and `themeManager` singleton.
+- **Apply mechanism**: `themeManager.setTheme(id)` calls `_applyThemeVars(theme)` which injects CSS custom properties directly onto `#phone-shell` using `element.style.setProperty(varName, value)`. Approximately 40 variables are overridden per theme.
+- **Root propagation**: A subset of critical variables (backgrounds, text, borders, primary colors) are also set on `document.documentElement` so `#modal-container` (outside `#phone-shell`) inherits the correct palette.
+- **Boot sequence**: `main.js` calls `themeManager.loadTheme()` then `themeManager.applyInstant()` after the initial route renders — no flash of wrong theme.
+- **Persistence**: Theme ID stored in `localStorage` key `aura_theme_v2` (via `themeManager.saveTheme()`) AND in `state.app.selectedTheme` (via `setState`).
+- **No page reload**: CSS variable injection is synchronous DOM mutation — instantaneous theme switching without any page navigation.
+

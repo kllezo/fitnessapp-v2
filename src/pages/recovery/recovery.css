@@ -204,7 +204,7 @@
   width: 160px;
   height: 160px;
   border-radius: 50%;
-  border: 3px solid #a78bfa;
+  border: 3px solid var(--aura-violet-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -225,7 +225,7 @@
 .breathe-count { font-family: var(--font-display); font-size: 40px; font-weight: var(--fw-bold); color: var(--text-primary); }
 .breathe-phase-dots { display: flex; gap: 8px; justify-content: center; }
 .phase-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-card); transition: all var(--dur-normal) ease; }
-.phase-dot.active { background: #a78bfa; box-shadow: 0 0 8px rgba(167,139,250,0.5); }
+.phase-dot.active { background: var(--aura-violet-light); box-shadow: 0 0 8px rgba(167,139,250,0.5); }
 
 /* Guided Mindfulness and Walk Reset Rework Keyframes */
 @keyframes breatheAnimation {
@@ -241,7 +241,7 @@
 }
 
 .spotify-player {
-  background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.18) 0%, transparent 65%), #0d0d15 !important;
+  background: radial-gradient(ellipse at 50% 0%, rgba(91,92,246,0.18) 0%, transparent 65%), var(--bg-base) !important;
   border-color: rgba(124, 58, 237, 0.35) !important;
 }
 

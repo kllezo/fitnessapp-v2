@@ -9,6 +9,7 @@ import './assets/styles/animations.css';
 import { loadState, getState } from './state/index.js';
 import { route, initRouter } from './router.js';
 import { renderBottomNav } from './components/navigation/bottom-nav.js';
+import { themeManager } from './services/theme-engine.js';
 
 // Pages
 import * as AuthPage from './pages/auth/index.js';
@@ -42,14 +43,12 @@ async function bootstrap() {
   // 4. Init router & navigate to initial route
   await initRouter();
 
-  // 5. Start status bar clock
-  startClock();
+  // 5. Apply persisted theme (instant — no animation on boot)
+  const themeId = themeManager.loadTheme();
+  themeManager.applyInstant(themeId);
 
-  // 6. Apply persisted theme
-  const state = getState();
-  if (state.app?.theme === 'light') {
-    document.body.classList.add('light-theme');
-  }
+  // 6. Start status bar clock
+  startClock();
 }
 
 function startClock() {
