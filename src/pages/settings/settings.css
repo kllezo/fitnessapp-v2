@@ -27,8 +27,8 @@
   transition: background var(--dur-fast) ease;
 }
 .setting-row:last-child { border-bottom: none; }
-.setting-row:active { background: rgba(255,255,255,0.03); }
-.setting-row.danger .setting-label { color: var(--aura-rose-light); }
+.setting-row:active { background: var(--bg-translucent-xs); }
+.setting-row.danger .setting-label { color: var(--aura-rose); }
 
 .setting-icon {
   font-size: 18px;
@@ -41,7 +41,7 @@
 .setting-label-full { flex: 1; font-size: var(--text-sm); font-weight: var(--fw-medium); color: var(--text-primary); }
 .setting-value { display: block; font-size: var(--text-xs); color: var(--text-muted); margin-top: 1px; }
 .setting-arrow { color: var(--text-muted); font-size: 18px; flex-shrink: 0; }
-.danger-arrow { color: var(--aura-rose-light); }
+.danger-arrow { color: var(--aura-rose); }
 
 /* Toggle */
 .toggle-row { cursor: default; }
@@ -64,11 +64,11 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.5);
+  background: var(--text-secondary);
   transition: all var(--dur-normal) var(--ease-spring);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-sm);
 }
-.toggle-btn.on .toggle-thumb { left: 20px; background: #fff; }
+.toggle-btn.on .toggle-thumb { left: 20px; background: var(--badge-text); }
 
 /* Inline Option Sheet */
 .setting-options-grid { display: flex; flex-direction: column; gap: 8px; }
@@ -89,9 +89,9 @@
 }
 .setting-option-btn:active { transform: scale(0.98); }
 .setting-option-btn.selected {
-  background: rgba(124,58,237,0.12);
+  background: var(--aura-violet-glow);
   border-color: var(--aura-violet);
-  color: var(--aura-violet-light);
+  color: var(--aura-violet);
   font-weight: var(--fw-semibold);
 }
 

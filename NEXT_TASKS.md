@@ -52,13 +52,14 @@
 - [x] Home Page Polish & Bug Fixes (UX Pass): compact burn strip, compact stats row, messages card redesign (📥 Inbox), protein card navigation fixed, diet protein ring navigation fixed, ghost sheet prevention with `_forceCloseAllSheets()`, duplicate event listener stacking in `_refreshMacros` fixed.
 - [x] Unified Dynamic Bottom Sheet Architecture: Created the global `openBottomSheet` and `closeActiveBottomSheet` singleton manager inside `ui.js` dynamically creating DOM overlay and sheet elements. Refactored Home (Discipline, Steps, Burn, Protein), Diet (Intake, Protein), Profile, and Settings page sheet triggers. Integrated sheet destruction inside `router.js` for seamless navigation cleanup without orphaned or ghost DOM boxes.
 - [x] **AURA V2 Theme System**: Full centralized theme engine (`theme-engine.js`) with 6 built-in themes (Slate Blue, Elite Green, Deep Indigo, Dusty Rose, Deep Blue & Silver, Forest & Stone). Onboarding "Choose Your Aura" step (step 13 of 14) with horizontal swipeable real mini-app preview cards. Settings Appearance section with circular swatch picker. CSS variable override engine covering 40+ tokens per theme switch. localStorage + state persistence. Hardcoded color removal across home, diet, train, recovery CSS/JS.
+- [x] **Theme-aware Canvas Share Card Export**: Reworked the Canvas drawing context inside the workout share card module (`train/index.js`) to dynamically query `themeManager.getColor()` for background, primary, card, textPrimary, and success colors, replacing all hardcoded violet/indigo colors.
+- [x] **AURA V2 Global Theme Contrast System**: Implemented dynamic relative luminance brightness-based contrast manager with a threshold of 140. Introduced 18 contrast-aware theme tokens, adaptive translucent theme colors, and fully audited all components, buttons, forms, badges, charts, and bottom sheets across all 6 core themes to guarantee AAA/AA text readability.
+- [x] **AURA V2 Global Discipline Rank System**: Built a premium fitness hierarchy based on consistency, nutrition, and recovery. Integrated a theme-aware metallic rank emblem on the home screen between the Discipline and Steps rings. Created a fullscreen Rank Center containing a progression tracker (previous -> current -> next), leaderboards with 5 tabs (Global, Country, Friends, Squad, Partner), unlockable rewards (frames/titles), and an interactive simulator panel to test promotions, demotions, and top-tier Phoenix challenger overtaking.
 
 ### 2. Next Priorities & Unresolved
 - [ ] Share workout cards download options.
 - [ ] Readiness syncing checks logic loop check.
 - [ ] Home dashboard mini Body Metrics card (BMI/BMR quick view).
 - [ ] Onboarding goals multi-select persistence verification.
-- [ ] Theme-aware chart export (share cards should use current theme's primary color instead of hardcoded violet).
 - [ ] Per-theme micro-animation variants (e.g. Forest theme uses slower, more nature-paced transitions).
 - [ ] Analytics sheets / modals: verify all dynamic sheets inherit theme correctly through root propagation.
-

@@ -21,10 +21,17 @@ import * as RecoveryPage from './pages/recovery/index.js';
 import * as SocialsPage from './pages/socials/index.js';
 import * as ProfilePage from './pages/profile/index.js';
 import * as SettingsPage from './pages/settings/index.js';
+import * as RankCenterPage from './pages/rank-center/index.js';
 
 async function bootstrap() {
   // 1. Load persisted state
   loadState();
+  try {
+    const { refreshUserRank } = await import('./services/rank-engine.js');
+    refreshUserRank();
+  } catch (e) {
+    console.error('[Boot] Failed to initialize ranks:', e);
+  }
 
   // 2. Render global bottom nav (always mounted)
   renderBottomNav();
@@ -39,6 +46,7 @@ async function bootstrap() {
   route('/socials', SocialsPage);
   route('/profile', ProfilePage);
   route('/settings', SettingsPage);
+  route('/rank-center', RankCenterPage);
 
   // 4. Init router & navigate to initial route
   await initRouter();

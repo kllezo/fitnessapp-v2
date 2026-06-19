@@ -46,14 +46,14 @@
 }
 .day-chip:active { transform: scale(0.93); }
 .day-chip.active {
-  background: rgba(124,58,237,0.15);
+  background: var(--aura-violet-glow);
   border-color: var(--aura-violet);
-  box-shadow: 0 0 0 1px rgba(124,58,237,0.2);
+  box-shadow: 0 0 0 1px var(--bg-translucent-md);
 }
 .day-chip-label { font-size: 10px; font-weight: var(--fw-bold); color: var(--text-muted); letter-spacing: 0.5px; }
-.day-chip.active .day-chip-label { color: var(--aura-violet-light); }
+.day-chip.active .day-chip-label { color: var(--aura-violet); }
 .day-chip-name { font-size: 11px; font-weight: var(--fw-medium); color: var(--text-secondary); }
-.day-chip.active .day-chip-name { color: var(--aura-violet-light); }
+.day-chip.active .day-chip-name { color: var(--aura-violet); }
 
 /* Train Content */
 .train-content { padding: 0 16px; }
@@ -77,7 +77,7 @@
   overflow: hidden;
   transition: all var(--dur-fast) ease;
 }
-.exercise-card.done { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.04); }
+.exercise-card.done { border-color: var(--aura-mint-glow); background: var(--bg-translucent-xs); }
 
 .ex-card-main {
   display: flex;
@@ -100,7 +100,7 @@
 }
 .ex-status-dot.done { background: var(--aura-mint); border-color: var(--aura-mint); }
 
-.ex-name { font-size: var(--text-sm); font-weight: var(--fw-semibold); color: var(--text-primary); }
+.ex-name { font-size: var(--text-sm); font-weight: var(--fw-semibold); color: var(--card-text); }
 .ex-meta { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
 
 .ex-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
@@ -128,15 +128,15 @@
 
 .session-complete-bar {
   margin-top: 16px;
-  background: rgba(16,185,129,0.08);
-  border: 1px solid rgba(16,185,129,0.2);
+  background: var(--bg-translucent-sm);
+  border: 1px solid var(--aura-mint-glow);
   border-radius: var(--radius-lg);
   padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: var(--text-sm);
-  color: var(--aura-mint-light);
+  color: var(--aura-mint);
 }
 
 /* Exercise Sheet */
@@ -162,7 +162,7 @@
   border: 1px solid var(--border-card);
   transition: all var(--dur-fast) ease;
 }
-.set-row.done { background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.2); }
+.set-row.done { background: var(--bg-translucent-xs); border-color: var(--aura-mint-glow); }
 
 .set-num {
   width: 22px;
@@ -196,7 +196,7 @@
   padding: 6px 4px;
   font-size: 13px;
   font-weight: var(--fw-semibold);
-  color: var(--text-primary);
+  color: var(--card-text);
   text-align: center;
   font-family: var(--font-sans);
   outline: none;
@@ -220,7 +220,7 @@
   transition: all var(--dur-fast) var(--ease-spring);
 }
 .set-check:active { transform: scale(0.85); }
-.set-check.done { background: var(--aura-mint); border-color: var(--aura-mint); color: #fff; }
+.set-check.done { background: var(--aura-mint); border-color: var(--aura-mint); color: var(--button-text); }
 
 .ex-sheet-actions { margin-top: 16px; }
 .ex-notes { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
@@ -244,7 +244,7 @@
   font-family: var(--font-sans);
   transition: all var(--dur-fast) ease;
 }
-.rest-dur-btn.active { background: rgba(124,58,237,0.15); border-color: var(--aura-violet); color: var(--aura-violet-light); }
+.rest-dur-btn.active { background: var(--aura-violet-glow); border-color: var(--aura-violet); color: var(--text-primary); }
 
 .rest-display {
   position: relative;
@@ -260,7 +260,7 @@
   font-family: var(--font-display);
   font-size: 28px;
   font-weight: var(--fw-bold);
-  color: var(--text-primary);
+  color: var(--ring-value);
 }
 
 /* History */
@@ -271,15 +271,16 @@
   padding: 12px 0;
   border-bottom: 1px solid var(--border-subtle);
 }
-.hist-title { font-size: var(--text-sm); font-weight: var(--fw-semibold); color: var(--text-primary); }
+.hist-title { font-size: var(--text-sm); font-weight: var(--fw-semibold); color: var(--card-text); }
 .hist-meta { font-size: var(--text-xs); color: var(--text-muted); margin-top: 2px; }
-.hist-vol { font-family: var(--font-display); font-size: var(--text-lg); font-weight: var(--fw-bold); color: var(--aura-violet-light); }
+.hist-vol { font-family: var(--font-display); font-size: var(--text-lg); font-weight: var(--fw-bold); color: var(--aura-violet); }
 
 /* Celebration */
 .celebration-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.9);
+  background: var(--bg-modal);
+  opacity: 0.98;
   backdrop-filter: blur(8px);
   z-index: 300;
   display: flex;
@@ -291,17 +292,17 @@
 .celebration-emoji { font-size: 64px; animation: bounce 0.6s ease infinite; margin-bottom: 16px; display: block; }
 .celebration-title { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: var(--fw-black); margin-bottom: 20px; background: var(--grad-violet); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .celebration-stats { display: flex; justify-content: center; gap: 24px; margin-bottom: 24px; }
-.cel-stat span { display: block; font-family: var(--font-display); font-size: var(--text-2xl); font-weight: var(--fw-bold); color: var(--text-primary); }
+.cel-stat span { display: block; font-family: var(--font-display); font-size: var(--text-2xl); font-weight: var(--fw-bold); color: var(--card-text); }
 .cel-stat label { font-size: var(--text-xs); color: var(--text-muted); }
 
 /* Share Card Styles */
 .share-card {
-  background: radial-gradient(ellipse at 50% 0%, rgba(91,92,246,0.22) 0%, transparent 60%), var(--bg-base);
-  border: 1.5px solid rgba(124, 58, 237, 0.4);
+  background: radial-gradient(ellipse at 50% 0%, var(--aura-violet-glow) 0%, transparent 60%), var(--bg-base);
+  border: 1.5px solid var(--border-active);
   border-radius: var(--radius-xl);
   padding: 20px;
   text-align: left;
-  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.15);
+  box-shadow: var(--shadow-md);
   margin: 16px 0;
   position: relative;
 }
@@ -315,7 +316,7 @@
   font-family: var(--font-display);
   font-size: var(--text-sm);
   font-weight: var(--fw-bold);
-  color: var(--aura-violet-light);
+  color: var(--aura-violet);
   letter-spacing: 0.5px;
 }
 .share-card-date {
@@ -326,7 +327,7 @@
   font-family: var(--font-display);
   font-size: var(--text-lg);
   font-weight: var(--fw-bold);
-  color: var(--text-primary);
+  color: var(--card-text);
   margin-bottom: 12px;
 }
 .share-card-stats {
@@ -343,7 +344,7 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-top: 14px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid var(--border-translucent-medium);
   padding-top: 8px;
 }
 .share-actions-grid {
@@ -359,7 +360,7 @@
   font-weight: var(--fw-semibold);
   border: none;
   cursor: pointer;
-  color: #fff;
+  color: var(--badge-text);
   transition: transform var(--dur-fast) ease;
   font-family: var(--font-sans);
   text-align: center;
@@ -367,12 +368,12 @@
 .share-action-btn:active { transform: scale(0.95); }
 .btn-whatsapp { background: #25D366; }
 .btn-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
-.btn-download { background: var(--bg-card); border: 1px solid var(--border-card); grid-column: span 2; }
+.btn-download { background: var(--bg-card); border: 1px solid var(--border-card); grid-column: span 2; color: var(--card-text); }
 
 /* Calendar and Planner Dropdown styles */
 .weekly-planner-header:hover {
   border-color: var(--aura-violet);
-  background: rgba(124,58,237,0.03);
+  background: var(--bg-translucent-xs);
 }
 
 .weekly-planner-dropdown {
@@ -380,11 +381,11 @@
 }
 
 .planner-dropdown-item:hover {
-  background: rgba(255,255,255,0.03) !important;
+  background: var(--bg-translucent-xs) !important;
 }
 
 .planner-dropdown-item.active {
-  background: rgba(124,58,237,0.12) !important;
+  background: var(--aura-violet-glow) !important;
 }
 
 .calendar-view-container {
@@ -393,13 +394,13 @@
 
 .calendar-day-cell:hover {
   border-color: var(--aura-violet) !important;
-  background: rgba(124,58,237,0.05) !important;
+  background: var(--bg-translucent-xs) !important;
   transform: translateY(-1px);
 }
 
 .calendar-day-cell.today {
   border-color: var(--aura-violet) !important;
-  box-shadow: 0 0 10px rgba(124,58,237,0.25) !important;
+  box-shadow: 0 0 10px var(--aura-violet-glow) !important;
 }
 
 .calendar-nav-btn:active {

@@ -21,6 +21,14 @@ let _noiseSeconds = 0;
 let _breatheInterval = null;
 let _breathePhase = 0; // 0=inhale 1=hold 2=exhale 3=hold
 
+// ── Box Breathing (4-4-4-4) ──
+const PHASES = [
+  { label: 'Inhale', secs: 4, color: 'var(--aura-violet)', glow: 'var(--aura-violet-glow)' },
+  { label: 'Hold', secs: 4, color: 'var(--aura-amber)', glow: 'var(--aura-amber-glow)' },
+  { label: 'Exhale', secs: 4, color: 'var(--aura-mint)', glow: 'var(--aura-mint-glow)' },
+  { label: 'Hold', secs: 4, color: 'var(--aura-amber)', glow: 'var(--aura-amber-glow)' },
+];
+
 // Walk Reset State
 let _walkInterval = null;
 let _walkActive = false;
@@ -103,8 +111,8 @@ export function render() {
           <div class="rec-score-row">
             <div class="rec-score-ring">
               <svg width="80" height="80" viewBox="0 0 80 80">
-                <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
-                <circle cx="40" cy="40" r="34" fill="none" stroke="${color === 'mint' ? '#10b981' : color === 'rose' ? '#f43f5e' : '#a78bfa'}" stroke-width="6"
+                <circle cx="40" cy="40" r="34" fill="none" stroke="var(--ring-secondary)" stroke-width="6"/>
+                <circle cx="40" cy="40" r="34" fill="none" stroke="${color === 'mint' ? 'var(--aura-mint)' : color === 'rose' ? 'var(--aura-rose)' : 'var(--aura-violet)'}" stroke-width="6"
                   stroke-linecap="round" stroke-dasharray="213.6"
                   stroke-dashoffset="${213.6 - 213.6 * score / 100}"
                   transform="rotate(-90 40 40)"/>
@@ -136,7 +144,7 @@ export function render() {
                 <div class="spark-bar-wrap">
                   <div class="spark-bar ${d.isToday ? 'today' : ''}"
                     style="height:${d.value ? Math.max(4, d.value * 0.36) : 4}px;
-                    background:${d.value >= 75 ? '#10b981' : d.value >= 50 ? '#a78bfa' : d.value > 0 ? '#f43f5e' : 'rgba(255,255,255,0.08)'}"></div>
+                    background:${d.value >= 75 ? 'var(--aura-mint)' : d.value >= 50 ? 'var(--aura-violet)' : d.value > 0 ? 'var(--aura-rose)' : 'var(--bg-translucent-md)'}"></div>
                 </div>
                 <span class="spark-label ${d.isToday ? 'today' : ''}">${d.day}</span>
               </div>
@@ -180,13 +188,13 @@ export function render() {
                 <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0;">AURA Calming Resonance Block</p>
               </div>
             </div>
-            <button class="player-play-btn ${isPlaying ? 'playing' : ''}" id="noise-play-btn" style="width:40px; height:40px; border-radius:50%; background:var(--aura-violet); border:none; color:#fff; font-size:16px; display:flex; align-items:center; justify-content:center; cursor:pointer;">${playIcon}</button>
+            <button class="player-play-btn ${isPlaying ? 'playing' : ''}" id="noise-play-btn" style="width:40px; height:40px; border-radius:50%; background:var(--aura-violet); border:none; color:var(--badge-text); font-size:16px; display:flex; align-items:center; justify-content:center; cursor:pointer;">${playIcon}</button>
           </div>
           
           <!-- Progress Slider (Remaining vs Elapsed) -->
           <div style="display:flex; flex-direction:column; gap:4px; margin-top:4px;">
             <div class="player-progress-bar-bg" style="height:4px; background:var(--border-subtle); border-radius:2px; position:relative; overflow:hidden; cursor:pointer;" id="audio-progress-bar">
-              <div class="player-progress-fill" id="audio-progress-fill" style="width:${progressPct}%; height:100%; background:var(--aura-violet-light); transition: width 0.3s ease;"></div>
+              <div class="player-progress-fill" id="audio-progress-fill" style="width:${progressPct}%; height:100%; background:var(--aura-violet); transition: width 0.3s ease;"></div>
             </div>
             <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted);">
               <span id="audio-elapsed">${timeElapsed}</span>
@@ -197,7 +205,7 @@ export function render() {
           <!-- Volume Control -->
           <div style="display:flex; align-items:center; gap:10px; justify-content:flex-end;">
             <span style="font-size:12px; color:var(--text-muted);">🔊</span>
-            <input type="range" class="volume-slider" id="noise-volume" min="0" max="1" step="0.05" value="${volumeVal}" aria-label="Volume" style="width:100px; accent-color:var(--aura-violet-light);">
+            <input type="range" class="volume-slider" id="noise-volume" min="0" max="1" step="0.05" value="${volumeVal}" aria-label="Volume" style="width:100px; accent-color:var(--aura-violet);">
           </div>
         </div>
       </div>
@@ -268,7 +276,7 @@ export function render() {
       <!-- Recovery Tips -->
       <div class="rec-section">
         <div class="section-label">Recovery Insights</div>
-        <div class="card" style="background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(8,145,178,0.04))">
+        <div class="card" style="background:var(--bg-translucent-xs)">
           <p style="font-size:var(--text-sm);color:var(--text-secondary);line-height:1.7;margin:0;">
             ${_getRecoveryInsight(score, sleepDebt, answers)}
           </p>
@@ -354,9 +362,9 @@ function _openDetailedRecoveryModal() {
               <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:var(--space-xs);">
                 <div style="position:relative; width:100%; height:80px; display:flex; align-items:flex-end; justify-content:center;">
                   <div style="position:absolute; top:-16px; font-size:9px; color:var(--text-muted); font-weight:var(--fw-medium);">${d.value || '—'}</div>
-                  <div style="width:16px; height:${h}%; background:${d.value >= 75 ? 'var(--aura-mint)' : d.value >= 50 ? 'var(--aura-violet)' : d.value > 0 ? 'var(--aura-rose)' : 'rgba(255,255,255,0.06)'}; border-radius:4px 4px 0 0; transition: height 0.5s ease-out;"></div>
+                  <div style="width:16px; height:${h}%; background:${d.value >= 75 ? 'var(--aura-mint)' : d.value >= 50 ? 'var(--aura-violet)' : d.value > 0 ? 'var(--aura-rose)' : 'var(--bg-translucent-md)'}; border-radius:4px 4px 0 0; transition: height 0.5s ease-out;"></div>
                 </div>
-                <span style="font-size:10px; color:${d.isToday ? 'var(--aura-violet-light)' : 'var(--text-muted)'}; font-weight:${d.isToday ? 'var(--fw-bold)' : 'var(--fw-regular)'};">${d.day}</span>
+                <span style="font-size:10px; color:${d.isToday ? 'var(--aura-violet)' : 'var(--text-muted)'}; font-weight:${d.isToday ? 'var(--fw-bold)' : 'var(--fw-regular)'};">${d.day}</span>
               </div>
             `;
           }).join('')}
@@ -405,13 +413,7 @@ function _wireEvents() {
   });
 }
 
-// ── Box Breathing (4-4-4-4) ──
-const PHASES = [
-  { label: 'Inhale', secs: 4, color: '#a78bfa' },
-  { label: 'Hold', secs: 4, color: '#fcd34d' },
-  { label: 'Exhale', secs: 4, color: '#6ee7b7' },
-  { label: 'Hold', secs: 4, color: '#fcd34d' },
-];
+
 
 function _openBreathe() {
   _breathePhase = 0;
@@ -433,15 +435,15 @@ function _getBreatheContentHtml() {
     <div class="breathe-content" style="text-align:center;">
       <p class="breathe-sub" style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">4–4–4–4 pattern for nervous system regulation</p>
       <div class="breathe-ring-wrap" style="display:flex; justify-content:center; margin-bottom:20px;">
-        <div class="breathe-ring" id="breathe-ring" style="width:140px; height:140px; border-radius:50%; border:4px solid ${ph.color}; box-shadow: 0 0 20px ${ph.color}40; display:flex; align-items:center; justify-content:center; transition: all 1s ease;">
-          <div class="breathe-ring-inner" id="breathe-ring-inner" style="width:110px; height:110px; border-radius:50%; background:${ph.color}15; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <div class="breathe-ring" id="breathe-ring" style="width:140px; height:140px; border-radius:50%; border:4px solid ${ph.color}; box-shadow: 0 0 20px ${ph.glow}; display:flex; align-items:center; justify-content:center; transition: all 1s ease;">
+          <div class="breathe-ring-inner" id="breathe-ring-inner" style="width:110px; height:110px; border-radius:50%; background:${ph.glow}; display:flex; flex-direction:column; align-items:center; justify-content:center;">
             <span class="breathe-phase" id="breathe-phase" style="font-size:16px; font-weight:bold; color:var(--text-primary);">${ph.label}</span>
             <span class="breathe-count" id="breathe-count" style="font-size:24px; font-weight:800; color:var(--text-primary); margin-top:4px;">${ph.secs}</span>
           </div>
         </div>
       </div>
       <div class="breathe-phase-dots" style="display:flex; justify-content:center; gap:8px; margin-bottom:20px;">
-        ${PHASES.map((p, i) => `<div class="phase-dot ${i === _breathePhase ? 'active' : ''}" style="width:8px; height:8px; border-radius:50%; background:${i === _breathePhase ? p.color : 'rgba(255,255,255,0.1)'}; box-shadow:${i === _breathePhase ? `0 0 8px ${p.color}` : 'none'}"></div>`).join('')}
+        ${PHASES.map((p, i) => `<div class="phase-dot ${i === _breathePhase ? 'active' : ''}" style="width:8px; height:8px; border-radius:50%; background:${i === _breathePhase ? p.color : 'var(--bg-translucent-md)'}; box-shadow:${i === _breathePhase ? `0 0 8px ${p.color}` : 'none'}"></div>`).join('')}
       </div>
       <button class="btn btn-ghost btn-sm btn-full" id="stop-breathe-btn">Stop & Close</button>
     </div>
@@ -487,8 +489,8 @@ function _openWalkReset() {
       <!-- Visual Steps Progress Ring -->
       <div style="position:relative; width:140px; height:140px; margin:0 auto;">
         <svg width="140" height="140" viewBox="0 0 120 120">
-          <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
-          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--aura-violet-light)" stroke-width="6"
+          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--ring-secondary)" stroke-width="6"/>
+          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--aura-violet)" stroke-width="6"
             stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"
             transform="rotate(-90 60 60)" id="walk-progress-ring"/>
         </svg>
@@ -505,7 +507,7 @@ function _openWalkReset() {
         </div>
         <div class="card" style="padding:10px;">
           <span style="font-size:10px; color:var(--text-muted); display:block;">Est. Calories</span>
-          <strong id="walk-cal-val" style="font-size:18px; color:var(--aura-rose-light); display:block; margin-top:4px;">0 kcal</strong>
+          <strong id="walk-cal-val" style="font-size:18px; color:var(--aura-rose); display:block; margin-top:4px;">0 kcal</strong>
         </div>
       </div>
 
@@ -675,12 +677,12 @@ function _updateMindfulnessUI() {
       
       <!-- Breathing Circle Animation -->
       <div style="display:flex; justify-content:center; margin:10px 0;">
-        <div class="breathing-circle-outer" style="width:140px; height:140px; border-radius:50%; background:rgba(124,58,237,0.06); display:flex; align-items:center; justify-content:center; border: 2px dashed rgba(124,58,237,0.2);">
-          <div class="breathing-circle-inner" style="width:80px; height:80px; border-radius:50%; background:var(--aura-violet); box-shadow:0 0 25px var(--aura-violet-light); animation: breatheAnimation 8s infinite ease-in-out;"></div>
+        <div class="breathing-circle-outer" style="width:140px; height:140px; border-radius:50%; background:var(--bg-translucent-sm); display:flex; align-items:center; justify-content:center; border: 2px dashed var(--aura-violet-glow);">
+          <div class="breathing-circle-inner" style="width:80px; height:80px; border-radius:50%; background:var(--aura-violet); box-shadow:0 0 25px var(--aura-violet); animation: breatheAnimation 8s infinite ease-in-out;"></div>
         </div>
       </div>
 
-      <div class="card" style="padding:16px; background:rgba(124,58,237,0.06); border-color:rgba(124,58,237,0.15); min-height:80px; display:flex; align-items:center; justify-content:center;">
+      <div class="card" style="padding:16px; background:var(--bg-translucent-xs); border-color:var(--border-translucent-subtle); min-height:80px; display:flex; align-items:center; justify-content:center;">
         <p id="mind-prompt-val" style="font-size:13px; color:var(--text-primary); line-height:1.6; font-style:italic; margin:0;">${MIND_GUIDED_PROMPTS[_mindPromptIndex]}</p>
       </div>
 

@@ -8,6 +8,7 @@ import { navigate } from '../../router.js';
 import { showToast, showModal, closeModal, openBottomSheet, closeActiveBottomSheet } from '../../components/shared/ui.js';
 import { computeReadinessScore, generateWeeklyReview, detectHabitPatterns, extractPRFeed } from '../../services/ai-engine.js';
 import { getActivityData, updateActivityGoal, updateActivitySteps, getDisciplineBreakdown, getDayIndexMonSun, getDailyBurnGoal, getCalorieBurnBreakdown } from '../../services/activity-engine.js';
+import { getRankEmblemSVG } from '../../services/rank-engine.js';
 import './home.css';
 
 // Daily sync state
@@ -87,39 +88,45 @@ export function render() {
       <!-- Rings Hero Card -->
       <div class="home-section">
         <div class="home-hero-card card card-glow" style="background:var(--bg-card); border:1px solid var(--border-card); padding: 20px; display:flex; flex-direction:column; gap:16px;">
-          <div class="rings-row" style="display:flex; justify-content:space-around; align-items:center;">
+        <div class="rings-row" style="display:flex; justify-content:space-around; align-items:center;">
             <!-- Discipline Ring (Left) -->
             <div class="ring-wrapper" id="discipline-ring-wrapper" style="display:flex; flex-direction:column; align-items:center; cursor:pointer;">
-              <span style="font-family:var(--font-display); font-size:10px; font-weight:700; letter-spacing:1px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Discipline Ring</span>
+              <span style="font-family:var(--font-display); font-size:10px; font-weight:700; letter-spacing:1px; color:var(--ring-label); text-transform:uppercase; margin-bottom:8px;">Discipline Ring</span>
               <div style="position:relative; width:96px; height:96px; display:flex; align-items:center; justify-content:center;">
                 <svg width="96" height="96" viewBox="0 0 96 96">
-                  <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
-                  <circle id="disc-ring-circle" cx="48" cy="48" r="40" fill="none" stroke="#5B5CF6" stroke-width="8"
+                  <circle cx="48" cy="48" r="40" fill="none" stroke="var(--ring-secondary)" stroke-width="8"/>
+                  <circle id="disc-ring-circle" cx="48" cy="48" r="40" fill="none" stroke="var(--aura-violet)" stroke-width="8"
                     stroke-linecap="round" stroke-dasharray="251.33" stroke-dashoffset="251.33"
                     data-offset="${251.33 - (251.33 * Math.min(discipline, 100) / 100)}"
                     transform="rotate(-90 48 48)" style="transition: stroke-dashoffset 1s cubic-bezier(0.1, 1, 0.1, 1);"/>
                 </svg>
                 <div style="position:absolute; display:flex; flex-direction:column; align-items:center;">
-                  <span style="font-size:18px; font-weight:800; color:#FFFFFF; line-height:1;">${discipline}</span>
-                  <span style="font-size:9px; color:var(--text-muted); margin-top:2px;">/100</span>
+                  <span style="font-size:18px; font-weight:800; color:var(--ring-value); line-height:1;">${discipline}</span>
+                  <span style="font-size:9px; color:var(--ring-label); margin-top:2px;">/100</span>
                 </div>
               </div>
             </div>
 
+            <!-- Rank Emblem (Middle) -->
+            <div id="home-rank-emblem" style="cursor:pointer; display:flex; align-items:center; justify-content:center; width:64px; height:64px; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10;" 
+                 onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform='scale(1)'" title="Open Rank Center">
+              ${getRankEmblemSVG(state.rank?.rankId || 'bronze_3', 60)}
+            </div>
+
             <!-- Steps Ring (Right) -->
             <div class="ring-wrapper" id="steps-ring-wrapper" style="display:flex; flex-direction:column; align-items:center; cursor:pointer;">
-              <span style="font-family:var(--font-display); font-size:10px; font-weight:700; letter-spacing:1px; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">Steps Ring</span>
+              <span style="font-family:var(--font-display); font-size:10px; font-weight:700; letter-spacing:1px; color:var(--ring-label); text-transform:uppercase; margin-bottom:8px;">Steps Ring</span>
               <div style="position:relative; width:96px; height:96px; display:flex; align-items:center; justify-content:center;">
                 <svg width="96" height="96" viewBox="0 0 96 96">
-                  <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
-                  <circle id="steps-ring-circle" cx="48" cy="48" r="40" fill="none" stroke="#00E5A8" stroke-width="8"
+                  <circle cx="48" cy="48" r="40" fill="none" stroke="var(--ring-secondary)" stroke-width="8"/>
+                  <circle id="steps-ring-circle" cx="48" cy="48" r="40" fill="none" stroke="var(--aura-mint)" stroke-width="8"
                     stroke-linecap="round" stroke-dasharray="251.33" stroke-dashoffset="251.33"
                     data-offset="${251.33 - (251.33 * Math.min(state.activity?.steps || 0, state.activity?.stepGoal || 10000) / (state.activity?.stepGoal || 10000))}"
                     transform="rotate(-90 48 48)" style="transition: stroke-dashoffset 1s cubic-bezier(0.1, 1, 0.1, 1);"/>
                 </svg>
                 <div style="position:absolute; display:flex; flex-direction:column; align-items:center;">
-                  <span style="font-size:16px; font-weight:800; color:#FFFFFF; line-height:1;">${(state.activity?.steps || 0) >= 1000 ? ((state.activity?.steps || 0)/1000).toFixed(1) + 'k' : (state.activity?.steps || 0)}</span>
-                  <span style="font-size:9px; color:var(--text-muted); margin-top:2px;">/${(state.activity?.stepGoal || 10000).toLocaleString()}</span>
+                  <span style="font-size:16px; font-weight:800; color:var(--ring-value); line-height:1;">${(state.activity?.steps || 0) >= 1000 ? ((state.activity?.steps || 0)/1000).toFixed(1) + 'k' : (state.activity?.steps || 0)}</span>
+                  <span style="font-size:9px; color:var(--ring-label); margin-top:2px;">/${(state.activity?.stepGoal || 10000).toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -131,19 +138,19 @@ export function render() {
       <div class="home-section" style="padding-bottom:10px;">
         <div class="stat-grid stat-grid-3" style="gap:8px;">
           <div class="stat-cell home-stat-compact" id="streak-stat-cell" style="cursor:pointer;">
-            <div style="font-size:18px; font-weight:800; color:var(--aura-amber); font-family:var(--font-display); line-height:1;">${streak}</div>
-            <div style="font-size:8px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-top:1px;">Days</div>
-            <div class="stat-label" style="font-size:9px; margin-top:4px;">🔥 Streak</div>
+            <div style="font-size:18px; font-weight:800; color:var(--card-text); font-family:var(--font-display); line-height:1;">${streak}</div>
+            <div style="font-size:8px; color:var(--card-subtext); text-transform:uppercase; letter-spacing:0.5px; margin-top:1px;">Days</div>
+            <div class="stat-label" style="font-size:9px; margin-top:4px; color:var(--card-text);">🔥 Streak</div>
           </div>
           <div class="stat-cell home-stat-compact" id="messages-stat-cell" style="cursor:pointer;">
             <div style="font-size:18px; line-height:1;">📥</div>
-            <div style="font-size:11px; font-weight:700; color:#42D4FF; font-family:var(--font-display); margin-top:2px;">Inbox</div>
-            <div style="font-size:9px; color:var(--text-muted); margin-top:2px;">${messagesText}</div>
+            <div style="font-size:11px; font-weight:700; color:var(--card-text); font-family:var(--font-display); margin-top:2px;">Inbox</div>
+            <div style="font-size:9px; color:var(--card-subtext); margin-top:2px;">${messagesText}</div>
           </div>
           <div class="stat-cell home-stat-compact" id="protein-stat-cell" style="cursor:pointer;">
-            <div style="font-size:15px; font-weight:800; color:#00E5A8; font-family:var(--font-display); line-height:1;">${proteinConsumed}g</div>
-            <div style="font-size:8px; color:var(--text-muted); margin-top:1px;">/ ${proteinTarget}g · ${proteinPct}%</div>
-            <div class="stat-label" style="font-size:9px; margin-top:4px;">💪 Protein</div>
+            <div style="font-size:15px; font-weight:800; color:var(--card-text); font-family:var(--font-display); line-height:1;">${proteinConsumed}g</div>
+            <div style="font-size:8px; color:var(--card-subtext); margin-top:1px;">/ ${proteinTarget}g · ${proteinPct}%</div>
+            <div class="stat-label" style="font-size:9px; margin-top:4px; color:var(--card-text);">💪 Protein</div>
           </div>
         </div>
       </div>
@@ -151,16 +158,16 @@ export function render() {
       <!-- Daily Burn Progress Strip -->
       <div class="home-section" style="padding-bottom:14px;">
         <div id="daily-burn-progress-card" style="cursor:pointer; background:var(--bg-card); border:1px solid var(--border-card); border-radius:12px; padding:10px 14px; position:relative; overflow:hidden; transition:border-color 0.2s ease;">
-          <div style="position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,#00E5A8,#42D4FF);"></div>
+          <div style="position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg, var(--aura-mint), var(--text-accent));"></div>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.8px;">🔥 Daily Burn Progress</span>
+            <span style="font-size:11px; font-weight:700; color:var(--card-subtext); text-transform:uppercase; letter-spacing:0.8px;">🔥 Daily Burn Progress</span>
             <span style="display:flex; align-items:baseline; gap:4px;">
-              <span style="font-size:13px; font-weight:800; color:#FFFFFF;">${burnBreakdown.total}</span>
-              <span style="font-size:10px; color:var(--text-muted); font-weight:400;">/ ${burnGoal} kcal</span>
-              <span style="font-size:11px; color:#00E5A8; font-weight:700;">${burnPct}%</span>
+              <span style="font-size:13px; font-weight:800; color:var(--card-text);">${burnBreakdown.total}</span>
+              <span style="font-size:10px; color:var(--card-subtext); font-weight:400;">/ ${burnGoal} kcal</span>
+              <span style="font-size:11px; color:var(--card-text); font-weight:700;">${burnPct}%</span>
             </span>
           </div>
-          <div style="width:100%; height:5px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden;">
+          <div style="width:100%; height:5px; background:var(--bg-translucent-sm); border-radius:3px; overflow:hidden;">
             <div class="burn-progress-fill" style="width:${burnPct}%; height:100%; border-radius:3px; transition:width 0.8s cubic-bezier(0.1,1,0.1,1);"></div>
           </div>
         </div>
@@ -201,7 +208,7 @@ function _renderTodaySession(state) {
   if (!plan || !plan.length) {
     return `
       <div class="today-empty">
-        <p style="color:var(--text-muted);font-size:var(--text-sm)">No workout plan yet</p>
+        <p style="color:var(--card-subtext);font-size:var(--text-sm)">No workout plan yet</p>
         <button class="btn btn-sm btn-primary" id="gen-plan-btn" style="margin-top:8px">Generate Plan</button>
       </div>
     `;
@@ -225,7 +232,7 @@ function _renderTodaySession(state) {
             <span class="today-exercise-sets">${ex.sets?.length || 0}×${ex.sets?.[0]?.targetReps || 10}</span>
           </div>
         `).join('')}
-        ${todayPlan.exercises?.length > 3 ? `<p style="font-size:11px;color:var(--text-muted);margin-top:4px">+${todayPlan.exercises.length - 3} more</p>` : ''}
+        ${todayPlan.exercises?.length > 3 ? `<p style="font-size:11px;color:var(--card-subtext);margin-top:4px">+${todayPlan.exercises.length - 3} more</p>` : ''}
       </div>
     </div>
   `;
@@ -269,7 +276,7 @@ function _loadAIData() {
   if (reviewCard) {
     if (review.empty) {
       reviewCard.innerHTML = `<div class="card" style="text-align:center;padding:16px">
-        <p style="color:var(--text-muted);font-size:var(--text-sm)">Complete your first workout to see your weekly review</p>
+        <p style="color:var(--card-subtext);font-size:var(--text-sm)">Complete your first workout to see your weekly review</p>
       </div>`;
     } else {
       const stars = '★'.repeat(review.stars) + '☆'.repeat(5 - review.stars);
@@ -310,7 +317,7 @@ function _loadAIData() {
   if (prFeed) {
     if (!prs.length) {
       prFeed.innerHTML = `<div class="card" style="text-align:center;padding:16px">
-        <p style="color:var(--text-muted);font-size:var(--text-sm)">Log workouts to track personal records 🏆</p>
+        <p style="color:var(--card-subtext);font-size:var(--text-sm)">Log workouts to track personal records 🏆</p>
       </div>`;
     } else {
       const medals = ['🥇', '🥈', '🥉', '🏅', '🏅'];
@@ -437,13 +444,13 @@ function _completeSyncFlow() {
       <div class="sync-complete">
         <div class="sync-score-ring">
           <svg width="80" height="80" viewBox="0 0 80 80">
-            <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+            <circle cx="40" cy="40" r="34" fill="none" stroke="var(--ring-secondary)" stroke-width="6"/>
             <circle cx="40" cy="40" r="34" fill="none" stroke="url(#syncGrad)" stroke-width="6"
               stroke-linecap="round" stroke-dasharray="213.6"
               stroke-dashoffset="${213.6 - (213.6 * score / 100)}"
               transform="rotate(-90 40 40)"/>
             <defs><linearGradient id="syncGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/>
+              <stop stop-color="var(--aura-violet-light)"/><stop offset="1" stop-color="var(--aura-violet)"/>
             </linearGradient></defs>
           </svg>
           <div class="sync-score-label">
@@ -479,6 +486,7 @@ function _wireEvents() {
   // Activity & Discipline Ring & Sheet Triggers
   document.getElementById('discipline-ring-wrapper')?.addEventListener('click', _openDisciplineSheet);
   document.getElementById('steps-ring-wrapper')?.addEventListener('click', _openActivitySheet);
+  document.getElementById('home-rank-emblem')?.addEventListener('click', () => navigate('/rank-center'));
 
   // New Triggers
   document.getElementById('daily-burn-progress-card')?.addEventListener('click', _openBurnSheet);
@@ -530,16 +538,16 @@ function _renderDisciplineSheetContent(view = '7d') {
   const streak = state.workout?.streakDays || 0;
   
   let status = 'Needs Attention';
-  let statusColor = '#fda4af';
+  let statusColor = 'var(--aura-rose)';
   if (discipline >= 80) {
     status = 'Elite';
-    statusColor = '#a78bfa';
+    statusColor = 'var(--aura-violet)';
   } else if (discipline >= 68) {
     status = 'Strong';
-    statusColor = '#60a5fa';
+    statusColor = 'var(--text-accent)';
   } else if (discipline >= 50) {
     status = 'Moderate';
-    statusColor = '#fbbf24';
+    statusColor = 'var(--aura-amber)';
   }
   
   const breakdown = getDisciplineBreakdown(state);
@@ -580,7 +588,7 @@ function _renderDisciplineSheetContent(view = '7d') {
     const trendPointsHtml = trendScores.map((val, i) => {
       const x = padding + (i * (width - 2 * padding) / 6);
       const y = height - padding - ((val - minVal) * (height - 2 * padding) / range);
-      return `<circle cx="${x}" cy="${y}" r="3" fill="#5B5CF6" />`;
+      return `<circle cx="${x}" cy="${y}" r="3" fill="var(--aura-violet)" />`;
     }).join('');
 
     const insights = [
@@ -596,79 +604,79 @@ function _renderDisciplineSheetContent(view = '7d') {
       <div style="margin-top:16px;">
         <!-- Breakdown table -->
         <span class="section-label" style="display:block; margin-bottom:8px;">Why is my score this?</span>
-        <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px; background:rgba(255,255,255,0.02); padding:12px; border-radius:8px;">
+        <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px; background:var(--bg-translucent-xs); padding:12px; border-radius:8px;">
           <div style="display:flex; justify-content:space-between; padding:4px 0;">
-            <span style="color:var(--text-muted);">Workout Consistency</span>
-            <strong style="color:#00E5A8;">+${breakdown.workout}</strong>
+            <span style="color:var(--analytics-secondary);">Workout Consistency</span>
+            <strong style="color:var(--aura-mint);">+${breakdown.workout}</strong>
           </div>
           <div style="display:flex; justify-content:space-between; padding:4px 0;">
-            <span style="color:var(--text-muted);">Protein Adherence</span>
-            <strong style="color:#00E5A8;">+${breakdown.protein}</strong>
+            <span style="color:var(--analytics-secondary);">Protein Adherence</span>
+            <strong style="color:var(--aura-mint);">+${breakdown.protein}</strong>
           </div>
           <div style="display:flex; justify-content:space-between; padding:4px 0;">
-            <span style="color:var(--text-muted);">Hydration</span>
-            <strong style="color:#00E5A8;">+${breakdown.hydration}</strong>
+            <span style="color:var(--analytics-secondary);">Hydration</span>
+            <strong style="color:var(--aura-mint);">+${breakdown.hydration}</strong>
           </div>
           <div style="display:flex; justify-content:space-between; padding:4px 0;">
-            <span style="color:var(--text-muted);">Recovery</span>
-            <strong style="color:#00E5A8;">+${breakdown.recovery}</strong>
+            <span style="color:var(--analytics-secondary);">Recovery</span>
+            <strong style="color:var(--aura-mint);">+${breakdown.recovery}</strong>
           </div>
           <div style="display:flex; justify-content:space-between; padding:4px 0;">
-            <span style="color:var(--text-muted);">Sleep</span>
-            <strong style="color:#00E5A8;">+${breakdown.sleep}</strong>
+            <span style="color:var(--analytics-secondary);">Sleep</span>
+            <strong style="color:var(--aura-mint);">+${breakdown.sleep}</strong>
           </div>
           <div style="display:flex; justify-content:space-between; padding:4px 0;">
-            <span style="color:var(--text-muted);">Step Goal Adherence</span>
-            <strong style="color:#00E5A8;">+${breakdown.stepGoal}</strong>
+            <span style="color:var(--analytics-secondary);">Step Goal Adherence</span>
+            <strong style="color:var(--aura-mint);">+${breakdown.stepGoal}</strong>
           </div>
           <div style="display:flex; justify-content:space-between; padding:4px 0;">
-            <span style="color:var(--text-muted);">Missed Workouts</span>
-            <strong style="color:#fda4af;">${breakdown.missed}</strong>
+            <span style="color:var(--analytics-secondary);">Missed Workouts</span>
+            <strong style="color:var(--aura-rose);">${breakdown.missed}</strong>
           </div>
           <div style="display:flex; justify-content:space-between; padding:4px 0;">
-            <span style="color:var(--text-muted);">Missed Recovery</span>
-            <strong style="color:#fda4af;">${breakdown.skipped}</strong>
+            <span style="color:var(--analytics-secondary);">Missed Recovery</span>
+            <strong style="color:var(--aura-rose);">${breakdown.skipped}</strong>
           </div>
           <div style="border-top:1px dashed var(--border-card); margin-top:8px; padding-top:8px; display:flex; justify-content:space-between;">
-            <span style="color:#FFFFFF; font-weight:bold;">TOTAL</span>
-            <strong style="color:#5B5CF6; font-size:18px;">${breakdown.total}</strong>
+            <span style="color:var(--analytics-text); font-weight:bold;">TOTAL</span>
+            <strong style="color:var(--aura-violet); font-size:18px;">${breakdown.total}</strong>
           </div>
         </div>
 
         <!-- Line Chart Trend -->
         <div class="card" style="background:var(--bg-card); border:1px solid var(--border-card); padding:12px; margin-bottom:16px;">
-          <p style="font-size:11px; color:var(--text-muted); font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:8px;">7 Day Trend</p>
+          <p style="font-size:11px; color:var(--analytics-secondary); font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:8px;">7 Day Trend</p>
           <svg viewBox="0 0 ${width} ${height}" style="width:100%; height:80px; overflow:visible;">
-            <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="rgba(255,255,255,0.03)" stroke-dasharray="2" />
-            <line x1="${padding}" y1="${height / 2}" x2="${width - padding}" y2="${height / 2}" stroke="rgba(255,255,255,0.03)" stroke-dasharray="2" />
-            <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="rgba(255,255,255,0.06)" />
+            <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="var(--chart-axis)" stroke-dasharray="2" />
+            <line x1="${padding}" y1="${height / 2}" x2="${width - padding}" y2="${height / 2}" stroke="var(--chart-axis)" stroke-dasharray="2" />
+            <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="var(--chart-axis)" />
             
-            <polyline fill="none" stroke="#5B5CF6" stroke-width="2.5" points="${points}" stroke-linecap="round" stroke-linejoin="round" />
+            <polyline fill="none" stroke="var(--aura-violet)" stroke-width="2.5" points="${points}" stroke-linecap="round" stroke-linejoin="round" />
             ${trendPointsHtml}
             
             ${days.map((day, i) => {
               const x = padding + (i * (width - 2 * padding) / 6);
-              return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="var(--text-muted)" text-anchor="middle" font-weight="${i === dayIdx ? 'bold' : 'normal'}">${day}</text>`;
+              return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="var(--chart-label)" text-anchor="middle" font-weight="${i === dayIdx ? 'bold' : 'normal'}">${day}</text>`;
             }).join('')}
           </svg>
         </div>
 
         <!-- Score Changes / Explanations -->
         <span class="section-label" style="display:block; margin-bottom:8px;">Daily Score Changes</span>
-        <div class="card" style="background:rgba(255,255,255,0.02); border:1px solid var(--border-card); padding:12px; margin-bottom:16px; display:flex; flex-direction:column; gap:8px;">
-          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Mon</span><span style="color:#00E5A8;">* Workout completed</span></div>
-          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Tue</span><span style="color:#00E5A8;">* Protein target hit</span></div>
-          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Wed</span><span style="color:#00E5A8;">* Sleep target hit</span></div>
-          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Thu</span><span style="color:#fda4af;">- Missed workout</span></div>
-          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Fri</span><span style="color:#fda4af;">- Missed hydration</span></div>
+        <div class="card" style="background:var(--bg-translucent-xs); border:1px solid var(--border-card); padding:12px; margin-bottom:16px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Mon</span><span style="color:var(--aura-mint);">* Workout completed</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Tue</span><span style="color:var(--aura-mint);">* Protein target hit</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Wed</span><span style="color:var(--aura-mint);">* Sleep target hit</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Thu</span><span style="color:var(--aura-rose);">- Missed workout</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Fri</span><span style="color:var(--aura-rose);">- Missed hydration</span></div>
         </div>
 
         <!-- Insights -->
         <span class="section-label" style="display:block; margin-bottom:8px;">Insights</span>
-        <div class="card" style="background:rgba(91, 92, 246, 0.05); border:1px solid rgba(91, 92, 246, 0.15); padding:12px; margin-bottom:16px;">
+        <div class="card" style="background:var(--aura-violet-glow); border:1px solid var(--aura-violet); padding:12px; margin-bottom:16px;">
           <div style="display:flex; flex-direction:column; gap:8px;">
             ${insights.map(ins => `
-              <div style="display:flex; gap:8px; font-size:12px; color:#FFFFFF; line-height:1.4;">
+              <div style="display:flex; gap:8px; font-size:12px; color:var(--text-primary); line-height:1.4;">
                 <span>✦</span>
                 <span>${ins}</span>
               </div>
@@ -692,11 +700,11 @@ function _renderDisciplineSheetContent(view = '7d') {
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:16px;">
           <div class="card" style="padding:10px; text-align:center; background:var(--bg-card); border:1px solid var(--border-card);">
             <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Avg Score</span>
-            <strong style="font-size:18px; color:#5B5CF6; display:block; margin-top:4px;">${avgScore}</strong>
+            <strong style="font-size:18px; color:var(--aura-violet); display:block; margin-top:4px;">${avgScore}</strong>
           </div>
           <div class="card" style="padding:10px; text-align:center; background:var(--bg-card); border:1px solid var(--border-card);">
             <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Highest</span>
-            <strong style="font-size:18px; color:#00E5A8; display:block; margin-top:4px;">${maxScore}</strong>
+            <strong style="font-size:18px; color:var(--aura-mint); display:block; margin-top:4px;">${maxScore}</strong>
           </div>
           <div class="card" style="padding:10px; text-align:center; background:var(--bg-card); border:1px solid var(--border-card);">
             <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Streak</span>
@@ -709,11 +717,11 @@ function _renderDisciplineSheetContent(view = '7d') {
           <p style="font-size:11px; color:var(--text-muted); font-weight:var(--fw-bold); text-transform:uppercase; margin-bottom:12px;">30 Day History</p>
           <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; justify-items:center;">
             ${mock30Days.map((scoreVal, idx) => {
-              const bg = scoreVal >= 80 ? 'rgba(167,139,250,0.3)' : scoreVal >= 65 ? 'rgba(96,165,250,0.3)' : scoreVal >= 50 ? 'rgba(251,191,36,0.3)' : 'rgba(244,63,94,0.3)';
-              const borderCol = scoreVal >= 80 ? '#a78bfa' : scoreVal >= 65 ? '#60a5fa' : scoreVal >= 50 ? '#fbbf24' : '#f43f5e';
+              const bg = scoreVal >= 80 ? 'var(--aura-violet-glow)' : scoreVal >= 65 ? 'var(--bg-translucent-md)' : scoreVal >= 50 ? 'var(--aura-amber-glow)' : 'var(--aura-rose-glow)';
+              const borderCol = scoreVal >= 80 ? 'var(--aura-violet)' : scoreVal >= 65 ? 'var(--text-secondary)' : scoreVal >= 50 ? 'var(--aura-amber)' : 'var(--aura-rose)';
               return `
                 <div style="width:36px; height:36px; border-radius:6px; background:${bg}; border:1px solid ${borderCol}; display:flex; align-items:center; justify-content:center;" title="Day ${idx + 1}: ${scoreVal}">
-                  <span style="font-size:10px; font-weight:bold; color:#FFFFFF;">${scoreVal}</span>
+                  <span style="font-size:10px; font-weight:bold; color:var(--text-primary);">${scoreVal}</span>
                 </div>
               `;
             }).join('')}
@@ -722,11 +730,11 @@ function _renderDisciplineSheetContent(view = '7d') {
 
         <!-- Score Changes / Explanations -->
         <span class="section-label" style="display:block; margin-bottom:8px;">Recent Key Changes</span>
-        <div class="card" style="background:rgba(255,255,255,0.02); border:1px solid var(--border-card); padding:12px; display:flex; flex-direction:column; gap:8px;">
-          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>June 10</span><span style="color:#00E5A8;">🏋️ Gym session completed (+15)</span></div>
-          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>June 9</span><span style="color:#00E5A8;">🥩 Protein target achieved (+10)</span></div>
-          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>June 8</span><span style="color:#fda4af;">🚫 Missed workout (-6)</span></div>
-          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>June 7</span><span style="color:#00E5A8;">😴 Sleep target achieved (+10)</span></div>
+        <div class="card" style="background:var(--bg-translucent-xs); border:1px solid var(--border-card); padding:12px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>June 10</span><span style="color:var(--aura-mint);">🏋️ Gym session completed (+15)</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>June 9</span><span style="color:var(--aura-mint);">🥩 Protein target achieved (+10)</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>June 8</span><span style="color:var(--aura-rose);">🚫 Missed workout (-6)</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:12px;"><span>June 7</span><span style="color:var(--aura-mint);">😴 Sleep target achieved (+10)</span></div>
         </div>
       </div>
     `;
@@ -745,11 +753,11 @@ function _renderDisciplineSheetContent(view = '7d') {
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px;">
           <div class="card" style="padding:10px; text-align:center; background:var(--bg-card); border:1px solid var(--border-card);">
             <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">90-day Avg Score</span>
-            <strong style="font-size:18px; color:#5B5CF6; display:block; margin-top:4px;">${avgScore}</strong>
+            <strong style="font-size:18px; color:var(--aura-violet); display:block; margin-top:4px;">${avgScore}</strong>
           </div>
           <div class="card" style="padding:10px; text-align:center; background:var(--bg-card); border:1px solid var(--border-card);">
             <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Consistency Rating</span>
-            <strong style="font-size:15px; color:#00E5A8; display:block; margin-top:4px;">Elite Stable</strong>
+            <strong style="font-size:15px; color:var(--aura-mint); display:block; margin-top:4px;">Elite Stable</strong>
           </div>
         </div>
 
@@ -757,12 +765,12 @@ function _renderDisciplineSheetContent(view = '7d') {
         <span class="section-label" style="display:block; margin-bottom:8px;">Weekly Averages</span>
         <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
           ${mockWeeks.map(w => `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(255,255,255,0.02); border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--bg-translucent-xs); border-radius:8px;">
               <div>
-                <span style="font-weight:600; color:#FFFFFF; display:block;">${w.lbl}</span>
+                <span style="font-weight:600; color:var(--text-primary); display:block;">${w.lbl}</span>
                 <span style="font-size:10px; color:var(--text-muted);">Status: ${w.status}</span>
               </div>
-              <strong style="color:#5B5CF6; font-size:16px;">${w.val}</strong>
+              <strong style="color:var(--aura-violet); font-size:16px;">${w.val}</strong>
             </div>
           `).join('')}
         </div>
@@ -773,13 +781,13 @@ function _renderDisciplineSheetContent(view = '7d') {
   return `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <div>
-        <h3 style="font-family:var(--font-display); font-size:20px; font-weight:700; color:#FFFFFF; margin:0;">Discipline Score</h3>
+        <h3 style="font-family:var(--font-display); font-size:20px; font-weight:700; color:var(--text-primary); margin:0;">Discipline Score</h3>
         <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0;">Status: <span style="font-weight:bold; color:${statusColor};">${status}</span></p>
       </div>
-      <div style="display:flex; background:rgba(255,255,255,0.04); padding:3px; border-radius:100px;">
-        <button class="toggle-opt ${sevenActive}" id="disc-toggle-7d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '7d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '7d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">7 Days</button>
-        <button class="toggle-opt ${thirtyActive}" id="disc-toggle-30d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '30d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '30d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">30 Days</button>
-        <button class="toggle-opt ${ninetyActive}" id="disc-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '90d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90 Days</button>
+      <div style="display:flex; background:var(--bg-translucent-sm); padding:3px; border-radius:100px;">
+        <button class="toggle-opt ${sevenActive}" id="disc-toggle-7d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '7d' ? 'var(--button-text)' : 'var(--text-muted)'}; background:${view === '7d' ? 'var(--aura-violet)' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">7 Days</button>
+        <button class="toggle-opt ${thirtyActive}" id="disc-toggle-30d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '30d' ? 'var(--button-text)' : 'var(--text-muted)'}; background:${view === '30d' ? 'var(--aura-violet)' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">30 Days</button>
+        <button class="toggle-opt ${ninetyActive}" id="disc-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? 'var(--button-text)' : 'var(--text-muted)'}; background:${view === '90d' ? 'var(--aura-violet)' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90 Days</button>
       </div>
     </div>
     ${bodyHtml}
@@ -882,10 +890,10 @@ function _renderActivitySheetContent(view = '7d') {
   const calMetricActive = _currentMovementMetric === 'calories' ? 'active' : '';
 
   const metricSelectorHtml = `
-    <div style="display:flex; gap:6px; background:rgba(255,255,255,0.02); padding:3px; border-radius:100px; margin-bottom:14px; justify-content:center;">
-      <button class="toggle-opt ${stepsMetricActive}" id="act-metric-steps" style="flex:1; border:none; background:transparent; padding:6px 12px; border-radius:100px; color:${_currentMovementMetric === 'steps' ? '#FFFFFF' : 'var(--text-muted)'}; background:${_currentMovementMetric === 'steps' ? '#00E5A8' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Steps</button>
-      <button class="toggle-opt ${distMetricActive}" id="act-metric-dist" style="flex:1; border:none; background:transparent; padding:6px 12px; border-radius:100px; color:${_currentMovementMetric === 'distance' ? '#FFFFFF' : 'var(--text-muted)'}; background:${_currentMovementMetric === 'distance' ? '#42D4FF' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Distance</button>
-      <button class="toggle-opt ${calMetricActive}" id="act-metric-calories" style="flex:1; border:none; background:transparent; padding:6px 12px; border-radius:100px; color:${_currentMovementMetric === 'calories' ? '#FFFFFF' : 'var(--text-muted)'}; background:${_currentMovementMetric === 'calories' ? '#FF8A00' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Calories</button>
+    <div style="display:flex; gap:6px; background:var(--bg-translucent-xs); padding:3px; border-radius:100px; margin-bottom:14px; justify-content:center;">
+      <button class="toggle-opt ${stepsMetricActive}" id="act-metric-steps" style="flex:1; border:none; background:transparent; padding:6px 12px; border-radius:100px; color:${_currentMovementMetric === 'steps' ? 'var(--button-text)' : 'var(--text-muted)'}; background:${_currentMovementMetric === 'steps' ? 'var(--aura-mint)' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Steps</button>
+      <button class="toggle-opt ${distMetricActive}" id="act-metric-dist" style="flex:1; border:none; background:transparent; padding:6px 12px; border-radius:100px; color:${_currentMovementMetric === 'distance' ? 'var(--button-text)' : 'var(--text-muted)'}; background:${_currentMovementMetric === 'distance' ? 'var(--aura-blue)' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Distance</button>
+      <button class="toggle-opt ${calMetricActive}" id="act-metric-calories" style="flex:1; border:none; background:transparent; padding:6px 12px; border-radius:100px; color:${_currentMovementMetric === 'calories' ? 'var(--button-text)' : 'var(--text-muted)'}; background:${_currentMovementMetric === 'calories' ? 'var(--aura-amber)' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Calories</button>
     </div>
   `;
 
@@ -940,23 +948,23 @@ function _renderActivitySheetContent(view = '7d') {
       <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
         <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-card);">
           <span style="color:var(--text-muted);">Today's Steps</span>
-          <strong style="color:#FFFFFF;">${steps.toLocaleString()} steps</strong>
+          <strong style="color:var(--text-primary);">${steps.toLocaleString()} steps</strong>
         </div>
         <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-card);">
           <span style="color:var(--text-muted);">Distance</span>
-          <strong style="color:#FFFFFF;">${distance} km</strong>
+          <strong style="color:var(--text-primary);">${distance} km</strong>
         </div>
         <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-card);">
           <span style="color:var(--text-muted);">Calories Burned From Walking</span>
-          <strong style="color:#FFFFFF;">${calories} kcal</strong>
+          <strong style="color:var(--text-primary);">${calories} kcal</strong>
         </div>
         <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-card);">
           <span style="color:var(--text-muted);">Stairs Climbed</span>
-          <strong style="color:#FFFFFF;">${stairs}</strong>
+          <strong style="color:var(--text-primary);">${stairs}</strong>
         </div>
         <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-card);">
           <span style="color:var(--text-muted);">Current Step Goal</span>
-          <strong style="color:#00E5A8;">${goal.toLocaleString()} steps</strong>
+          <strong style="color:var(--aura-mint);">${goal.toLocaleString()} steps</strong>
         </div>
       </div>
 
@@ -972,9 +980,9 @@ function _renderActivitySheetContent(view = '7d') {
       </div>
 
       <!-- Today's Insight -->
-      <div class="card" style="background:rgba(0, 229, 168, 0.05); border:1px solid rgba(0, 229, 168, 0.15); padding:12px; margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+      <div class="card" style="background:var(--aura-mint-glow); border:1px solid var(--aura-mint); padding:12px; margin-bottom:20px; display:flex; align-items:center; gap:8px;">
         <span style="font-size:16px;">💡</span>
-        <p style="font-size:12px; color:#FFFFFF; margin:0; line-height:1.4;">${insightText}</p>
+        <p style="font-size:12px; color:var(--text-primary); margin:0; line-height:1.4;">${insightText}</p>
       </div>
 
       <button class="btn btn-primary btn-full" id="change-goal-btn">Change Goal</button>
@@ -983,11 +991,11 @@ function _renderActivitySheetContent(view = '7d') {
 
   return `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <h3 style="font-family:var(--font-display); font-size:20px; font-weight:700; color:#FFFFFF; margin:0;">Movement Analytics</h3>
-      <div style="display:flex; background:rgba(255,255,255,0.04); padding:3px; border-radius:100px;">
-        <button class="toggle-opt ${sevenActive}" id="act-toggle-7d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '7d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '7d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">7d</button>
-        <button class="toggle-opt ${thirtyActive}" id="act-toggle-30d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '30d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '30d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">30d</button>
-        <button class="toggle-opt ${ninetyActive}" id="act-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '90d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90d</button>
+      <h3 style="font-family:var(--font-display); font-size:20px; font-weight:700; color:var(--text-primary); margin:0;">Movement Analytics</h3>
+      <div style="display:flex; background:var(--bg-translucent-sm); padding:3px; border-radius:100px;">
+        <button class="toggle-opt ${sevenActive}" id="act-toggle-7d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '7d' ? 'var(--button-text)' : 'var(--text-muted)'}; background:${view === '7d' ? 'var(--aura-violet)' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">7d</button>
+        <button class="toggle-opt ${thirtyActive}" id="act-toggle-30d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '30d' ? 'var(--button-text)' : 'var(--text-muted)'}; background:${view === '30d' ? 'var(--aura-violet)' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">30d</button>
+        <button class="toggle-opt ${ninetyActive}" id="act-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? 'var(--button-text)' : 'var(--text-muted)'}; background:${view === '90d' ? 'var(--aura-violet)' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90d</button>
       </div>
     </div>
     ${bodyHtml}
@@ -1004,7 +1012,7 @@ function _openChangeGoalModal() {
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
         ${options.map(opt => `
           <button class="btn btn-secondary change-goal-opt ${currentGoal === opt ? 'active' : ''}" 
-            data-val="${opt}" style="padding:10px; font-size:14px; background:${currentGoal === opt ? 'rgba(91,92,246,0.15)' : ''}; border-color:${currentGoal === opt ? '#5B5CF6' : ''}; color:${currentGoal === opt ? '#5B5CF6' : ''};">
+            data-val="${opt}" style="padding:10px; font-size:14px; background:${currentGoal === opt ? 'var(--aura-violet-glow)' : ''}; border-color:${currentGoal === opt ? 'var(--aura-violet)' : ''}; color:${currentGoal === opt ? 'var(--text-primary)' : ''};">
             ${opt.toLocaleString()}
           </button>
         `).join('')}
@@ -1151,10 +1159,10 @@ function _renderBurnSheetContent(view = 'week') {
       const intensity = w.intensity || 'Moderate';
       const c = w.caloriesBurned || duration * 8;
       gymDetailsHtml += `
-        <div style="padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
+        <div style="padding: 6px 0; border-bottom: 1px solid var(--border-translucent-subtle);">
           <div style="display:flex; justify-content:space-between;">
-            <span style="color:#FFFFFF; font-weight:600;">🏋️ ${w.label || 'Workout Session'}</span>
-            <span style="color:#00E5A8; font-weight:bold;">${c} kcal</span>
+            <span style="color:var(--text-primary); font-weight:600;">🏋️ ${w.label || 'Workout Session'}</span>
+            <span style="color:var(--aura-mint); font-weight:bold;">${c} kcal</span>
           </div>
           <span style="font-size:10px; color:var(--text-muted);">${duration} mins · ${intensity} Intensity</span>
         </div>
@@ -1171,60 +1179,60 @@ function _renderBurnSheetContent(view = 'week') {
   return `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <div>
-        <h3 style="font-family:var(--font-display); font-size:20px; font-weight:700; color:#FFFFFF; margin:0;">Calorie Burn</h3>
-        <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0;">Today's Target: <span style="font-weight:bold; color:#00E5A8;">${burnGoal} kcal</span></p>
+        <h3 style="font-family:var(--font-display); font-size:20px; font-weight:700; color:var(--text-primary); margin:0;">Calorie Burn</h3>
+        <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0;">Today's Target: <span style="font-weight:bold; color:var(--aura-mint);">${burnGoal} kcal</span></p>
       </div>
-      <div style="display:flex; background:rgba(255,255,255,0.04); padding:3px; border-radius:100px;">
-        <button class="toggle-opt ${weekActive}" id="burn-toggle-week" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === 'week' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === 'week' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Week</button>
-        <button class="toggle-opt ${monthActive}" id="burn-toggle-month" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === 'month' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === 'month' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Month</button>
-        <button class="toggle-opt ${ninetyActive}" id="burn-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '90d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90d</button>
+      <div style="display:flex; background:var(--bg-translucent-sm); padding:3px; border-radius:100px;">
+        <button class="toggle-opt ${weekActive}" id="burn-toggle-week" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === 'week' ? 'var(--button-text)' : 'var(--text-muted)'}; background:${view === 'week' ? 'var(--aura-violet)' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Week</button>
+        <button class="toggle-opt ${monthActive}" id="burn-toggle-month" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === 'month' ? 'var(--button-text)' : 'var(--text-muted)'}; background:${view === 'month' ? 'var(--aura-violet)' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">Month</button>
+        <button class="toggle-opt ${ninetyActive}" id="burn-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? 'var(--button-text)' : 'var(--text-muted)'}; background:${view === '90d' ? 'var(--aura-violet)' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90d</button>
       </div>
     </div>
 
     <!-- Header Stats -->
-    <div class="card" style="background:rgba(255,255,255,0.02); padding:16px; margin-bottom:16px; border-radius:8px;">
+    <div class="card" style="background:var(--bg-translucent-xs); padding:16px; margin-bottom:16px; border-radius:8px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
           <span style="font-size:12px; color:var(--text-muted);">Today's Burn</span>
-          <strong style="font-size:24px; color:#FFFFFF; display:block; margin-top:2px;">${burnBreakdown.total} <span style="font-size:14px; font-weight:normal; color:var(--text-muted);">kcal</span></strong>
+          <strong style="font-size:24px; color:var(--text-primary); display:block; margin-top:2px;">${burnBreakdown.total} <span style="font-size:14px; font-weight:normal; color:var(--text-muted);">kcal</span></strong>
         </div>
         <div style="text-align:right;">
           <span style="font-size:12px; color:var(--text-muted);">Progress</span>
-          <strong style="font-size:20px; color:#00E5A8; display:block; margin-top:2px;">${burnPct}%</strong>
+          <strong style="font-size:20px; color:var(--aura-mint); display:block; margin-top:2px;">${burnPct}%</strong>
         </div>
       </div>
-      <div style="width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden; margin-top:10px;">
-        <div style="width:${burnPct}%; height:100%; background:#00E5A8; border-radius:4px;"></div>
+      <div style="width:100%; height:8px; background:var(--bg-translucent-sm); border-radius:4px; overflow:hidden; margin-top:10px;">
+        <div style="width:${burnPct}%; height:100%; background:var(--aura-mint); border-radius:4px;"></div>
       </div>
     </div>
 
     <!-- Calorie Breakdown -->
     <span class="section-label" style="display:block; margin-bottom:8px;">Calorie Breakdown</span>
-    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px; background:rgba(255,255,255,0.02); padding:16px; border-radius:8px;">
-      <div style="padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.03);">
+    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px; background:var(--bg-translucent-xs); padding:16px; border-radius:8px;">
+      <div style="padding-bottom:8px; border-bottom:1px solid var(--border-translucent-subtle);">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <span style="color:var(--text-muted); font-size:13px;">🏋️ Gym Calories</span>
-          <strong style="color:#FFFFFF;">${burnBreakdown.gym} kcal</strong>
+          <strong style="color:var(--text-primary);">${burnBreakdown.gym} kcal</strong>
         </div>
         ${gymDetailsHtml}
       </div>
-      <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.03);">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; border-bottom:1px solid var(--border-translucent-subtle);">
         <div>
           <span style="color:var(--text-muted); font-size:13px; display:block;">👣 Walking Calories</span>
           <span style="font-size:10px; color:var(--text-muted);">Based on: Steps, Distance, Pace</span>
         </div>
-        <strong style="color:#FFFFFF;">${burnBreakdown.walking} kcal</strong>
+        <strong style="color:var(--text-primary);">${burnBreakdown.walking} kcal</strong>
       </div>
-      <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.03);">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; border-bottom:1px solid var(--border-translucent-subtle);">
         <div>
           <span style="color:var(--text-muted); font-size:13px; display:block;">🚶 Daily Activity</span>
           <span style="font-size:10px; color:var(--text-muted);">Estimated NEAT</span>
         </div>
-        <strong style="color:#FFFFFF;">${burnBreakdown.neat} kcal</strong>
+        <strong style="color:var(--text-primary);">${burnBreakdown.neat} kcal</strong>
       </div>
       <div style="display:flex; justify-content:space-between; margin-top:4px;">
-        <span style="color:#FFFFFF; font-weight:bold;">🔥 Total Burn</span>
-        <strong style="color:#00E5A8; font-size:18px;">${burnBreakdown.total} kcal</strong>
+        <span style="color:var(--text-primary); font-weight:bold;">🔥 Total Burn</span>
+        <strong style="color:var(--aura-mint); font-size:18px;">${burnBreakdown.total} kcal</strong>
       </div>
     </div>
 
@@ -1241,17 +1249,17 @@ function _renderBurnSheetContent(view = 'week') {
 
     <!-- Burn Insights -->
     <span class="section-label" style="display:block; margin-bottom:8px;">Burn Insights</span>
-    <div class="card" style="background:rgba(0, 229, 168, 0.05); border:1px solid rgba(0, 229, 168, 0.15); padding:12px; margin-bottom:16px;">
+    <div class="card" style="background:var(--aura-mint-glow); border:1px solid var(--aura-mint); padding:12px; margin-bottom:16px;">
       <div style="display:flex; flex-direction:column; gap:8px;">
-        <div style="display:flex; gap:8px; font-size:12px; color:#FFFFFF; line-height:1.4;">
+        <div style="display:flex; gap:8px; font-size:12px; color:var(--text-primary); line-height:1.4;">
           <span>✦</span>
           <span>${gymPct > 0 ? `🏋️ Gym workouts contributed ${gymPct}% of your burn today.` : '🏋️ Log a workout in the Train page to increase active gym burn.'}</span>
         </div>
-        <div style="display:flex; gap:8px; font-size:12px; color:#FFFFFF; line-height:1.4;">
+        <div style="display:flex; gap:8px; font-size:12px; color:var(--text-primary); line-height:1.4;">
           <span>✦</span>
           <span>👣 Walking steps contributed ${walkPct}% of your burn today.</span>
         </div>
-        <div style="display:flex; gap:8px; font-size:12px; color:#FFFFFF; line-height:1.4;">
+        <div style="display:flex; gap:8px; font-size:12px; color:var(--text-primary); line-height:1.4;">
           <span>✦</span>
           <span>${remainingInsight}</span>
         </div>
@@ -1430,30 +1438,30 @@ function _renderProteinSheetContent(view = '7d') {
   return `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <div>
-        <h3 style="font-family:var(--font-display); font-size:20px; font-weight:700; color:#FFFFFF; margin:0;">Protein Analytics</h3>
-        <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0;">Daily Goal: <span style="font-weight:bold; color:#00E5A8;">${proteinTarget}g</span></p>
+        <h3 style="font-family:var(--font-display); font-size:20px; font-weight:700; color:var(--text-primary); margin:0;">Protein Analytics</h3>
+        <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0 0;">Daily Goal: <span style="font-weight:bold; color:var(--aura-mint);">${proteinTarget}g</span></p>
       </div>
-      <div style="display:flex; background:rgba(255,255,255,0.04); padding:3px; border-radius:100px;">
-        <button class="toggle-opt ${sevenActive}" id="prot-toggle-7d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '7d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '7d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">7d</button>
-        <button class="toggle-opt ${thirtyActive}" id="prot-toggle-30d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '30d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '30d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">30d</button>
-        <button class="toggle-opt ${ninetyActive}" id="prot-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? '#FFFFFF' : 'var(--text-muted)'}; background:${view === '90d' ? '#5B5CF6' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90d</button>
+      <div style="display:flex; background:var(--bg-translucent-sm); padding:3px; border-radius:100px;">
+        <button class="toggle-opt ${sevenActive}" id="prot-toggle-7d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '7d' ? 'var(--button-text)' : 'var(--text-muted)'}; background:${view === '7d' ? 'var(--aura-violet)' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">7d</button>
+        <button class="toggle-opt ${thirtyActive}" id="prot-toggle-30d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '30d' ? 'var(--button-text)' : 'var(--text-muted)'}; background:${view === '30d' ? 'var(--aura-violet)' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">30d</button>
+        <button class="toggle-opt ${ninetyActive}" id="prot-toggle-90d" style="border:none; background:transparent; padding:4px 12px; border-radius:100px; color:${view === '90d' ? 'var(--button-text)' : 'var(--text-muted)'}; background:${view === '90d' ? 'var(--aura-violet)' : 'transparent'}; font-size:11px; font-weight:600; cursor:pointer;">90d</button>
       </div>
     </div>
 
     <!-- Header Stats -->
-    <div class="card" style="background:rgba(255,255,255,0.02); padding:16px; margin-bottom:16px; border-radius:8px;">
+    <div class="card" style="background:var(--bg-translucent-xs); padding:16px; margin-bottom:16px; border-radius:8px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
           <span style="font-size:12px; color:var(--text-muted);">Today's Protein</span>
-          <strong style="font-size:24px; color:#FFFFFF; display:block; margin-top:2px;">${proteinConsumed} <span style="font-size:14px; font-weight:normal; color:var(--text-muted);">g</span></strong>
+          <strong style="font-size:24px; color:var(--text-primary); display:block; margin-top:2px;">${proteinConsumed} <span style="font-size:14px; font-weight:normal; color:var(--text-muted);">g</span></strong>
         </div>
         <div style="text-align:right;">
           <span style="font-size:12px; color:var(--text-muted);">Goal Adherence</span>
-          <strong style="font-size:20px; color:#00E5A8; display:block; margin-top:2px;">${proteinPct}%</strong>
+          <strong style="font-size:20px; color:var(--aura-mint); display:block; margin-top:2px;">${proteinPct}%</strong>
         </div>
       </div>
-      <div style="width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden; margin-top:10px;">
-        <div style="width:${proteinPct}%; height:100%; background:#00E5A8; border-radius:4px;"></div>
+      <div style="width:100%; height:8px; background:var(--bg-translucent-sm); border-radius:4px; overflow:hidden; margin-top:10px;">
+        <div style="width:${proteinPct}%; height:100%; background:var(--aura-mint); border-radius:4px;"></div>
       </div>
     </div>
 
@@ -1462,31 +1470,31 @@ function _renderProteinSheetContent(view = '7d') {
     <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:8px; margin-bottom:16px;">
       <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
         <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Weight</span>
-        <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px;">${weight} ${weightUnit}</strong>
+        <strong style="font-size:14px; color:var(--text-primary); display:block; margin-top:2px;">${weight} ${weightUnit}</strong>
       </div>
       <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
         <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Goal</span>
-        <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px; text-transform:capitalize;">${goal.replace('_', ' ')}</strong>
+        <strong style="font-size:14px; color:var(--text-primary); display:block; margin-top:2px; text-transform:capitalize;">${goal.replace('_', ' ')}</strong>
       </div>
       <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
         <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Activity Level</span>
-        <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px; text-transform:capitalize;">${activityLevel.replace('_', ' ')}</strong>
+        <strong style="font-size:14px; color:var(--text-primary); display:block; margin-top:2px; text-transform:capitalize;">${activityLevel.replace('_', ' ')}</strong>
       </div>
       <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
         <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Experience</span>
-        <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px; text-transform:capitalize;">${onboarding.experience || 'Intermediate'}</strong>
+        <strong style="font-size:14px; color:var(--text-primary); display:block; margin-top:2px; text-transform:capitalize;">${onboarding.experience || 'Intermediate'}</strong>
       </div>
       <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
         <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Body Fat %</span>
-        <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px;">${onboarding.bodyFatPct || 18}%</strong>
+        <strong style="font-size:14px; color:var(--text-primary); display:block; margin-top:2px;">${onboarding.bodyFatPct || 18}%</strong>
       </div>
       <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card);">
         <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Protein Multiplier</span>
-        <strong style="font-size:14px; color:#FFFFFF; display:block; margin-top:2px;">${proteinMultiplier} g/kg</strong>
+        <strong style="font-size:14px; color:var(--text-primary); display:block; margin-top:2px;">${proteinMultiplier} g/kg</strong>
       </div>
       <div class="card" style="padding:10px; background:var(--bg-card); border:1px solid var(--border-card); grid-column: span 2;">
         <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Target Protein</span>
-        <strong style="font-size:14px; color:#00E5A8; display:block; margin-top:2px;">${proteinTarget} g</strong>
+        <strong style="font-size:14px; color:var(--aura-mint); display:block; margin-top:2px;">${proteinTarget} g</strong>
       </div>
     </div>
 
@@ -1494,17 +1502,17 @@ function _renderProteinSheetContent(view = '7d') {
     <span class="section-label" style="display:block; margin-bottom:8px;">Protein Sources</span>
     <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
       ${mealsList.map(m => `
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:rgba(255,255,255,0.02); border-radius:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--bg-translucent-xs); border-radius:8px;">
           <div>
-            <span style="font-weight:600; color:#FFFFFF; display:block; font-size:13px;">${m.name}</span>
+            <span style="font-weight:600; color:var(--text-primary); display:block; font-size:13px;">${m.name}</span>
             <span style="font-size:10px; color:var(--text-muted);">${m.details}</span>
           </div>
-          <strong style="color:#00E5A8; font-size:14px;">${m.val}g</strong>
+          <strong style="color:var(--aura-mint); font-size:14px;">${m.val}g</strong>
         </div>
       `).join('')}
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:rgba(255,255,255,0.02); border-radius:8px; border-top:1px dashed var(--border-card);">
-        <span style="font-weight:bold; color:#FFFFFF; font-size:13px;">Total</span>
-        <strong style="color:#00E5A8; font-size:14px;">${proteinConsumed}g</strong>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--bg-translucent-xs); border-radius:8px; border-top:1px dashed var(--border-card);">
+        <span style="font-weight:bold; color:var(--text-primary); font-size:13px;">Total</span>
+        <strong style="color:var(--aura-mint); font-size:14px;">${proteinConsumed}g</strong>
       </div>
     </div>
 
@@ -1521,19 +1529,19 @@ function _renderProteinSheetContent(view = '7d') {
 
     <!-- Protein Insights -->
     <span class="section-label" style="display:block; margin-bottom:8px;">Protein Insights</span>
-    <div class="card" style="background:rgba(91, 92, 246, 0.05); border:1px solid rgba(91, 92, 246, 0.15); padding:12px; margin-bottom:16px;">
+    <div class="card" style="background:var(--aura-violet-glow); border:1px solid var(--aura-violet); padding:12px; margin-bottom:16px;">
       <div style="display:flex; flex-direction:column; gap:8px;">
-        <div style="display:flex; gap:8px; font-size:12px; color:#FFFFFF; line-height:1.4;">
+        <div style="display:flex; gap:8px; font-size:12px; color:var(--text-primary); line-height:1.4;">
           <span>✦</span>
           <span>${remainingText}</span>
         </div>
         ${breakfastContribution > 0 ? `
-          <div style="display:flex; gap:8px; font-size:12px; color:#FFFFFF; line-height:1.4;">
+          <div style="display:flex; gap:8px; font-size:12px; color:var(--text-primary); line-height:1.4;">
             <span>✦</span>
             <span>🥚 Breakfast contributed ${breakfastContribution}% of your protein intake today.</span>
           </div>
         ` : ''}
-        <div style="display:flex; gap:8px; font-size:12px; color:#FFFFFF; line-height:1.4;">
+        <div style="display:flex; gap:8px; font-size:12px; color:var(--text-primary); line-height:1.4;">
           <span>✦</span>
           <span>🎯 Hit your lunch and dinner protein targets to stay on pace.</span>
         </div>
@@ -1558,9 +1566,9 @@ function _drawMovementSVG(data, labels, targetLineVal, metric) {
     return `${x},${y}`;
   }).join(' ');
 
-  let strokeColor = '#00E5A8'; // steps (mint)
-  if (metric === 'distance') strokeColor = '#42D4FF'; // distance (blue)
-  else if (metric === 'calories') strokeColor = '#FF8A00'; // calories (orange)
+  let strokeColor = 'var(--aura-mint)'; // steps (mint)
+  if (metric === 'distance') strokeColor = 'var(--aura-blue)'; // distance (blue)
+  else if (metric === 'calories') strokeColor = 'var(--aura-amber)'; // calories (orange)
 
   const pointsHtml = data.map((val, i) => {
     const x = padding + (i * (width - 2 * padding) / (data.length - 1 || 1));
@@ -1576,8 +1584,8 @@ function _drawMovementSVG(data, labels, targetLineVal, metric) {
 
   return `
     <svg viewBox="0 0 ${width} ${height}" style="width:100%; height:80px; overflow:visible;">
-      <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="rgba(255,255,255,0.02)" />
-      <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="rgba(255,255,255,0.06)" />
+      <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="var(--chart-axis)" />
+      <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="var(--chart-axis)" />
       
       ${targetLineHtml}
       <polyline fill="none" stroke="${strokeColor}" stroke-width="2" points="${points}" stroke-linecap="round" stroke-linejoin="round" opacity="0.75" />
@@ -1585,7 +1593,7 @@ function _drawMovementSVG(data, labels, targetLineVal, metric) {
       
       ${labels.map((lbl, i) => {
         const x = padding + (i * (width - 2 * padding) / (labels.length - 1 || 1));
-        return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="var(--text-muted)" text-anchor="middle">${lbl}</text>`;
+        return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="var(--chart-label)" text-anchor="middle">${lbl}</text>`;
       }).join('')}
     </svg>
   `;
@@ -1608,27 +1616,27 @@ function _drawBurnSVG(data, labels, targetLineVal) {
   const pointsHtml = data.map((val, i) => {
     const x = padding + (i * (width - 2 * padding) / (data.length - 1 || 1));
     const y = height - padding - ((val - minVal) * (height - 2 * padding) / range);
-    return `<circle cx="${x}" cy="${y}" r="3.5" fill="#00E5A8" />`;
+    return `<circle cx="${x}" cy="${y}" r="3.5" fill="var(--aura-mint)" />`;
   }).join('');
 
   const targetY = height - padding - ((targetLineVal - minVal) * (height - 2 * padding) / range);
   const targetLineHtml = targetLineVal > 0 ? `
-    <line x1="${padding}" y1="${targetY}" x2="${width - padding}" y2="${targetY}" stroke="rgba(0, 229, 168, 0.4)" stroke-dasharray="3,3" stroke-width="1" />
-    <text x="${width - padding}" y="${targetY - 2}" font-size="6.5" fill="#00E5A8" text-anchor="end">Goal: ${targetLineVal}</text>
+    <line x1="${padding}" y1="${targetY}" x2="${width - padding}" y2="${targetY}" stroke="var(--aura-mint)" stroke-dasharray="3,3" stroke-width="1" opacity="0.4" />
+    <text x="${width - padding}" y="${targetY - 2}" font-size="6.5" fill="var(--aura-mint)" text-anchor="end">Goal: ${targetLineVal}</text>
   ` : '';
 
   return `
     <svg viewBox="0 0 ${width} ${height}" style="width:100%; height:80px; overflow:visible;">
-      <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="rgba(255,255,255,0.02)" />
-      <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="rgba(255,255,255,0.06)" />
+      <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="var(--chart-axis)" />
+      <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="var(--chart-axis)" />
       
       ${targetLineHtml}
-      <polyline fill="none" stroke="rgba(0, 229, 168, 0.7)" stroke-width="2" points="${points}" stroke-linecap="round" stroke-linejoin="round" />
+      <polyline fill="none" stroke="var(--aura-mint)" stroke-width="2" points="${points}" stroke-linecap="round" stroke-linejoin="round" opacity="0.7" />
       ${pointsHtml}
       
       ${labels.map((lbl, i) => {
         const x = padding + (i * (width - 2 * padding) / (labels.length - 1 || 1));
-        return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="var(--text-muted)" text-anchor="middle">${lbl}</text>`;
+        return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="var(--chart-label)" text-anchor="middle">${lbl}</text>`;
       }).join('')}
     </svg>
   `;
@@ -1651,27 +1659,27 @@ function _drawProteinSVG(data, labels, targetLineVal) {
   const pointsHtml = data.map((val, i) => {
     const x = padding + (i * (width - 2 * padding) / (data.length - 1 || 1));
     const y = height - padding - ((val - minVal) * (height - 2 * padding) / range);
-    return `<circle cx="${x}" cy="${y}" r="3.5" fill="#5B5CF6" />`;
+    return `<circle cx="${x}" cy="${y}" r="3.5" fill="var(--aura-violet)" />`;
   }).join('');
 
   const targetY = height - padding - ((targetLineVal - minVal) * (height - 2 * padding) / range);
   const targetLineHtml = targetLineVal > 0 ? `
-    <line x1="${padding}" y1="${targetY}" x2="${width - padding}" y2="${targetY}" stroke="rgba(91, 92, 246, 0.4)" stroke-dasharray="3,3" stroke-width="1" />
-    <text x="${width - padding}" y="${targetY - 2}" font-size="6.5" fill="#5B5CF6" text-anchor="end">Goal: ${targetLineVal}g</text>
+    <line x1="${padding}" y1="${targetY}" x2="${width - padding}" y2="${targetY}" stroke="var(--aura-violet)" stroke-dasharray="3,3" stroke-width="1" opacity="0.4" />
+    <text x="${width - padding}" y="${targetY - 2}" font-size="6.5" fill="var(--aura-violet)" text-anchor="end">Goal: ${targetLineVal}g</text>
   ` : '';
 
   return `
     <svg viewBox="0 0 ${width} ${height}" style="width:100%; height:80px; overflow:visible;">
-      <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="rgba(255,255,255,0.02)" />
-      <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="rgba(255,255,255,0.06)" />
+      <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="var(--chart-axis)" />
+      <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="var(--chart-axis)" />
       
       ${targetLineHtml}
-      <polyline fill="none" stroke="rgba(91, 92, 246, 0.7)" stroke-width="2" points="${points}" stroke-linecap="round" stroke-linejoin="round" />
+      <polyline fill="none" stroke="var(--aura-violet)" stroke-width="2" points="${points}" stroke-linecap="round" stroke-linejoin="round" opacity="0.7" />
       ${pointsHtml}
       
       ${labels.map((lbl, i) => {
         const x = padding + (i * (width - 2 * padding) / (labels.length - 1 || 1));
-        return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="var(--text-muted)" text-anchor="middle">${lbl}</text>`;
+        return `<text x="${x}" y="${height - 2}" font-size="7.5" fill="var(--chart-label)" text-anchor="middle">${lbl}</text>`;
       }).join('')}
     </svg>
   `;

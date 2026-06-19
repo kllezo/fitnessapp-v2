@@ -29,7 +29,7 @@
   font-family: var(--font-display);
   font-size: 32px;
   font-weight: var(--fw-bold);
-  color: #fff;
+  color: var(--badge-text);
   box-shadow: var(--shadow-violet);
 }
 
@@ -38,7 +38,7 @@
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(124,58,237,0.4);
+  border: 2px solid var(--aura-violet-glow);
 }
 
 .avatar-edit-btn {
@@ -62,10 +62,10 @@
   font-family: var(--font-display);
   font-size: var(--text-xl);
   font-weight: var(--fw-bold);
-  color: var(--text-primary);
+  color: var(--card-text);
   letter-spacing: -0.3px;
 }
-.profile-username { font-size: var(--text-sm); color: var(--aura-violet-light); margin: 2px 0 6px; }
+.profile-username { font-size: var(--text-sm); color: var(--aura-violet); margin: 2px 0 6px; }
 .profile-bio { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.5; }
 
 /* Discipline Card */
@@ -93,7 +93,7 @@
 .profile-info-row:last-child { border-bottom: none; }
 .info-icon { font-size: 16px; width: 24px; text-align: center; flex-shrink: 0; }
 .info-label { font-size: var(--text-sm); color: var(--text-muted); flex: 1; }
-.info-value { font-size: var(--text-sm); font-weight: var(--fw-medium); color: var(--text-primary); text-align: right; }
+.info-value { font-size: var(--text-sm); font-weight: var(--fw-medium); color: var(--card-text); text-align: right; }
 
 /* Edit Sheet */
 .edit-fields { display: flex; flex-direction: column; gap: 12px; }

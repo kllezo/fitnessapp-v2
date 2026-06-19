@@ -24,7 +24,7 @@
   animation: float 6s ease-in-out infinite;
 }
 .auth-orb-1 { width: 200px; height: 200px; background: var(--aura-violet); top: -40px; left: -60px; animation-delay: 0s; }
-.auth-orb-2 { width: 160px; height: 160px; background: #4f46e5; bottom: 100px; right: -40px; animation-delay: 2s; }
+.auth-orb-2 { width: 160px; height: 160px; background: var(--aura-violet-glow); bottom: 100px; right: -40px; animation-delay: 2s; }
 .auth-orb-3 { width: 120px; height: 120px; background: var(--aura-mint); bottom: 40px; left: 20px; animation-delay: 4s; }
 
 /* Logo */
@@ -41,8 +41,8 @@
 .auth-emblem {
   width: 72px;
   height: 72px;
-  background: rgba(124,58,237,0.1);
-  border: 1px solid rgba(124,58,237,0.3);
+  background: var(--aura-violet-glow);
+  border: 1px solid var(--border-translucent-strong);
   border-radius: 20px;
   display: flex;
   align-items: center;
@@ -55,7 +55,7 @@
   font-size: 32px;
   font-weight: var(--fw-black);
   letter-spacing: 6px;
-  background: linear-gradient(135deg, #a78bfa, #7c3aed);
+  background: var(--grad-violet);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -144,7 +144,7 @@
 .auth-link {
   background: transparent;
   border: none;
-  color: var(--aura-violet-light);
+  color: var(--aura-violet);
   font-size: var(--text-sm);
   font-weight: var(--fw-medium);
   cursor: pointer;

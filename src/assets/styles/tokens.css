@@ -40,6 +40,33 @@
   --text-secondary: #8E93B8;
   --text-muted: #4A4F6E;
   --text-accent: #818CF8;
+  --text-inverse: #050505;
+
+  /* Contrast tokens fallback */
+  --card-text: #FFFFFF;
+  --card-subtext: #8E93B8;
+  --ring-value: #FFFFFF;
+  --ring-label: #8E93B8;
+  --ring-secondary: rgba(255, 255, 255, 0.06);
+  --chart-label: #8E93B8;
+  --chart-axis: rgba(255, 255, 255, 0.1);
+  --chart-tooltip: #11121A;
+  --chart-tooltip-text: #FFFFFF;
+  --badge-text: #FFFFFF;
+  --button-text: #FFFFFF;
+  --input-text: #FFFFFF;
+  --placeholder-text: rgba(255, 255, 255, 0.4);
+  --analytics-text: #FFFFFF;
+  --analytics-secondary: #8E93B8;
+
+  /* Translucent variables fallback */
+  --bg-translucent-xs: rgba(255, 255, 255, 0.02);
+  --bg-translucent-sm: rgba(255, 255, 255, 0.04);
+  --bg-translucent-md: rgba(255, 255, 255, 0.08);
+  --bg-translucent-lg: rgba(255, 255, 255, 0.15);
+  --border-translucent-subtle: rgba(255, 255, 255, 0.03);
+  --border-translucent-medium: rgba(255, 255, 255, 0.06);
+  --border-translucent-strong: rgba(255, 255, 255, 0.15);
 
   /* Borders */
   --border-subtle: rgba(35, 37, 58, 0.8);

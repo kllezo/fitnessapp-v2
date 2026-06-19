@@ -7,6 +7,7 @@ import { getState, setState, updateState, getTodayDateString } from '../../state
 import { navigate } from '../../router.js';
 import { showToast, showModal, closeModal } from '../../components/shared/ui.js';
 import { generateWeeklyPlan, checkForPR, logWorkoutSession } from '../../services/workout-engine.js';
+import { themeManager } from '../../services/theme-engine.js';
 import './train.css';
 
 let _activeDayIdx = 0;
@@ -113,7 +114,7 @@ function _getExerciseDetailHTML(name) {
   };
 
   return `
-    <div class="ex-detail-guide card" style="margin-bottom:14px; background:rgba(255,255,255,0.02)">
+    <div class="ex-detail-guide card" style="margin-bottom:14px; background:var(--bg-translucent-xs)">
       <div class="ex-detail-anim" style="font-size:48px; text-align:center; margin-bottom:8px; animation: bounce 1.5s infinite;">
         ${item.anim}
       </div>
@@ -122,11 +123,11 @@ function _getExerciseDetailHTML(name) {
         <p style="font-size:11px; color:var(--text-secondary); margin-top:2px; line-height:1.4;">${item.desc}</p>
       </div>
       <div class="ex-detail-section" style="margin-top:8px;">
-        <strong style="color:var(--aura-rose-light); font-size:12px;">Common Mistakes:</strong>
+        <strong style="color:var(--aura-rose); font-size:12px;">Common Mistakes:</strong>
         <p style="font-size:11px; color:var(--text-secondary); margin-top:2px; line-height:1.4;">⚠️ ${item.mistakes}</p>
       </div>
-      <div class="ex-detail-section" style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
-        <a href="${item.yt}" target="_blank" style="color:var(--aura-violet-light); font-size:11px; text-decoration:none; display:flex; align-items:center; gap:4px;">
+      <div class="ex-detail-section" style="margin-top:10px; border-top:1px solid var(--border-translucent-medium); padding-top:8px;">
+        <a href="${item.yt}" target="_blank" style="color:var(--text-accent); font-size:11px; text-decoration:none; display:flex; align-items:center; gap:4px;">
           🎥 Watch YouTube Tutorial →
         </a>
       </div>
@@ -312,10 +313,10 @@ export function render() {
             <path d="M6 9l6 6 6-6"/>
           </svg>
         </div>
-        <div class="weekly-planner-dropdown hidden" id="weekly-planner-dropdown" style="display: none; flex-direction: column; gap: 6px; background: rgba(15, 15, 27, 0.96); backdrop-filter: blur(15px); border: 1.5px solid var(--border-card); border-radius: var(--radius-xl); padding: 8px; margin-top: 6px; position: absolute; left: 16px; right: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index: 100;">
+        <div class="weekly-planner-dropdown hidden" id="weekly-planner-dropdown" style="display: none; flex-direction: column; gap: 6px; background: var(--bg-modal); backdrop-filter: blur(15px); border: 1.5px solid var(--border-card); border-radius: var(--radius-xl); padding: 8px; margin-top: 6px; position: absolute; left: 16px; right: 16px; box-shadow: var(--shadow-lg); z-index: 100;">
           ${(plan || []).map((day, i) => `
-            <div class="planner-dropdown-item ${i === _activeDayIdx ? 'active' : ''}" data-day="${i}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: var(--radius-lg); cursor: pointer; transition: all var(--dur-fast) ease; background: ${i === _activeDayIdx ? 'rgba(124,58,237,0.1)' : 'transparent'}; border: 1px solid ${i === _activeDayIdx ? 'var(--aura-violet)' : 'transparent'};">
-              <span class="item-label" style="font-size: 13px; font-weight: 600; color: ${i === _activeDayIdx ? 'var(--aura-violet-light)' : 'var(--text-secondary)'};">D${i + 1} — ${day.dayName}</span>
+            <div class="planner-dropdown-item ${i === _activeDayIdx ? 'active' : ''}" data-day="${i}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: var(--radius-lg); cursor: pointer; transition: all var(--dur-fast) ease; background: ${i === _activeDayIdx ? 'var(--aura-violet-glow)' : 'transparent'}; border: 1px solid ${i === _activeDayIdx ? 'var(--aura-violet)' : 'transparent'};">
+              <span class="item-label" style="font-size: 13px; font-weight: 600; color: ${i === _activeDayIdx ? 'var(--text-primary)' : 'var(--text-secondary)'};">D${i + 1} — ${day.dayName}</span>
               <span class="item-meta" style="font-size: 11px; color: var(--text-muted);">${day.exercises?.length || 0} Ex · ${day.estimatedDuration} min</span>
             </div>
           `).join('')}
@@ -368,7 +369,7 @@ function _renderCalendarView(plan) {
       <div class="page-header">
         <h1 class="page-title">Train Calendar</h1>
         <div style="display:flex;gap:8px">
-          <button class="icon-btn active" id="calendar-toggle-btn" aria-label="Toggle Calendar View" style="background:rgba(124,58,237,0.15); border-color:var(--aura-violet); color:var(--aura-violet-light)">
+          <button class="icon-btn active" id="calendar-toggle-btn" aria-label="Toggle Calendar View" style="background:var(--aura-violet-glow); border-color:var(--aura-violet); color:var(--aura-violet)">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
             </svg>
@@ -391,8 +392,8 @@ function _renderCalendarView(plan) {
             <button class="calendar-nav-btn" id="cal-next-btn" style="background:var(--bg-elevated); border:1px solid var(--border-card); color:var(--text-primary); width:30px; height:30px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;">▶</button>
           </div>
           <div class="calendar-toggle-mode" style="display:flex; background:var(--bg-elevated); padding:2px; border-radius:var(--radius-lg); border:1px solid var(--border-card);">
-            <button class="calendar-mode-btn ${_calendarZoomMode === 'week' ? 'active' : ''}" id="cal-mode-week" style="background:${_calendarZoomMode === 'week' ? 'var(--aura-violet)' : 'transparent'}; border:none; color:${_calendarZoomMode === 'week' ? '#fff' : 'var(--text-secondary)'}; padding:4px 12px; font-size:11px; font-weight:600; border-radius:var(--radius-md); cursor:pointer;">Week</button>
-            <button class="calendar-mode-btn ${_calendarZoomMode === 'month' ? 'active' : ''}" id="cal-mode-month" style="background:${_calendarZoomMode === 'month' ? 'var(--aura-violet)' : 'transparent'}; border:none; color:${_calendarZoomMode === 'month' ? '#fff' : 'var(--text-secondary)'}; padding:4px 12px; font-size:11px; font-weight:600; border-radius:var(--radius-md); cursor:pointer;">Month</button>
+            <button class="calendar-mode-btn ${_calendarZoomMode === 'week' ? 'active' : ''}" id="cal-mode-week" style="background:${_calendarZoomMode === 'week' ? 'var(--aura-violet)' : 'transparent'}; border:none; color:${_calendarZoomMode === 'week' ? 'var(--button-text)' : 'var(--text-secondary)'}; padding:4px 12px; font-size:11px; font-weight:600; border-radius:var(--radius-md); cursor:pointer;">Week</button>
+            <button class="calendar-mode-btn ${_calendarZoomMode === 'month' ? 'active' : ''}" id="cal-mode-month" style="background:${_calendarZoomMode === 'month' ? 'var(--aura-violet)' : 'transparent'}; border:none; color:${_calendarZoomMode === 'month' ? 'var(--button-text)' : 'var(--text-secondary)'}; padding:4px 12px; font-size:11px; font-weight:600; border-radius:var(--radius-md); cursor:pointer;">Month</button>
           </div>
         </div>
 
@@ -513,7 +514,7 @@ function _openDailySummaryModal(dateStr) {
   
   const content = `
     <div class="daily-summary-modal" style="display:flex; flex-direction:column; gap:14px;">
-      <div class="card card-glow" style="background:linear-gradient(135deg, rgba(124,58,237,0.1), rgba(16,185,129,0.05));">
+      <div class="card card-glow" style="background:linear-gradient(135deg, var(--aura-violet-glow), var(--bg-translucent-xs));">
         <p class="section-label" style="margin-bottom:6px;">Workout Details</p>
         <div style="display:flex; align-items:center; gap:12px;">
           <span style="font-size:32px;">${metrics.workout.completed ? '🏋️' : '🛋️'}</span>
@@ -527,17 +528,17 @@ function _openDailySummaryModal(dateStr) {
       <div class="stat-grid stat-grid-2" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
         <div class="stat-cell card" style="display:flex; flex-direction:column; align-items:center; padding:10px;">
           <span class="stat-label" style="font-size:10px; color:var(--text-muted);">Readiness Score</span>
-          <span class="stat-value" style="color:var(--aura-violet-light); font-size:22px; font-weight:bold; margin-top:4px;">${metrics.recoveryScore}</span>
+          <span class="stat-value" style="color:var(--text-accent); font-size:22px; font-weight:bold; margin-top:4px;">${metrics.recoveryScore}</span>
           <span style="font-size:9px; color:var(--text-muted); margin-top:2px;">Somatic Readiness</span>
         </div>
         <div class="stat-cell card" style="display:flex; flex-direction:column; align-items:center; padding:10px;">
           <span class="stat-label" style="font-size:10px; color:var(--text-muted);">Water Intake</span>
-          <span class="stat-value" style="color:var(--aura-blue-light); font-size:22px; font-weight:bold; margin-top:4px;">${metrics.waterIntake} L</span>
+          <span class="stat-value" style="color:var(--text-primary); font-size:22px; font-weight:bold; margin-top:4px;">${metrics.waterIntake} L</span>
           <span style="font-size:9px; color:var(--text-muted); margin-top:2px;">Goal: ${getState().nutrition?.water?.target || 3.5}L</span>
         </div>
       </div>
 
-      <div class="card" style="background:rgba(255,255,255,0.015); padding:12px;">
+      <div class="card" style="background:var(--bg-translucent-xs); padding:12px;">
         <p class="section-label" style="margin-bottom:10px;">Nutrition & Macros</p>
         <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12px;">
           <span style="color:var(--text-secondary);">Calories Consumed:</span>
@@ -545,11 +546,11 @@ function _openDailySummaryModal(dateStr) {
         </div>
         <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12px;">
           <span style="color:var(--text-secondary);">Estimated Calories Burned:</span>
-          <strong style="color:var(--aura-rose-light);">${metrics.caloriesBurned} kcal</strong>
+          <strong style="color:var(--aura-rose);">${metrics.caloriesBurned} kcal</strong>
         </div>
         <div style="display:flex; justify-content:space-between; font-size:12px;">
           <span style="color:var(--text-secondary);">Protein Logged:</span>
-          <strong style="color: ${metrics.proteinHit ? 'var(--aura-mint-light)' : 'var(--aura-rose-light)'};">${metrics.proteinConsumed}g / ${metrics.proteinTarget}g ${metrics.proteinHit ? '✓' : '✗'}</strong>
+          <strong style="color: ${metrics.proteinHit ? 'var(--aura-mint)' : 'var(--aura-rose)'};">${metrics.proteinConsumed}g / ${metrics.proteinTarget}g ${metrics.proteinHit ? '✓' : '✗'}</strong>
         </div>
       </div>
 
@@ -650,11 +651,11 @@ function _renderMiniRing(exercises) {
   const r = 18, circ = 2 * Math.PI * r;
   return `
     <svg width="44" height="44" viewBox="0 0 44 44">
-      <circle cx="22" cy="22" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3.5"/>
-      <circle cx="22" cy="22" r="${r}" fill="none" stroke="#a78bfa" stroke-width="3.5"
+      <circle cx="22" cy="22" r="${r}" fill="none" stroke="var(--chart-axis)" stroke-width="3.5"/>
+      <circle cx="22" cy="22" r="${r}" fill="none" stroke="var(--aura-violet)" stroke-width="3.5"
         stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${circ - circ * pct}"
         transform="rotate(-90 22 22)"/>
-      <text x="22" y="27" text-anchor="middle" fill="white" font-size="10" font-weight="600">${done}/${total}</text>
+      <text x="22" y="27" text-anchor="middle" fill="var(--text-primary)" font-size="10" font-weight="600">${done}/${total}</text>
     </svg>
   `;
 }
@@ -975,11 +976,11 @@ function _openRestSheet() {
       </div>
       <div class="rest-display" id="rest-display">
         <svg width="120" height="120" viewBox="0 0 120 120">
-          <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--chart-axis)" stroke-width="6"/>
           <circle cx="60" cy="60" r="52" fill="none" stroke="url(#restGrad)" stroke-width="6"
             stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="0"
             transform="rotate(-90 60 60)" id="rest-ring"/>
-          <defs><linearGradient id="restGrad"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
+          <defs><linearGradient id="restGrad"><stop stop-color="var(--aura-violet-light)"/><stop offset="1" stop-color="var(--aura-violet)"/></linearGradient></defs>
         </svg>
         <div class="rest-time" id="rest-time">${_restSeconds}s</div>
       </div>
@@ -1234,55 +1235,62 @@ function _downloadShareCardImage(workoutName, totalVolume, exercisesCount, durat
   canvas.height = 400;
   const ctx = canvas.getContext('2d');
 
+  const primaryColor = themeManager.getColor('primary') || '#7c3aed';
+  const bgColor = themeManager.getColor('background') || '#080810';
+  const cardColor = themeManager.getColor('card') || '#131324';
+  const textPrimary = themeManager.getColor('textPrimary') || '#ffffff';
+  const textSecondary = themeManager.getColor('textSecondary') || '#94a3b8';
+  const successColor = themeManager.getColor('success') || '#10b981';
+
   const grad = ctx.createLinearGradient(0, 0, 0, 400);
-  grad.addColorStop(0, '#131324');
-  grad.addColorStop(1, '#080810');
+  grad.addColorStop(0, cardColor);
+  grad.addColorStop(1, bgColor);
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 400, 400);
 
-  ctx.strokeStyle = '#7c3aed';
+  ctx.strokeStyle = primaryColor;
   ctx.lineWidth = 4;
   ctx.strokeRect(10, 10, 380, 380);
 
-  ctx.fillStyle = '#a78bfa';
+  ctx.fillStyle = primaryColor;
   ctx.font = 'bold 20px sans-serif';
   ctx.fillText('✦ AURA', 30, 45);
 
-  ctx.fillStyle = '#94a3b8';
+  ctx.fillStyle = textSecondary;
   ctx.font = '14px sans-serif';
   const dateStr = new Date().toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
   ctx.fillText(dateStr, 280, 45);
 
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = textPrimary;
   ctx.font = 'bold 24px sans-serif';
   ctx.fillText(workoutName, 30, 100);
 
-  ctx.fillStyle = '#94a3b8';
+  ctx.fillStyle = textSecondary;
   ctx.font = '14px sans-serif';
   ctx.fillText('Session Summary', 30, 125);
 
-  ctx.fillStyle = '#a78bfa';
+  ctx.fillStyle = primaryColor;
   ctx.font = 'bold 32px sans-serif';
   ctx.fillText(`${totalVolume}kg`, 30, 200);
-  ctx.fillStyle = '#94a3b8';
+  ctx.fillStyle = textSecondary;
   ctx.font = '12px sans-serif';
   ctx.fillText('Total Volume', 30, 220);
 
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = textPrimary;
   ctx.font = 'bold 32px sans-serif';
   ctx.fillText(`${exercisesCount}`, 170, 200);
-  ctx.fillStyle = '#94a3b8';
+  ctx.fillStyle = textSecondary;
   ctx.font = '12px sans-serif';
   ctx.fillText('Exercises', 170, 220);
 
-  ctx.fillStyle = '#34d399';
+  ctx.fillStyle = successColor;
   ctx.font = 'bold 32px sans-serif';
   ctx.fillText(`${duration}m`, 290, 200);
-  ctx.fillStyle = '#94a3b8';
+  ctx.fillStyle = textSecondary;
   ctx.font = '12px sans-serif';
   ctx.fillText('Duration', 290, 220);
 
-  ctx.fillStyle = '#475569';
+  ctx.fillStyle = textSecondary;
   ctx.font = 'bold 11px sans-serif';
   ctx.fillText('AURA — ADAPTIVE FITNESS OS', 30, 360);
 

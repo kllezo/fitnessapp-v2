@@ -199,7 +199,7 @@ function _stepPersonal() {
           <label class="field-label">Body Fat % <span style="color:var(--text-muted);font-weight:normal;">(Optional)</span></label>
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
             ${[10,15,20,25,30].map(pct => `
-              <button class="btn btn-sm btn-secondary ob-bf-btn ${Number(s.bodyFatPct) === pct ? 'active' : ''}" data-pct="${pct}" style="flex:1; min-width:40px; padding:6px 4px; font-size:12px; ${Number(s.bodyFatPct) === pct ? 'background:rgba(124,58,237,0.2);border-color:var(--aura-violet);color:var(--aura-violet-light);' : ''}">${pct}%</button>
+              <button class="btn btn-sm btn-secondary ob-bf-btn ${Number(s.bodyFatPct) === pct ? 'active' : ''}" data-pct="${pct}" style="flex:1; min-width:40px; padding:6px 4px; font-size:12px; ${Number(s.bodyFatPct) === pct ? 'background:var(--aura-violet-glow);border-color:var(--aura-violet);color:var(--aura-violet);' : ''}">${pct}%</button>
             `).join('')}
             <input class="input" id="ob-bf-custom" type="number" placeholder="Custom" min="3" max="50" value="${s.bodyFatPct && ![10,15,20,25,30].includes(Number(s.bodyFatPct)) ? s.bodyFatPct : ''}" style="flex:1; min-width:60px; font-size:12px; padding:6px 8px; height:auto;" />
           </div>
@@ -499,7 +499,7 @@ function _stepAccountability() {
           </button>
         `).join('')}
       </div>
-      <div class="card" style="margin-top:16px;background:rgba(124,58,237,0.08);border-color:rgba(124,58,237,0.2)">
+      <div class="card" style="margin-top:16px;background:var(--bg-translucent-xs);border-color:var(--border-translucent-medium)">
         <p style="font-size:var(--text-sm);color:var(--text-secondary);line-height:1.6">
           ✦ AURA matches you with someone on a similar transformation path — same goals, similar schedule, compatible lifestyle.
         </p>
@@ -529,7 +529,7 @@ function _stepChooseAura() {
         position:relative;
         box-shadow: ${isSelected ? `0 0 0 3px ${c.primary}55, 0 8px 24px ${c.primary}33` : '0 4px 16px rgba(0,0,0,0.2)'};
       ">
-        ${isSelected ? `<div style="position:absolute;top:8px;right:8px;background:${c.primary};color:${t.dark ? '#fff' : '#fff'};border-radius:100px;padding:2px 8px;font-size:10px;font-weight:700;z-index:10;">✓ Selected</div>` : ''}
+        ${isSelected ? `<div style="position:absolute;top:8px;right:8px;background:${c.primary};color:var(--badge-text);border-radius:100px;padding:2px 8px;font-size:10px;font-weight:700;z-index:10;">✓ Selected</div>` : ''}
 
         <!-- Mini App Preview: Status bar -->
         <div style="background:${c.background};padding:6px 10px 4px;display:flex;justify-content:space-between;align-items:center;">
@@ -598,7 +598,7 @@ function _stepChooseAura() {
                 <div style="font-size:9px;font-weight:700;color:${c.textPrimary}">Push Day</div>
                 <div style="font-size:6px;color:${c.textSecondary}">6 exercises · ~60min</div>
               </div>
-              <div style="background:${c.primary};color:#fff;font-size:7px;font-weight:700;padding:3px 8px;border-radius:100px;">Start →</div>
+              <div style="background:${c.primary};color:var(--badge-text);font-size:7px;font-weight:700;padding:3px 8px;border-radius:100px;">Start →</div>
             </div>
           </div>
         </div>
@@ -661,7 +661,7 @@ function _stepComplete() {
   const s = getState().onboarding;
   const macros = calculateMacros(getState());
   const { bmi, bmiCat, bmr, tdee, leanMass } = _calcBMIBMR(s);
-  const bmiColor = bmiCat === 'Healthy' ? 'var(--aura-mint-light)' : bmiCat === 'Underweight' ? 'var(--aura-violet-light)' : 'var(--aura-rose-light)';
+  const bmiColor = bmiCat === 'Healthy' ? 'var(--aura-mint)' : bmiCat === 'Underweight' ? 'var(--aura-violet)' : 'var(--aura-rose)';
   return `
     <div class="ob-step ob-complete anim-scale-in">
       <div class="complete-emblem">
@@ -687,7 +687,7 @@ function _stepComplete() {
       </div>
 
       <!-- Body Metrics Card -->
-      <div class="card" style="margin-top:16px; padding:14px; background:rgba(124,58,237,0.06); border-color:rgba(124,58,237,0.2); text-align:left;">
+      <div class="card" style="margin-top:16px; padding:14px; background:var(--bg-translucent-xs); border-color:var(--border-translucent-medium); text-align:left;">
         <p style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">Body Metrics</p>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
           <div style="display:flex; flex-direction:column;">
@@ -702,12 +702,12 @@ function _stepComplete() {
           </div>
           <div style="display:flex; flex-direction:column;">
             <span style="font-size:9px; color:var(--text-muted);">Maintenance</span>
-            <strong style="font-size:18px; color:var(--aura-amber-light);">${tdee}</strong>
+            <strong style="font-size:18px; color:var(--aura-amber);">${tdee}</strong>
             <span style="font-size:10px; color:var(--text-muted);">kcal / day</span>
           </div>
           ${leanMass ? `<div style="display:flex; flex-direction:column;">
             <span style="font-size:9px; color:var(--text-muted);">Lean Mass</span>
-            <strong style="font-size:18px; color:var(--aura-violet-light);">${leanMass}kg</strong>
+            <strong style="font-size:18px; color:var(--aura-violet);">${leanMass}kg</strong>
             <span style="font-size:10px; color:var(--text-muted);">Est.</span>
           </div>` : ''}
         </div>
@@ -811,7 +811,7 @@ function _wireEvents() {
           const badge = document.createElement('div');
           badge.className = 'theme-selected-badge';
           badge.textContent = '✓ Selected';
-          badge.style.cssText = `position:absolute;top:8px;right:8px;background:${t.colors.primary};color:#fff;border-radius:100px;padding:2px 8px;font-size:10px;font-weight:700;z-index:10;`;
+          badge.style.cssText = `position:absolute;top:8px;right:8px;background:${t.colors.primary};color:var(--badge-text);border-radius:100px;padding:2px 8px;font-size:10px;font-weight:700;z-index:10;`;
           c.style.position = 'relative';
           c.prepend(badge);
         }
@@ -848,9 +848,9 @@ function _wireEvents() {
         b.style.background = ''; b.style.borderColor = ''; b.style.color = '';
         b.classList.remove('active');
       });
-      btn.style.background = 'rgba(124,58,237,0.2)';
+      btn.style.background = 'var(--aura-violet-glow)';
       btn.style.borderColor = 'var(--aura-violet)';
-      btn.style.color = 'var(--aura-violet-light)';
+      btn.style.color = 'var(--aura-violet)';
       btn.classList.add('active');
       const customInput = document.getElementById('ob-bf-custom');
       if (customInput) customInput.value = '';

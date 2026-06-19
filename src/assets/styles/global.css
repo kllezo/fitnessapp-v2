@@ -14,7 +14,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #000;
+  background: var(--bg-base);
   font-family: var(--font-sans);
   color: var(--text-primary);
 }
@@ -27,7 +27,7 @@ html, body {
   justify-content: center;
   background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.12) 0%, transparent 60%),
               radial-gradient(ellipse at 80% 100%, rgba(79,70,229,0.08) 0%, transparent 50%),
-              #000;
+              var(--bg-base);
 }
 
 /* ── Phone Shell ── */
@@ -108,21 +108,21 @@ html, body {
 .battery-body {
   width: 22px;
   height: 11px;
-  border: 1.5px solid rgba(255,255,255,0.8);
+  border: 1.5px solid var(--border-translucent-strong);
   border-radius: 3px;
   padding: 1.5px;
   overflow: hidden;
 }
 .battery-fill {
   height: 100%;
-  background: #fff;
+  background: var(--text-primary);
   border-radius: 1px;
   transition: width 1s ease;
 }
 .battery-cap {
   width: 2px;
   height: 5px;
-  background: rgba(255,255,255,0.6);
+  background: var(--border-translucent-strong);
   border-radius: 0 1px 1px 0;
 }
 
@@ -190,14 +190,14 @@ html, body {
   content: '';
   width: 134px;
   height: 5px;
-  background: rgba(255,255,255,0.3);
+  background: var(--border-translucent-strong);
   border-radius: var(--radius-full);
 }
 
 /* ── Bottom Navigation ── */
 #bottom-nav {
   height: var(--nav-height);
-  background: rgba(10, 10, 15, 0.95);
+  background: var(--bg-elevated);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid var(--border-subtle);
@@ -339,14 +339,14 @@ html, body {
 
 .btn-primary {
   background: var(--grad-violet);
-  color: #fff;
+  color: var(--button-text);
   box-shadow: var(--shadow-violet);
 }
 .btn-primary:hover { box-shadow: 0 6px 32px rgba(124,58,237,0.5); }
 
 .btn-secondary {
   background: var(--bg-card);
-  color: var(--text-primary);
+  color: var(--card-text);
   border: 1px solid var(--border-card);
 }
 .btn-secondary:hover { border-color: var(--border-active); }
@@ -366,7 +366,7 @@ html, body {
 
 .btn-mint {
   background: var(--grad-mint);
-  color: #fff;
+  color: var(--button-text);
   box-shadow: var(--shadow-mint);
 }
 
@@ -379,12 +379,12 @@ html, body {
   padding: 14px 16px;
   font-size: var(--text-base);
   font-family: var(--font-sans);
-  color: var(--text-primary);
+  color: var(--input-text);
   outline: none;
   transition: border-color var(--dur-fast) ease;
 }
-.input::placeholder { color: var(--text-muted); }
-.input:focus { border-color: var(--aura-violet); }
+.input::placeholder { color: var(--placeholder-text); }
+.input:focus { border-color: var(--border-active); }
 
 /* ── Pills / Tags ── */
 .pill {
@@ -404,7 +404,7 @@ html, body {
 .pill-mint { background: rgba(16,185,129,0.15); color: var(--aura-mint-light); border: 1px solid rgba(16,185,129,0.25); }
 .pill-rose { background: rgba(244,63,94,0.15); color: var(--aura-rose-light); border: 1px solid rgba(244,63,94,0.25); }
 .pill-amber { background: rgba(245,158,11,0.15); color: var(--aura-amber-light); border: 1px solid rgba(245,158,11,0.25); }
-.pill-muted { background: rgba(255,255,255,0.06); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
+.pill-muted { background: var(--bg-translucent-sm); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
 
 /* ── Section Labels ── */
 .section-label {
@@ -441,7 +441,7 @@ html, body {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  background: linear-gradient(90deg, transparent, var(--bg-translucent-sm), transparent);
   transform: translateX(-100%);
   animation: shimmer 1.5s infinite;
 }
@@ -466,7 +466,7 @@ html, body {
   padding: 10px 20px;
   font-size: var(--text-sm);
   font-weight: var(--fw-medium);
-  color: var(--text-primary);
+  color: var(--card-text);
   white-space: nowrap;
   pointer-events: auto;
   display: flex;
@@ -521,7 +521,7 @@ html, body {
 .modal-handle {
   width: 40px;
   height: 4px;
-  background: rgba(255,255,255,0.15);
+  background: var(--border-translucent-strong);
   border-radius: var(--radius-full);
   margin: 0 auto var(--space-md);
 }
@@ -649,7 +649,7 @@ html, body {
   font-family: var(--font-display);
   font-size: var(--text-2xl);
   font-weight: var(--fw-bold);
-  color: var(--text-primary);
+  color: var(--card-text);
   letter-spacing: -0.5px;
 }
 .stat-label {
@@ -671,7 +671,7 @@ html, body {
 }
 .circular-progress .cp-track {
   fill: none;
-  stroke: rgba(255,255,255,0.06);
+  stroke: var(--ring-secondary);
 }
 .circular-progress .cp-fill {
   fill: none;
@@ -759,5 +759,5 @@ html, body {
 }
 .switch input:checked + .switch-track::after {
   transform: translateX(18px);
-  background: #fff;
+  background: var(--button-text);
 }

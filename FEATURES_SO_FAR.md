@@ -123,3 +123,23 @@
 - **Hardcoded Color Removal**: All `#11121A`, `#23253A`, `#8E93B8`, `#0d0d15`, and other hardcoded hex values in `home/index.js`, `diet/index.js`, `home/home.css`, `train/train.css`, `recovery/recovery.css` replaced with CSS variable references (`var(--bg-card)`, `var(--border-card)`, `var(--text-muted)`, `var(--bg-base)`, `var(--aura-violet-light)`).
 - **Bottom Sheet Theme Fix**: `ui.js` bottom sheet no longer hardcodes `#11121A` background — uses `var(--bg-elevated)` from `global.css`.
 
+## 13. Aura V2 Global Theme Contrast System
+- **Contrast-Aware Token Engine**: Extended `theme-engine.js` with 18 dynamic contrast-aware tokens (`textPrimary`, `textSecondary`, `textMuted`, `textInverse`, `cardText`, `cardSubtext`, `ringValue`, `ringLabel`, `ringSecondary`, `chartLabel`, `chartAxis`, `chartTooltip`, `badgeText`, `buttonText`, `inputText`, `placeholderText`, `analyticsText`, `analyticsSecondary`).
+- **Dynamic Brightness Auto-Contrast**: Implemented a brightness calculations engine using relative luminance standard (threshold 140) to evaluate backgrounds and card elements at runtime, automatically swapping between light and dark text colors.
+- **Adaptive Translucent System**: Added adaptive translucent custom properties (`--bg-translucent-xs` to `-lg` and `--border-translucent-subtle` to `-strong`) that adjust opacity values dynamically based on light/dark themes.
+- **Global Codebase Audit**: Replaced all hardcoded hex, rgb, and rgba black and white colors from stylesheets, scripts, SVGs, and inline styling with theme tokens.
+- **Low-Contrast Color Fixes**: Sanitized low-contrast colors on light/wellness themes (Slate Blue, Dusty Rose) by replacing lightened text variables (like `var(--aura-violet-light)`) with primary variables (like `var(--aura-violet)`).
+- **Robust UI Verification**: Fully tested all pages, bottom sheets, grids, modals, and elements (including calendars, leaderboards, rest timers, and chat windows) across all 6 core themes.
+
+## 14. Global Discipline Rank System
+- **Fitness Hierarchy**: Replaced generic gamified XP with a premium status hierarchy based on workouts, streaks, macro adherence, hydration, sleep, and partner/squad accountability.
+- **Tiers Setup**: Defined 15 Open Tiers (Bronze III-I, Silver III-I, Gold III-I, Platinum III-I, Mythic III-I) and 3 Limited Tiers with strict global capacities (Paragon: 1000 users, Ascendant: 100 users, Phoenix: 10 users).
+- **Home Screen Emblem integration**: Clean metallic vector SVG badge mounted directly between the Discipline and Steps rings on the dashboard. No text or sub-stats, retaining a premium aesthetic. Tapping navigates to `/rank-center`.
+- **Fullscreen Rank Center Page**: Immersive, dark-bezel dashboard comprising:
+  - Header highlighting active rank, global index position, and streaks.
+  - Progression panel charting current to next milestones with points remaining and animated progress bars.
+  - Five-Tab Leaderboard switcher (Global, Country, Friends, Squad, Partner) tracking rankings, scores, and streaks.
+  - Profile frames and title unlocks activated instantly via the unlocked cosmetics drawer.
+  - Simulator panel allowing manual logs, inactivity triggers, and challenger overtaking to verify promotion/demotion engine updates.
+- **Profile Customizations**: Employs unlocked frames (Gold Bezel, Carbon Fiber, Paragon Halo, Phoenix Flame) as overlays on the user's avatar image, displays active titles next to usernames, and shows a compact rank banner under profile credentials.
+- **Adaptive Contrast Badge styling**: Emblem SVGs inherit dynamic gradients and glow animations based on active themes, rendering perfectly on light, dark, and wellness theme styles.

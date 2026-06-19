@@ -62,4 +62,14 @@ webiste 2/
 - **Boot sequence**: `main.js` calls `themeManager.loadTheme()` then `themeManager.applyInstant()` after the initial route renders — no flash of wrong theme.
 - **Persistence**: Theme ID stored in `localStorage` key `aura_theme_v2` (via `themeManager.saveTheme()`) AND in `state.app.selectedTheme` (via `setState`).
 - **No page reload**: CSS variable injection is synchronous DOM mutation — instantaneous theme switching without any page navigation.
+- **Global Theme Contrast System**: 
+  - **Auto-Contrast Engine**: `theme-engine.js` computes contrast-aware text, card, ring, chart, button, input, and analytics color tokens at runtime using relative luminance brightness checks (`(r*299 + g*587 + b*114)/1000`) with a threshold of 140.
+  - **Adaptive Translucency**: CSS custom properties for translucent backgrounds/borders dynamically shift opacity values according to the theme's dark/light setting.
+  - **Strict Contrast Compliance**: Elimination of hardcoded text colors in all pages/components (including calendars, charts, forms, chat screens) ensures absolute readability.
+
+## Rank System Architecture
+- **Engine**: `src/services/rank-engine.js` computes rank scores, manages Open/Limited tier thresholds, maps vector SVGs, and houses mock leaderboards with user overtake simulations.
+- **Route / Render lifecycle**: Registered as `#rank-center` fullscreen page. Updates user parameters synchronously inside `onEnter` and re-renders dynamically on simulation triggers.
+- **Cosmetics Injection**: Rewards selections update `state.rank.activeFrame` and `state.rank.activeTitle` dynamically. Frame styles are loaded globally from `rank.css` and overlaid on profile views.
+- **Auto-Update hooks**: Called during app bootstrap in `main.js` and profile rendering in `profile/index.js` to ensure sync consistency.
 

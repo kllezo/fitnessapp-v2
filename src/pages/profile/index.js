@@ -6,12 +6,17 @@
 import { getState, setState, updateState, getDisciplineScore } from '../../state/index.js';
 import { showToast, openBottomSheet, closeActiveBottomSheet } from '../../components/shared/ui.js';
 import { navigate } from '../../router.js';
+import { getRankEmblemSVG, refreshUserRank } from '../../services/rank-engine.js';
 import './profile.css';
+import '../rank-center/rank.css';
 
 let _editing = false;
 
 export function render() {
   const state = getState();
+  // Ensure ranks are calculated accurately on render
+  refreshUserRank();
+  
   const auth = state.auth;
   const ob = state.onboarding;
   const discipline = getDisciplineScore(state);
@@ -34,7 +39,7 @@ export function render() {
 
       <!-- Avatar & Identity -->
       <div class="profile-hero">
-        <div class="profile-avatar-wrap" id="avatar-wrap">
+        <div class="profile-avatar-wrap ${state.rank?.activeFrame || 'default'}" id="avatar-wrap">
           ${auth?.avatar
             ? `<img src="${auth.avatar}" class="profile-avatar-img" alt="Avatar"/>`
             : `<div class="profile-avatar-placeholder">${(auth?.profileName?.[0] || 'A').toUpperCase()}</div>`
@@ -43,8 +48,19 @@ export function render() {
           <input type="file" id="avatar-input" accept="image/*" class="hidden" />
         </div>
         <div class="profile-identity">
-          <h2 class="profile-name" id="profile-name-display">${auth?.profileName || 'Athlete'}</h2>
+          <h2 class="profile-name" id="profile-name-display" style="display:flex; align-items:center; gap:6px;">
+            ${auth?.profileName || 'Athlete'}
+            ${state.rank?.activeTitle ? `<span style="font-size:9px; font-weight:bold; color:var(--aura-violet); padding:2px 6px; background:var(--bg-translucent-md); border-radius:4px; border:1px solid var(--border-translucent-medium); vertical-align:middle;">${state.rank.activeTitle}</span>` : ''}
+          </h2>
           <p class="profile-username">@${auth?.username || 'athlete'}</p>
+          
+          <!-- Rank Indicator -->
+          <div style="display:flex; align-items:center; gap:8px; margin:6px 0; background:var(--bg-translucent-xs); border:1px solid var(--border-translucent-subtle); padding:4px 8px; border-radius:6px; width:fit-content;">
+            ${getRankEmblemSVG(state.rank?.rankId || 'bronze_3', 20)}
+            <span style="font-size:11px; font-weight:800; color:var(--text-primary); text-transform:uppercase; letter-spacing:0.5px;">${state.rank?.currentRank || 'Bronze III'}</span>
+            <span style="font-size:10px; color:var(--text-muted);">Global #${(state.rank?.globalRank || 9999).toLocaleString()}</span>
+          </div>
+
           <p class="profile-bio" id="profile-bio-display">${auth?.bio || 'No bio yet — tap Edit to add one'}</p>
           <button class="btn btn-sm btn-secondary" id="edit-profile-btn" style="margin-top:8px">Edit Profile</button>
         </div>
@@ -61,12 +77,11 @@ export function render() {
             </div>
             <div class="discipline-ring">
               <svg width="80" height="80" viewBox="0 0 80 80">
-                <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
-                <circle cx="40" cy="40" r="32" fill="none" stroke="url(#discGrad)" stroke-width="6"
+                <circle cx="40" cy="40" r="32" fill="none" stroke="var(--ring-secondary)" stroke-width="6"/>
+                <circle cx="40" cy="40" r="32" fill="none" stroke="var(--aura-violet)" stroke-width="6"
                   stroke-linecap="round" stroke-dasharray="201.1"
                   stroke-dashoffset="${201.1 - 201.1 * discipline / 100}"
                   transform="rotate(-90 40 40)"/>
-                <defs><linearGradient id="discGrad"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
               </svg>
             </div>
           </div>
@@ -119,7 +134,7 @@ export function render() {
         const leanMass = prof.leanMass;
         const bmiCat = prof.bmiCat || '';
         if (!bmi && !bmr) return '';
-        const bmiColor = bmiCat === 'Healthy' ? 'var(--aura-mint-light)' : bmiCat === 'Underweight' ? 'var(--aura-violet-light)' : 'var(--aura-rose-light)';
+        const bmiColor = bmiCat === 'Healthy' ? 'var(--aura-mint)' : bmiCat === 'Underweight' ? 'var(--aura-violet)' : 'var(--aura-rose)';
         return `
           <div class="profile-section">
             <div class="section-label">Body Metrics</div>
@@ -136,22 +151,22 @@ export function render() {
               </div>` : ''}
               ${tdee ? `<div class="card" style="padding:12px; text-align:center;">
                 <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase; letter-spacing:0.5px;">Maintenance</span>
-                <strong style="font-size:22px; color:var(--aura-amber-light); display:block; margin-top:2px;">${tdee}</strong>
+                <strong style="font-size:22px; color:var(--aura-amber); display:block; margin-top:2px;">${tdee}</strong>
                 <span style="font-size:10px; color:var(--text-muted);">kcal / day</span>
               </div>` : ''}
               ${protTarget ? `<div class="card" style="padding:12px; text-align:center;">
                 <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase; letter-spacing:0.5px;">Protein Target</span>
-                <strong style="font-size:22px; color:var(--aura-mint-light); display:block; margin-top:2px;">${protTarget}g</strong>
+                <strong style="font-size:22px; color:var(--aura-mint); display:block; margin-top:2px;">${protTarget}g</strong>
                 <span style="font-size:10px; color:var(--text-muted);">per day</span>
               </div>` : ''}
               ${waterTarget ? `<div class="card" style="padding:12px; text-align:center;">
                 <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase; letter-spacing:0.5px;">Water Target</span>
-                <strong style="font-size:22px; color:#60a5fa; display:block; margin-top:2px;">${waterTarget}L</strong>
+                <strong style="font-size:22px; color:var(--aura-blue); display:block; margin-top:2px;">${waterTarget}L</strong>
                 <span style="font-size:10px; color:var(--text-muted);">per day</span>
               </div>` : ''}
               ${leanMass ? `<div class="card" style="padding:12px; text-align:center;">
                 <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase; letter-spacing:0.5px;">Lean Mass</span>
-                <strong style="font-size:22px; color:var(--aura-violet-light); display:block; margin-top:2px;">${leanMass}kg</strong>
+                <strong style="font-size:22px; color:var(--aura-violet); display:block; margin-top:2px;">${leanMass}kg</strong>
                 <span style="font-size:10px; color:var(--text-muted);">Est.</span>
               </div>` : ''}
             </div>

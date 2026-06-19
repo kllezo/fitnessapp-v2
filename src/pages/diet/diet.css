@@ -11,16 +11,16 @@
 .macro-ring-card { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 16px 12px; }
 .macro-ring-visual { position: relative; width: 96px; height: 96px; display: flex; align-items: center; justify-content: center; }
 .macro-ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.macro-val { font-family: var(--font-display); font-size: 22px; font-weight: var(--fw-bold); color: var(--text-primary); line-height: 1; }
-.macro-unit { font-size: 10px; color: var(--text-muted); }
-.macro-label { font-size: var(--text-sm); font-weight: var(--fw-semibold); color: var(--text-primary); }
-.macro-target { font-size: var(--text-xs); color: var(--text-muted); }
+.macro-val { font-family: var(--font-display); font-size: 22px; font-weight: var(--fw-bold); color: var(--ring-value); line-height: 1; }
+.macro-unit { font-size: 10px; color: var(--ring-label); }
+.macro-label { font-size: var(--text-sm); font-weight: var(--fw-semibold); color: var(--card-text); }
+.macro-target { font-size: var(--text-xs); color: var(--card-subtext); }
 
 /* Hydration */
 .hydration-card {}
 .hydration-header { display: flex; align-items: center; justify-content: space-between; }
-.hydration-title { font-size: var(--text-base); font-weight: var(--fw-semibold); color: var(--text-primary); }
-.hydration-sub { font-size: var(--text-xs); color: var(--text-muted); margin-top: 2px; }
+.hydration-title { font-size: var(--text-base); font-weight: var(--fw-semibold); color: var(--card-text); }
+.hydration-sub { font-size: var(--text-xs); color: var(--card-subtext); margin-top: 2px; }
 
 .water-btns { display: flex; gap: 8px; margin-top: 8px; }
 .water-btn {
@@ -36,8 +36,8 @@
   font-family: var(--font-sans);
   transition: all var(--dur-fast) ease;
 }
-.water-btn:active { transform: scale(0.93); background: rgba(124,58,237,0.1); }
-.water-reset { color: var(--aura-rose-light); }
+.water-btn:active { transform: scale(0.93); background: var(--aura-violet-glow); }
+.water-reset { color: var(--aura-rose); }
 
 /* Meals */
 .meals-list { display: flex; flex-direction: column; gap: 10px; }
@@ -46,7 +46,7 @@
 .today-meal-card:active { transform: scale(0.98); }
 .today-meal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .today-meal-time { font-size: var(--text-xs); color: var(--text-muted); }
-.today-meal-name { font-size: var(--text-sm); font-weight: var(--fw-semibold); color: var(--text-primary); }
+.today-meal-name { font-size: var(--text-sm); font-weight: var(--fw-semibold); color: var(--card-text); }
 .today-meal-meta { font-size: var(--text-xs); color: var(--text-muted); }
 .today-meal-macros { display: flex; gap: 4px; }
 
@@ -63,7 +63,7 @@
 }
 .meal-emoji { font-size: 24px; flex-shrink: 0; }
 .meal-row-info { flex: 1; min-width: 0; }
-.meal-row-name { font-size: var(--text-sm); font-weight: var(--fw-semibold); color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meal-row-name { font-size: var(--text-sm); font-weight: var(--fw-semibold); color: var(--card-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .meal-row-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
 /* Log Sheet */

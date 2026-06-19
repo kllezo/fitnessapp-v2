@@ -183,7 +183,7 @@ function _renderPartnerTab() {
               <p class="section-label" style="margin-bottom:10px;text-align:center">Or Invite from Squad Friends</p>
               <div class="friends-invite-list" style="display:flex;flex-direction:column;gap:8px">
                 ${friends.map(f => `
-                  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,0.03);border:1px solid var(--border-card);border-radius:var(--radius-md)">
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-translucent-sm);border:1px solid var(--border-card);border-radius:var(--radius-md)">
                     <span style="font-size:var(--text-sm);font-weight:var(--fw-medium);color:var(--text-secondary)">${f.name} (${f.trainingStyle.split(' ')[0]})</span>
                     <button class="btn btn-xs btn-accent invite-friend-partner-btn" data-friend-id="${f.id}" style="padding:4px 10px">Invite</button>
                   </div>
@@ -249,13 +249,13 @@ function _renderPartnerTab() {
       </div>
 
       <!-- Match Partner Schedule -->
-      <div class="card" id="match-partner-schedule-btn" style="cursor:pointer; padding:14px; display:flex; align-items:center; gap:12px; border-color:rgba(0,229,168,0.3); background:rgba(0,229,168,0.05); transition:all 0.2s;" onmouseenter="this.style.borderColor='rgba(0,229,168,0.6)'" onmouseleave="this.style.borderColor='rgba(0,229,168,0.3)'">
+      <div class="card" id="match-partner-schedule-btn" style="cursor:pointer; padding:14px; display:flex; align-items:center; gap:12px; border-color:var(--aura-mint-glow); background:var(--bg-translucent-xs); transition:all 0.2s;" onmouseenter="this.style.borderColor='var(--aura-mint)'" onmouseleave="this.style.borderColor='var(--aura-mint-glow)'">
         <span style="font-size:28px;">🔥</span>
         <div style="flex:1;">
-          <strong style="font-size:13px; color:#00E5A8; display:block;">Match Partner Schedule</strong>
+          <strong style="font-size:13px; color:var(--aura-mint); display:block;">Match Partner Schedule</strong>
           <span style="font-size:11px; color:var(--text-muted);">Copy ${partner.name}'s split structure — personalised for you</span>
         </div>
-        <span style="font-size:11px; color:#00E5A8; font-weight:700;">Preview →</span>
+        <span style="font-size:11px; color:var(--aura-mint); font-weight:700;">Preview →</span>
       </div>
 
       <!-- Partner Action Cards (2x2 grid) -->
@@ -309,20 +309,20 @@ function _renderPartnerTab() {
         const yourComp = Math.min(100, Math.round((workoutsMe / 7) * 100));
         const partComp = Math.min(100, Math.round((workoutsPartner / 7) * 100));
         const adherence = Math.round((yourComp + partComp) / 2);
-        const bmiColor = recMe >= 80 ? '#00E5A8' : recMe >= 60 ? '#fcd34d' : '#fda4af';
+        const bmiColor = recMe >= 80 ? 'var(--aura-mint)' : recMe >= 60 ? 'var(--aura-amber)' : 'var(--aura-rose)';
         return `
           <div class="card" style="padding:14px; margin-top:4px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <span class="section-label" style="margin-bottom:0;">Partner Schedule Match</span>
-              <span style="font-size:10px; padding:3px 8px; border-radius:20px; font-weight:700; ${synced ? 'background:rgba(0,229,168,0.12);color:#00E5A8;' : 'background:rgba(35,37,58,0.8);color:var(--text-muted);'}">${synced ? '✓ Matched' : 'Not Matched'}</span>
+              <span style="font-size:10px; padding:3px 8px; border-radius:20px; font-weight:700; ${synced ? 'background:var(--aura-mint-glow);color:var(--aura-mint);' : 'background:var(--bg-translucent-md);color:var(--text-muted);'}">${synced ? '✓ Matched' : 'Not Matched'}</span>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
-              <div style="text-align:center; padding:8px; background:rgba(35,37,58,0.5); border-radius:10px;">
+              <div style="text-align:center; padding:8px; background:var(--bg-translucent-sm); border-radius:10px;">
                 <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Weekly Completion</span>
                 <strong style="font-size:13px; color:var(--text-primary); display:block; margin-top:3px;">You ${workoutsMe}/7</strong>
-                <strong style="font-size:13px; color:var(--aura-violet-light); display:block;">Partner ${workoutsPartner}/7</strong>
+                <strong style="font-size:13px; color:var(--aura-violet); display:block;">Partner ${workoutsPartner}/7</strong>
               </div>
-              <div style="text-align:center; padding:8px; background:rgba(35,37,58,0.5); border-radius:10px;">
+              <div style="text-align:center; padding:8px; background:var(--bg-translucent-sm); border-radius:10px;">
                 <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Adherence</span>
                 <strong style="font-size:22px; color:${bmiColor}; display:block; margin-top:3px;">${adherence}%</strong>
               </div>
@@ -330,7 +330,7 @@ function _renderPartnerTab() {
             <div style="margin-bottom:4px;">
               <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-bottom:4px;"><span>Recovery Comparison</span><span style="color:${bmiColor};">${recMe}% vs ${recPartner}%</span></div>
               <div style="height:4px; background:var(--border-card); border-radius:4px; overflow:hidden;">
-                <div style="height:100%; width:${adherence}%; background:linear-gradient(90deg,#00E5A8,#42D4FF); border-radius:4px;"></div>
+                <div style="height:100%; width:${adherence}%; background:var(--grad-mint); border-radius:4px;"></div>
               </div>
             </div>
           </div>
@@ -338,7 +338,7 @@ function _renderPartnerTab() {
       })()}
 
       <!-- End Partnership -->
-      <button class="btn btn-ghost btn-sm" id="end-partner-btn" style="margin-top:8px;width:100%;color:var(--aura-rose-light)">
+      <button class="btn btn-ghost btn-sm" id="end-partner-btn" style="margin-top:8px;width:100%;color:var(--aura-rose)">
         End Partnership
       </button>
     </div>
@@ -388,10 +388,10 @@ function _renderFriendsTab() {
   const groups = state.socials?.groups || [];
 
   const universalLeaderboardHtml = universalLeaderboard.map((m, i) => `
-    <div class="leaderboard-row ${m.isMe ? 'you' : ''}" style="display:flex; align-items:center; gap:8px; padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.02)">
+    <div class="leaderboard-row ${m.isMe ? 'you' : ''}" style="display:flex; align-items:center; gap:8px; padding:10px 12px; border-bottom:1px solid var(--border-translucent-subtle)">
       <span class="lb-rank" style="font-family:var(--font-display); font-weight:bold; color:var(--text-muted); width:20px;">${i + 1}</span>
-      <span class="lb-name username-clickable" data-user-id="${m.id}" style="flex:1; cursor:pointer; font-weight:bold; color:${m.isMe ? 'var(--aura-violet-light)' : 'var(--text-primary)'};">${m.name}</span>
-      <div class="lb-bar-wrap" style="flex:2; height:6px; background:rgba(255,255,255,0.04); border-radius:var(--radius-full); overflow:hidden; position:relative; max-width:140px;">
+      <span class="lb-name username-clickable" data-user-id="${m.id}" style="flex:1; cursor:pointer; font-weight:bold; color:${m.isMe ? 'var(--aura-violet)' : 'var(--text-primary)'};">${m.name}</span>
+      <div class="lb-bar-wrap" style="flex:2; height:6px; background:var(--bg-translucent-sm); border-radius:var(--radius-full); overflow:hidden; position:relative; max-width:140px;">
         <div class="lb-bar" style="height:100%; width:${m.discipline}%; background:${m.isMe ? 'var(--grad-violet)' : `linear-gradient(90deg,hsl(${200 + i * 30},70%,55%),hsl(${230 + i * 30},70%,45%))`}"></div>
       </div>
       <span class="lb-score" style="font-family:var(--font-display); font-weight:bold; color:var(--text-secondary); width:28px; text-align:right;">${m.discipline}</span>
@@ -406,7 +406,7 @@ function _renderFriendsTab() {
     const avgScore = Math.round(totalScore / g.members.length);
     
     return `
-      <div class="group-card card card-glow clickable-group-card" data-group-id="${g.id}" style="cursor:pointer; display:flex; flex-direction:column; gap:8px; padding:16px; border:1.5px solid var(--border-card); background:rgba(255,255,255,0.01); margin-top:8px;">
+      <div class="group-card card card-glow clickable-group-card" data-group-id="${g.id}" style="cursor:pointer; display:flex; flex-direction:column; gap:8px; padding:16px; border:1.5px solid var(--border-card); background:var(--bg-translucent-xs); margin-top:8px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <h3 style="font-family:var(--font-display); font-size:15px; font-weight:700; color:var(--text-primary); margin:0;">${g.name}</h3>
           <span style="font-size:10px; color:var(--text-muted);">${g.members.length} Members</span>
@@ -414,11 +414,11 @@ function _renderFriendsTab() {
         <div style="display:flex; gap:16px; margin-top:4px;">
           <div style="flex:1;">
             <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Your Rank</span>
-            <strong style="font-size:15px; color:var(--aura-violet-light);">${myRank === 1 ? '🥇 1st' : myRank === 2 ? '🥈 2nd' : myRank === 3 ? '🥉 3rd' : `${myRank}th`}</strong>
+            <strong style="font-size:15px; color:var(--aura-violet);">${myRank === 1 ? '🥇 1st' : myRank === 2 ? '🥈 2nd' : myRank === 3 ? '🥉 3rd' : `${myRank}th`}</strong>
           </div>
           <div style="flex:1;">
             <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase;">Avg. Score</span>
-            <strong style="font-size:15px; color:var(--aura-amber-light);">${avgScore} Disc</strong>
+            <strong style="font-size:15px; color:var(--aura-amber);">${avgScore} Disc</strong>
           </div>
         </div>
       </div>
@@ -781,7 +781,7 @@ function _openAddFriendModal() {
       </div>
       
       <!-- User Preview Box -->
-      <div id="friend-search-preview" class="friend-search-preview" style="min-height:80px; display:flex; align-items:center; justify-content:center; border:1.5px dashed var(--border-card); border-radius:var(--radius-lg); padding:12px; background:rgba(255,255,255,0.01);">
+      <div id="friend-search-preview" class="friend-search-preview" style="min-height:80px; display:flex; align-items:center; justify-content:center; border:1.5px dashed var(--border-card); border-radius:var(--radius-lg); padding:12px; background:var(--bg-translucent-xs);">
         <p style="color:var(--text-muted); font-size:12px; text-align:center; margin:0;">Enter username above and tap Search</p>
       </div>
 
@@ -824,7 +824,7 @@ function _openAddFriendModal() {
     if (foundUser) {
       previewDiv.innerHTML = `
         <div style="display:flex; align-items:center; gap:12px; width:100%;">
-          <div class="partner-avatar" style="width:40px; height:40px; font-size:16px; background:var(--grad-violet); display:flex; align-items:center; justify-content:center; color:#fff; border-radius:50%">
+          <div class="partner-avatar" style="width:40px; height:40px; font-size:16px; background:var(--grad-violet); display:flex; align-items:center; justify-content:center; color:var(--badge-text); border-radius:50%">
             ${foundUser.name[0]}
           </div>
           <div style="flex:1; text-align:left;">
@@ -851,7 +851,7 @@ function _openAddFriendModal() {
 
       previewDiv.innerHTML = `
         <div style="display:flex; align-items:center; gap:12px; width:100%;">
-          <div class="partner-avatar" style="width:40px; height:40px; font-size:16px; background:var(--grad-violet); display:flex; align-items:center; justify-content:center; color:#fff; border-radius:50%">
+          <div class="partner-avatar" style="width:40px; height:40px; font-size:16px; background:var(--grad-violet); display:flex; align-items:center; justify-content:center; color:var(--badge-text); border-radius:50%">
             ${foundUser.name[0]}
           </div>
           <div style="flex:1; text-align:left;">
@@ -1044,7 +1044,7 @@ function _openFriendProfile(user) {
     content: `
       <div class="friend-profile-modal">
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
-          <div class="partner-avatar" style="width:64px;height:64px;font-size:24px;background:var(--grad-violet);display:flex;align-items:center;justify-content:center;color:#fff;border-radius:50%">${user.name[0]}</div>
+          <div class="partner-avatar" style="width:64px;height:64px;font-size:24px;background:var(--grad-violet);display:flex;align-items:center;justify-content:center;color:var(--badge-text);border-radius:50%">${user.name[0]}</div>
           <div style="text-align:left;">
             <h4 style="font-size:var(--text-lg);font-weight:var(--fw-bold);color:var(--text-primary);margin-bottom:4px;margin-top:0;">${user.name}</h4>
             <p style="font-size:var(--text-xs);color:var(--text-muted);margin:0 0 6px 0;">${country} · ${user.trainingStyle || 'Training'}</p>
@@ -1056,9 +1056,9 @@ function _openFriendProfile(user) {
         </div>
         
         <!-- Metrics -->
-        <div class="stat-grid stat-grid-3" style="margin-bottom:20px;border:1px solid var(--border-card);border-radius:var(--radius-lg);padding:12px;background:rgba(255,255,255,0.01)">
+        <div class="stat-grid stat-grid-3" style="margin-bottom:20px;border:1px solid var(--border-card);border-radius:var(--radius-lg);padding:12px;background:var(--bg-translucent-xs)">
           <div class="stat-cell" style="text-align:center">
-            <div class="stat-value" style="font-size:18px;font-weight:bold;color:var(--aura-violet-light)">${disc}</div>
+            <div class="stat-value" style="font-size:18px;font-weight:bold;color:var(--aura-violet)">${disc}</div>
             <div class="stat-label" style="font-size:10px;color:var(--text-muted);margin-top:2px">Discipline</div>
           </div>
           <div class="stat-cell" style="text-align:center">
@@ -1077,7 +1077,7 @@ function _openFriendProfile(user) {
           <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
             ${recentAct.map(a => `
               <div class="activity-row" style="display:flex;gap:8px;font-size:var(--text-sm);color:var(--text-secondary);align-items:center">
-                <span style="color:var(--aura-violet-light)">✦</span>
+                <span style="color:var(--aura-violet)">✦</span>
                 <span>${a}</span>
               </div>
             `).join('')}
@@ -1201,7 +1201,7 @@ function _openChat(user, prefill = '') {
     <div class="chat-header">
       <button class="icon-btn" id="close-chat-btn">←</button>
       <div class="chat-user-info clickable-chat-header" id="chat-header-user" style="cursor:pointer">
-        <div class="partner-avatar" style="width:32px;height:32px;font-size:13px;background:var(--grad-violet);display:flex;align-items:center;justify-content:center;color:#fff;border-radius:50%">${user.name?.[0]}</div>
+        <div class="partner-avatar" style="width:32px;height:32px;font-size:13px;background:var(--grad-violet);display:flex;align-items:center;justify-content:center;color:var(--badge-text);border-radius:50%">${user.name?.[0]}</div>
         <span class="chat-user-name">${user.name}</span>
       </div>
     </div>
@@ -1273,7 +1273,7 @@ const MEMBER_MOCK_DATA = {
 };
 
 function _renderGroupSVGChart(metricKey, title, group) {
-  const colors = ['#a78bfa', '#34d399', '#f43f5e', '#fbbf24', '#60a5fa'];
+  const colors = ['var(--aura-violet)', 'var(--aura-mint)', 'var(--aura-rose)', 'var(--aura-amber)', 'var(--aura-blue)'];
   const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   const width = 280;
   const height = 80;
@@ -1319,9 +1319,9 @@ function _renderGroupSVGChart(metricKey, title, group) {
       <span style="font-size:10.5px; font-weight:700; color:var(--text-primary);">${title}</span>
       <svg viewBox="0 0 ${width} ${height}" style="width:100%; height:80px; overflow:visible;">
         <!-- Grid Lines -->
-        <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="rgba(255,255,255,0.03)" stroke-dasharray="2" />
-        <line x1="${padding}" y1="${height / 2}" x2="${width - padding}" y2="${height / 2}" stroke="rgba(255,255,255,0.03)" stroke-dasharray="2" />
-        <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="rgba(255,255,255,0.06)" />
+        <line x1="${padding}" y1="${padding}" x2="${width - padding}" y2="${padding}" stroke="var(--chart-axis)" stroke-dasharray="2" />
+        <line x1="${padding}" y1="${height / 2}" x2="${width - padding}" y2="${height / 2}" stroke="var(--chart-axis)" stroke-dasharray="2" />
+        <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="var(--chart-axis)" />
         
         <!-- Polylines -->
         ${linesHtml}
@@ -1354,7 +1354,7 @@ function _openGroupDetailModal(groupId) {
   const avgScore = Math.round(totalScore / group.members.length);
 
   const openGroupChatBtnHtml = `
-    <div class="card" id="group-open-chat-btn" style="cursor:pointer; padding:16px; margin-bottom:12px; border:1.5px solid rgba(167,139,250,0.25); background:rgba(167,139,250,0.04); display:flex; flex-direction:column; gap:8px; transition:all 0.2s ease;" onmouseenter="this.style.borderColor='rgba(167,139,250,0.5)'" onmouseleave="this.style.borderColor='rgba(167,139,250,0.25)'">
+    <div class="card" id="group-open-chat-btn" style="cursor:pointer; padding:16px; margin-bottom:12px; border:1.5px solid var(--aura-violet-glow); background:var(--bg-translucent-xs); display:flex; flex-direction:column; gap:8px; transition:all 0.2s ease;" onmouseenter="this.style.borderColor='var(--aura-violet)'" onmouseleave="this.style.borderColor='var(--aura-violet-glow)'">
       <div style="display:flex; align-items:center; gap:10px;">
         <span style="font-size:22px;">💬</span>
         <div style="flex:1;">
@@ -1363,7 +1363,7 @@ function _openGroupDetailModal(groupId) {
         </div>
       </div>
       <div style="display:flex; align-items:center; justify-content:flex-end;">
-        <span style="font-size:11px; color:var(--aura-violet-light); font-weight:700;">Open Group Chat →</span>
+        <span style="font-size:11px; color:var(--aura-violet); font-weight:700;">Open Group Chat →</span>
       </div>
     </div>
   `;
@@ -1384,14 +1384,14 @@ function _openGroupDetailModal(groupId) {
         </thead>
         <tbody>
           ${group.members.map(m => `
-            <tr style="border-bottom:1px dashed rgba(255,255,255,0.03);">
+            <tr style="border-bottom:1px dashed var(--border-translucent-subtle);">
               <td class="username-clickable" data-username="${m.name}" style="padding:8px 4px; font-weight:bold; color:var(--text-primary); cursor:pointer; text-align:left;">${m.name}</td>
-              <td style="text-align:center; padding:8px 4px; color:${m.workout ? 'var(--aura-mint-light)' : 'var(--aura-rose-light)'};">${m.workout ? '✓' : '✗'}</td>
-              <td style="text-align:center; padding:8px 4px; color:${m.protein ? 'var(--aura-mint-light)' : 'var(--aura-rose-light)'};">${m.protein ? '✓' : '✗'}</td>
-              <td style="text-align:center; padding:8px 4px; color:${m.water ? 'var(--aura-mint-light)' : 'var(--aura-rose-light)'};">${m.water ? '✓' : '✗'}</td>
+              <td style="text-align:center; padding:8px 4px; color:${m.workout ? 'var(--aura-mint)' : 'var(--aura-rose)'};">${m.workout ? '✓' : '✗'}</td>
+              <td style="text-align:center; padding:8px 4px; color:${m.protein ? 'var(--aura-mint)' : 'var(--aura-rose)'};">${m.protein ? '✓' : '✗'}</td>
+              <td style="text-align:center; padding:8px 4px; color:${m.water ? 'var(--aura-mint)' : 'var(--aura-rose)'};">${m.water ? '✓' : '✗'}</td>
               <td style="text-align:center; padding:8px 4px; color:var(--text-secondary);">${m.sleep}h</td>
-              <td style="text-align:center; padding:8px 4px; color:var(--aura-violet-light); font-weight:bold;">${m.recovery}%</td>
-              <td style="text-align:center; padding:8px 4px; color:var(--aura-amber-light); font-weight:bold;">${m.discipline}</td>
+              <td style="text-align:center; padding:8px 4px; color:var(--aura-violet); font-weight:bold;">${m.recovery}%</td>
+              <td style="text-align:center; padding:8px 4px; color:var(--aura-amber); font-weight:bold;">${m.discipline}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -1413,15 +1413,15 @@ function _openGroupDetailModal(groupId) {
       <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px;">
         <div class="card" style="padding:10px; text-align:center;">
           <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase; letter-spacing:0.4px;">Your Rank</span>
-          <strong style="font-size:16px; color:var(--aura-violet-light); display:block; margin-top:4px;">${myRank === 1 ? '🥇 1st' : myRank === 2 ? '🥈 2nd' : myRank === 3 ? '🥉 3rd' : `${myRank}th`}</strong>
+          <strong style="font-size:16px; color:var(--aura-violet); display:block; margin-top:4px;">${myRank === 1 ? '🥇 1st' : myRank === 2 ? '🥈 2nd' : myRank === 3 ? '🥉 3rd' : `${myRank}th`}</strong>
         </div>
         <div class="card" style="padding:10px; text-align:center;">
           <span style="font-size:9px; color:var(--text-muted); display:block; text-transform:uppercase; letter-spacing:0.4px;">Group Avg</span>
-          <strong style="font-size:16px; color:var(--aura-amber-light); display:block; margin-top:4px;">${avgScore} Disc</strong>
+          <strong style="font-size:16px; color:var(--aura-amber); display:block; margin-top:4px;">${avgScore} Disc</strong>
         </div>
-        <div class="card" id="group-header-chat-btn" style="padding:10px; text-align:center; cursor:pointer; border-color:rgba(0,214,143,0.35); background:rgba(0,214,143,0.08); transition:all 0.2s ease;" onmouseenter="this.style.borderColor='rgba(0,214,143,0.65)'" onmouseleave="this.style.borderColor='rgba(0,214,143,0.35)'">
+        <div class="card" id="group-header-chat-btn" style="padding:10px; text-align:center; cursor:pointer; border-color:var(--aura-mint-glow); background:var(--bg-translucent-xs); transition:all 0.2s ease;" onmouseenter="this.style.borderColor='var(--aura-mint)'" onmouseleave="this.style.borderColor='var(--aura-mint-glow)'">
           <span style="font-size:16px; display:block;">💬</span>
-          <strong style="font-size:13px; color:#00D68F; display:block; margin-top:2px;">Chat</strong>
+          <strong style="font-size:13px; color:var(--aura-mint); display:block; margin-top:2px;">Chat</strong>
         </div>
       </div>
 
@@ -1438,28 +1438,28 @@ function _openGroupDetailModal(groupId) {
           <div style="margin:12px 0 0;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
               <span class="section-label" style="margin-bottom:0;">Schedule Sync</span>
-              <button class="btn btn-sm" id="copy-squad-schedule-btn" style="padding:5px 12px; font-size:10px; background:rgba(0,229,168,0.1); border:1px solid rgba(0,229,168,0.3); color:#00E5A8; border-radius:var(--radius-md); cursor:pointer;">🔥 Copy Schedule</button>
+              <button class="btn btn-sm" id="copy-squad-schedule-btn" style="padding:5px 12px; font-size:10px; background:var(--aura-mint-glow); border:1px solid var(--aura-mint-glow); color:var(--aura-mint); border-radius:var(--radius-md); cursor:pointer;">🔥 Copy Schedule</button>
             </div>
-            <div class="card" style="padding:12px; background:rgba(35,37,58,0.5);">
+            <div class="card" style="padding:12px; background:var(--bg-translucent-sm);">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <span style="font-size:11px; font-weight:700; color:var(--text-primary);">Squad Schedule Sync</span>
-                <span style="font-size:10px; color:#00E5A8; font-weight:700;">${syncedCount}/${totalMembers} Synced</span>
+                <span style="font-size:10px; color:var(--aura-mint); font-weight:700;">${syncedCount}/${totalMembers} Synced</span>
               </div>
               <div style="height:4px; background:var(--border-card); border-radius:4px; overflow:hidden; margin-bottom:10px;">
-                <div style="height:100%; width:${Math.round(syncedCount/totalMembers*100)}%; background:linear-gradient(90deg,#00E5A8,#42D4FF); border-radius:4px;"></div>
+                <div style="height:100%; width:${Math.round(syncedCount/totalMembers*100)}%; background:var(--grad-mint); border-radius:4px;"></div>
               </div>
               <div style="display:flex; flex-direction:column; gap:4px;">
                 ${group.members.map(m => {
                   const st = syncStatus[m.id];
                   const icon = st === 'accepted' ? '✓' : st === 'pending' ? '⏳' : '✗';
-                  const col = st === 'accepted' ? '#00E5A8' : st === 'pending' ? '#fcd34d' : '#fda4af';
+                  const col = st === 'accepted' ? 'var(--aura-mint)' : st === 'pending' ? 'var(--aura-amber)' : 'var(--aura-rose)';
                   return `<div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-size:11px; color:var(--text-secondary);">${m.name}</span>
                     <span style="font-size:11px; color:${col}; font-weight:700;">${icon} ${st === 'accepted' ? 'Synced' : st === 'pending' ? 'Pending' : 'Not Synced'}</span>
                   </div>`;
                 }).join('')}
               </div>
-              <button class="btn btn-sm" id="admin-sync-btn" style="width:100%; margin-top:10px; padding:6px 0; font-size:11px; background:rgba(91,92,246,0.1); border:1px solid rgba(91,92,246,0.3); color:var(--aura-violet-light); border-radius:var(--radius-md); cursor:pointer;">🔥 Sync Schedule To Squad</button>
+              <button class="btn btn-sm" id="admin-sync-btn" style="width:100%; margin-top:10px; padding:6px 0; font-size:11px; background:var(--aura-violet-glow); border:1px solid var(--aura-violet-glow); color:var(--aura-violet); border-radius:var(--radius-md); cursor:pointer;">🔥 Sync Schedule To Squad</button>
             </div>
           </div>
         `;
@@ -1484,7 +1484,7 @@ function _openGroupDetailModal(groupId) {
             <div class="card" style="padding:12px; margin-bottom:10px;">
               <p style="font-size:11px; font-weight:700; color:var(--text-primary); margin-bottom:8px;">Most Copied Schedule</p>
               ${podium.map(([name, count], i) => `
-                <div style="display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid rgba(35,37,58,0.8);">
+                <div style="display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid var(--border-translucent-subtle);">
                   <span style="font-size:14px;">${medals[i]}</span>
                   <span style="flex:1; font-size:12px; color:var(--text-primary); font-weight:600;">${name}</span>
                   <span style="font-size:10px; color:var(--text-muted);">copied by ${count} members</span>
@@ -1495,7 +1495,7 @@ function _openGroupDetailModal(groupId) {
               <p style="font-size:11px; font-weight:700; color:var(--text-primary); margin-bottom:8px;">Schedule Compatibility</p>
               ${group.members.filter(m => m.id !== 'me').map(m => {
                 const compat = friends.find(f => f.name === m.name)?.compatibility || Math.floor(65 + Math.random()*25);
-                const col = compat >= 85 ? '#00E5A8' : compat >= 70 ? '#fcd34d' : '#fda4af';
+                const col = compat >= 85 ? 'var(--aura-mint)' : compat >= 70 ? 'var(--aura-amber)' : 'var(--aura-rose)';
                 return `<div style="margin-bottom:8px;">
                   <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
                     <span style="color:var(--text-secondary);">${m.name}</span>
@@ -1510,16 +1510,16 @@ function _openGroupDetailModal(groupId) {
             <div class="card" style="padding:12px;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <p style="font-size:11px; font-weight:700; color:var(--text-primary);">Schedule Compliance</p>
-                <span style="font-size:11px; color:#00E5A8; font-weight:700;">${compToday}/${group.members.length} Today</span>
+                <span style="font-size:11px; color:var(--aura-mint); font-weight:700;">${compToday}/${group.members.length} Today</span>
               </div>
               <div style="height:4px; background:var(--border-card); border-radius:4px; overflow:hidden; margin-bottom:10px;">
-                <div style="height:100%; width:${compPct}%; background:linear-gradient(90deg,#00E5A8,#42D4FF); border-radius:4px;"></div>
+                <div style="height:100%; width:${compPct}%; background:var(--grad-mint); border-radius:4px;"></div>
               </div>
               <p style="font-size:10px; color:var(--text-muted); margin-bottom:6px;">Weekly Adherence</p>
               <div style="display:flex; gap:4px; align-items:flex-end; height:32px;">
                 ${weeklyAdh.map((h,i) => `
                   <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;">
-                    <div style="width:100%; height:${Math.round(h/100*28)}px; background:linear-gradient(180deg,#00E5A8,#42D4FF); border-radius:2px; opacity:0.8;"></div>
+                    <div style="width:100%; height:${Math.round(h/100*28)}px; background:var(--grad-mint); border-radius:2px; opacity:0.8;"></div>
                     <span style="font-size:8px; color:var(--text-muted);">${days[i]}</span>
                   </div>
                 `).join('')}
@@ -1590,7 +1590,7 @@ function _openGroupChatFullscreen(groupId) {
     <div class="chat-header">
       <button class="icon-btn" id="close-group-chat-btn">←</button>
       <div class="chat-user-info" style="cursor:pointer">
-        <div class="partner-avatar" style="width:32px;height:32px;font-size:13px;background:var(--grad-blue);display:flex;align-items:center;justify-content:center;color:#fff;border-radius:50%">${group.name?.[0]}</div>
+        <div class="partner-avatar" style="width:32px;height:32px;font-size:13px;background:var(--grad-blue);display:flex;align-items:center;justify-content:center;color:var(--badge-text);border-radius:50%">${group.name?.[0]}</div>
         <span class="chat-user-name">${group.name}</span>
       </div>
     </div>
@@ -1701,7 +1701,7 @@ function _openInboxModal() {
     const lastTime = msgs.length ? msgs[msgs.length - 1].time : '';
     dmsHtml += `
       <div class="inbox-row card clickable-inbox-row" data-type="dm" data-id="${f.id}" style="cursor:pointer; display:flex; align-items:center; gap:12px; padding:12px; margin-bottom:8px;">
-        <div class="partner-avatar" style="width:36px; height:36px; font-size:14px; background:var(--grad-violet); display:flex; align-items:center; justify-content:center; color:#fff; border-radius:50%">${f.name[0]}</div>
+        <div class="partner-avatar" style="width:36px; height:36px; font-size:14px; background:var(--grad-violet); display:flex; align-items:center; justify-content:center; color:var(--badge-text); border-radius:50%">${f.name[0]}</div>
         <div style="flex:1; min-width:0;">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
             <strong style="font-size:13px; color:var(--text-primary);">${f.name}</strong>
@@ -1720,7 +1720,7 @@ function _openInboxModal() {
     const lastTime = lastMsg ? lastMsg.time : '';
     groupsHtml += `
       <div class="inbox-row card clickable-inbox-row" data-type="group" data-id="${g.id}" style="cursor:pointer; display:flex; align-items:center; gap:12px; padding:12px; margin-bottom:8px;">
-        <div class="partner-avatar" style="width:36px; height:36px; font-size:14px; background:var(--grad-blue); display:flex; align-items:center; justify-content:center; color:#fff; border-radius:50%">${g.name[0]}</div>
+        <div class="partner-avatar" style="width:36px; height:36px; font-size:14px; background:var(--grad-blue); display:flex; align-items:center; justify-content:center; color:var(--badge-text); border-radius:50%">${g.name[0]}</div>
         <div style="flex:1; min-width:0;">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
             <strong style="font-size:13px; color:var(--text-primary);">${g.name}</strong>
@@ -1739,7 +1739,7 @@ function _openInboxModal() {
     const lastTime = msgs.length ? msgs[msgs.length - 1].time : '';
     partnerHtml = `
       <div class="inbox-row card clickable-inbox-row" data-type="partner" data-id="${partner.id}" style="cursor:pointer; display:flex; align-items:center; gap:12px; padding:12px; margin-bottom:8px; border-color:var(--aura-violet);">
-        <div class="partner-avatar" style="width:36px; height:36px; font-size:14px; background:var(--grad-violet); display:flex; align-items:center; justify-content:center; color:#fff; border-radius:50%">${partner.name[0]}</div>
+        <div class="partner-avatar" style="width:36px; height:36px; font-size:14px; background:var(--grad-violet); display:flex; align-items:center; justify-content:center; color:var(--badge-text); border-radius:50%">${partner.name[0]}</div>
         <div style="flex:1; min-width:0;">
           <div style="display:flex; justify-content:space-between; align-items:baseline;">
             <strong style="font-size:13px; color:var(--text-primary);">${partner.name} (Partner 🤝)</strong>
@@ -1913,16 +1913,16 @@ function _openMatchPartnerScheduleModal(partner) {
   const ob = getState().onboarding || {};
   const DAYS = _WEEKDAYS;
   const dayTypeColors = {
-    Push:'#818CF8', Pull:'#00E5A8', Legs:'#42D4FF', Recovery:'#fcd34d',
-    Cardio:'#fda4af', Upper:'#818CF8', Lower:'#00E5A8', 'Full Body':'#00E5A8', Rest:'#4A4F6E'
+    Push:'var(--aura-violet)', Pull:'var(--aura-mint)', Legs:'var(--aura-blue)', Recovery:'var(--aura-amber)',
+    Cardio:'var(--aura-rose)', Upper:'var(--aura-violet)', Lower:'var(--aura-mint)', 'Full Body':'var(--aura-mint)', Rest:'var(--text-muted)'
   };
 
   const scheduleRowsHtml = DAYS.map((day, i) => {
     const type = schedule.split[i];
     const exercises = _getPersonalizedExercises(type, ob);
-    const col = dayTypeColors[type] || '#8E93B8';
+    const col = dayTypeColors[type] || 'var(--text-secondary)';
     return `
-      <div style="display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid rgba(35,37,58,0.8);">
+      <div style="display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid var(--border-translucent-subtle);">
         <span style="font-size:10px; color:var(--text-muted); width:28px; flex-shrink:0; margin-top:3px;">${day}</span>
         <div style="flex:1;">
           <span style="font-size:12px; font-weight:700; color:${col};">${type}</span>
@@ -1969,8 +1969,8 @@ function _openCopySquadScheduleModal(group) {
   let selectedMemberId = null;
 
   const dayTypeColors = {
-    Push:'#818CF8', Pull:'#00E5A8', Legs:'#42D4FF', Recovery:'#fcd34d',
-    Cardio:'#fda4af', Upper:'#818CF8', Lower:'#00E5A8', 'Full Body':'#00E5A8', Rest:'#4A4F6E'
+    Push: 'var(--aura-violet)', Pull: 'var(--aura-mint)', Legs: 'var(--text-accent)', Recovery: 'var(--aura-amber)',
+    Cardio: 'var(--aura-rose)', Upper: 'var(--aura-violet)', Lower: 'var(--aura-mint)', 'Full Body': 'var(--aura-mint)', Rest: 'var(--text-muted)'
   };
 
   const memberListHtml = group.members
@@ -1981,12 +1981,12 @@ function _openCopySquadScheduleModal(group) {
       const compat = friend?.compatibility || Math.floor(65 + Math.random() * 25);
       return `
         <div class="squad-member-select-row" data-member-id="${friend?.id || m.id}" style="display:flex; align-items:center; gap:10px; padding:10px; border:1.5px solid var(--border-card); border-radius:var(--radius-md); cursor:pointer; transition:all 0.15s; margin-bottom:8px;">
-          <div style="width:36px; height:36px; border-radius:50%; background:var(--grad-violet); display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff; flex-shrink:0; font-size:14px;">${m.name[0]}</div>
+          <div style="width:36px; height:36px; border-radius:50%; background:var(--grad-violet); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--badge-text); flex-shrink:0; font-size:14px;">${m.name[0]}</div>
           <div style="flex:1;">
             <strong style="font-size:12px; color:var(--text-primary); display:block;">${m.name}</strong>
             <span style="font-size:10px; color:var(--text-muted);">${sched.name} · Disc ${m.discipline}</span>
           </div>
-          <span style="font-size:10px; font-weight:700; color:#00E5A8;">${compat}% compat</span>
+          <span style="font-size:10px; font-weight:700; color:var(--aura-mint);">${compat}% compat</span>
         </div>
       `;
     }).join('');
@@ -2011,8 +2011,8 @@ function _openCopySquadScheduleModal(group) {
       const schedRows = DAYS.map((day, i) => {
         const type = sched.split[i];
         const exercises = _getPersonalizedExercises(type, ob);
-        const col = dayTypeColors[type] || '#8E93B8';
-        return `<div style="display:flex; align-items:flex-start; gap:10px; padding:7px 0; border-bottom:1px solid rgba(35,37,58,0.8);">
+        const col = dayTypeColors[type] || 'var(--text-secondary)';
+        return `<div style="display:flex; align-items:flex-start; gap:10px; padding:7px 0; border-bottom:1px solid var(--border-translucent-subtle);">
           <span style="font-size:10px; color:var(--text-muted); width:28px; flex-shrink:0; margin-top:2px;">${day}</span>
           <div style="flex:1;">
             <span style="font-size:12px; font-weight:700; color:${col};">${type}</span>
@@ -2048,12 +2048,12 @@ function _openAdminSyncModal(group) {
   const state = getState();
   const mySchedule = state.socials?.partnerSyncedPlan || state.socials?.squadSyncedPlan;
   const DAYS = _WEEKDAYS;
-  const dayTypeColors = { Push:'#818CF8', Pull:'#00E5A8', Legs:'#42D4FF', Recovery:'#fcd34d', Cardio:'#fda4af', Upper:'#818CF8', Lower:'#00E5A8', 'Full Body':'#00E5A8', Rest:'#4A4F6E' };
+  const dayTypeColors = { Push:'var(--aura-violet)', Pull:'var(--aura-mint)', Legs:'var(--aura-blue)', Recovery:'var(--aura-amber)', Cardio:'var(--aura-rose)', Upper:'var(--aura-violet)', Lower:'var(--aura-mint)', 'Full Body':'var(--aura-mint)', Rest:'var(--text-muted)' };
 
   const schedToShow = mySchedule || _DEFAULT_SCHEDULE.split.map((type, i) => ({ day: DAYS[i], type }));
   const schedRows = schedToShow.map(d => {
-    const col = dayTypeColors[d.type] || '#8E93B8';
-    return `<div style="display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid rgba(35,37,58,0.8);">
+    const col = dayTypeColors[d.type] || 'var(--text-secondary)';
+    return `<div style="display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid var(--border-translucent-subtle);">
       <span style="font-size:10px; color:var(--text-muted); width:28px;">${d.day}</span>
       <span style="font-size:12px; font-weight:700; color:${col};">${d.type}</span>
     </div>`;

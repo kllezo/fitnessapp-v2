@@ -131,6 +131,21 @@ const defaultState = {
     inboxOpen: false,
     activeChatUser: null,
   },
+  rank: {
+    rankScore: 0,
+    currentRank: 'Bronze III',
+    rankId: 'bronze_3',
+    globalRank: 9999,
+    rewardsUnlocked: {
+      frames: ['default'],
+      emblems: [],
+      themes: [],
+      titles: ['Novice']
+    },
+    activeFrame: 'default',
+    activeTitle: 'Novice',
+    simulatedScore: null
+  }
 };
 
 // ── State instance ──

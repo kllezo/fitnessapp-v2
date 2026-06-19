@@ -102,7 +102,7 @@ export function render() {
                     width:32px;height:32px;border-radius:50%;
                     background:linear-gradient(135deg, ${t.colors.primary}, ${t.colors.background});
                     border:2px solid ${isActive ? t.colors.primary : 'transparent'};
-                    outline:${isActive ? `3px solid ${t.colors.primary}44` : 'none'};
+                    outline:${isActive ? `3px solid var(--aura-violet-glow)` : 'none'};
                     cursor:pointer;padding:0;transition:transform 200ms ease,outline 200ms ease;
                   "></button>
                 `;
@@ -165,7 +165,7 @@ function _wireEvents() {
         const t = THEMES[b.dataset.theme];
         const isNowActive = b.dataset.theme === themeId;
         b.style.border = `2px solid ${isNowActive ? t.colors.primary : 'transparent'}`;
-        b.style.outline = isNowActive ? `3px solid ${t.colors.primary}44` : 'none';
+        b.style.outline = isNowActive ? `3px solid var(--aura-violet-glow)` : 'none';
         b.style.transform = isNowActive ? 'scale(1.15)' : 'scale(1)';
         b.classList.toggle('active', isNowActive);
       });

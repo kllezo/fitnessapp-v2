@@ -171,6 +171,83 @@ function _alpha(hex, opacity) {
   return `rgba(${r},${g},${b},${opacity})`;
 }
 
+function _getBrightness(hex) {
+  if (!hex || typeof hex !== 'string') return 0;
+  let cleanHex = hex.trim().replace('#', '');
+  if (cleanHex.length === 3) {
+    cleanHex = cleanHex[0] + cleanHex[0] + cleanHex[1] + cleanHex[1] + cleanHex[2] + cleanHex[2];
+  }
+  if (cleanHex.length !== 6) return 0;
+  const r = parseInt(cleanHex.substring(0, 2), 16);
+  const g = parseInt(cleanHex.substring(2, 4), 16);
+  const b = parseInt(cleanHex.substring(4, 6), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000;
+}
+
+export function getContrastColor(hexBg, lightText = '#FFFFFF', darkText = '#0F172A') {
+  return _getBrightness(hexBg) >= 140 ? darkText : lightText;
+}
+
+export function getComputedThemeVars(theme) {
+  const c = theme.colors;
+  const bgBrightness = _getBrightness(c.background);
+  const cardBrightness = _getBrightness(c.card);
+  const surfaceBrightness = _getBrightness(c.surface);
+  const primaryBrightness = _getBrightness(c.primary);
+
+  const isBgLight = bgBrightness >= 140;
+  const isCardLight = cardBrightness >= 140;
+  const isSurfaceLight = surfaceBrightness >= 140;
+  const isPrimaryLight = primaryBrightness >= 140;
+
+  const textPrimary = c.textPrimary || (isBgLight ? '#0F172A' : '#FFFFFF');
+  const textSecondary = c.textSecondary || (isBgLight ? '#475569' : '#8E93B8');
+  const textMuted = c.textMuted || (isBgLight ? '#94A3B8' : '#4A4F6E');
+  const textInverse = c.textInverse || (isBgLight ? '#FFFFFF' : '#0F172A');
+
+  const cardText = c.cardText || (isCardLight ? '#0F172A' : '#FFFFFF');
+  const cardSubtext = c.cardSubtext || (isCardLight ? '#64748B' : '#8E93B8');
+
+  const ringValue = c.ringValue || (isCardLight ? '#0F172A' : '#FFFFFF');
+  const ringLabel = c.ringLabel || (isCardLight ? '#64748B' : '#8E93B8');
+  const ringSecondary = c.ringSecondary || (isCardLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)');
+
+  const chartLabel = c.chartLabel || (isCardLight ? '#475569' : '#8E93B8');
+  const chartAxis = c.chartAxis || (isCardLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)');
+  const chartTooltip = c.chartTooltip || (isCardLight ? '#FFFFFF' : '#11121A');
+  const chartTooltipText = isCardLight ? '#0F172A' : '#FFFFFF';
+
+  const badgeText = c.badgeText || '#FFFFFF';
+  const buttonText = c.buttonText || (isPrimaryLight ? '#0F172A' : '#FFFFFF');
+  const inputText = c.inputText || (isSurfaceLight ? '#0F172A' : '#FFFFFF');
+  const placeholderText = c.placeholderText || (isSurfaceLight ? 'rgba(15,23,42,0.4)' : 'rgba(255,255,255,0.4)');
+
+  const analyticsText = c.analyticsText || (isCardLight ? '#0F172A' : '#FFFFFF');
+  const analyticsSecondary = c.analyticsSecondary || (isCardLight ? '#64748B' : '#8E93B8');
+
+  return {
+    textPrimary,
+    textSecondary,
+    textMuted,
+    textInverse,
+    cardText,
+    cardSubtext,
+    ringValue,
+    ringLabel,
+    ringSecondary,
+    chartLabel,
+    chartAxis,
+    chartTooltip,
+    chartTooltipText,
+    badgeText,
+    buttonText,
+    inputText,
+    placeholderText,
+    analyticsText,
+    analyticsSecondary
+  };
+}
+
 // ── Apply theme CSS variables to the phone shell ──
 function _applyThemeVars(theme) {
   const c = theme.colors;
@@ -181,6 +258,8 @@ function _applyThemeVars(theme) {
   // Mark theme on shell
   shell.dataset.theme = theme.id;
 
+  const comp = getComputedThemeVars(theme);
+
   const vars = {
     '--bg-base':        c.background,
     '--bg-surface':     c.surface,
@@ -190,10 +269,39 @@ function _applyThemeVars(theme) {
     '--bg-input':       c.surface,
     '--bg-modal':       c.card,
 
-    '--text-primary':   c.textPrimary,
-    '--text-secondary': c.textSecondary,
-    '--text-muted':     c.textMuted,
+    '--text-primary':   comp.textPrimary,
+    '--text-secondary': comp.textSecondary,
+    '--text-muted':     comp.textMuted,
     '--text-accent':    c.primary,
+    '--text-inverse':   comp.textInverse,
+
+    '--card-text':      comp.cardText,
+    '--card-subtext':   comp.cardSubtext,
+    '--ring-value':     comp.ringValue,
+    '--ring-label':     comp.ringLabel,
+    '--ring-secondary': comp.ringSecondary,
+
+    '--chart-label':    comp.chartLabel,
+    '--chart-axis':     comp.chartAxis,
+    '--chart-tooltip':  comp.chartTooltip,
+    '--chart-tooltip-text': comp.chartTooltipText,
+
+    '--badge-text':     comp.badgeText,
+    '--button-text':    comp.buttonText,
+    '--input-text':     comp.inputText,
+    '--placeholder-text': comp.placeholderText,
+    '--analytics-text':  comp.analyticsText,
+    '--analytics-secondary': comp.analyticsSecondary,
+
+    // Translucent theme variables
+    '--bg-translucent-xs': theme.dark ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.02)',
+    '--bg-translucent-sm': theme.dark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.04)',
+    '--bg-translucent-md': theme.dark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
+    '--bg-translucent-lg': theme.dark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.12)',
+
+    '--border-translucent-subtle': theme.dark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.04)',
+    '--border-translucent-medium': theme.dark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.08)',
+    '--border-translucent-strong': theme.dark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)',
 
     '--border-subtle':  _alpha(c.border, 0.8),
     '--border-card':    c.border,
@@ -244,8 +352,14 @@ function _applyThemeVars(theme) {
   // Also propagate key vars to root (for modal-container which is outside shell)
   const rootKeys = [
     '--bg-elevated', '--bg-card', '--bg-modal', '--bg-input',
-    '--text-primary', '--text-secondary', '--text-muted',
+    '--text-primary', '--text-secondary', '--text-muted', '--text-inverse',
+    '--card-text', '--card-subtext', '--ring-value', '--ring-label', '--ring-secondary',
+    '--chart-label', '--chart-axis', '--chart-tooltip', '--chart-tooltip-text',
+    '--badge-text', '--button-text', '--input-text', '--placeholder-text',
+    '--analytics-text', '--analytics-secondary',
     '--border-card', '--border-subtle', '--border-active',
+    '--border-translucent-subtle', '--border-translucent-medium', '--border-translucent-strong',
+    '--bg-translucent-xs', '--bg-translucent-sm', '--bg-translucent-md', '--bg-translucent-lg',
     '--aura-violet', '--aura-violet-light', '--aura-violet-glow',
     '--aura-mint', '--aura-mint-light',
     '--aura-rose', '--aura-rose-light',
@@ -254,7 +368,7 @@ function _applyThemeVars(theme) {
     '--shadow-lg',
   ];
   rootKeys.forEach(k => {
-    if (vars[k]) root.style.setProperty(k, vars[k]);
+    if (vars[k] !== undefined) root.style.setProperty(k, vars[k]);
   });
 }
 
@@ -270,7 +384,10 @@ export const themeManager = {
 
   /** Get a specific color from active theme */
   getColor(token) {
-    return this.getTheme().colors[token] || '';
+    const theme = this.getTheme();
+    const comp = getComputedThemeVars(theme);
+    if (token in comp) return comp[token];
+    return theme.colors[token] || '';
   },
 
   /** Apply + save a theme by id */

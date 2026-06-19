@@ -29,8 +29,8 @@ export function render() {
             <path d="M17 27h14" stroke="url(#authGrad)" stroke-width="2" stroke-linecap="round"/>
             <defs>
               <linearGradient id="authGrad" x1="0" y1="0" x2="48" y2="48">
-                <stop stop-color="#a78bfa"/>
-                <stop offset="1" stop-color="#7c3aed"/>
+                <stop stop-color="var(--aura-violet)"/>
+                <stop offset="1" stop-color="var(--aura-violet-dark)"/>
               </linearGradient>
             </defs>
           </svg>

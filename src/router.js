@@ -145,7 +145,7 @@ async function _handleRoute(path) {
 function _updateNavVisibility(path) {
   const nav = document.getElementById('bottom-nav');
   if (!nav) return;
-  const hiddenRoutes = ['/auth', '/onboarding'];
+  const hiddenRoutes = ['/auth', '/onboarding', '/rank-center'];
   if (hiddenRoutes.includes(path)) {
     nav.style.display = 'none';
   } else {

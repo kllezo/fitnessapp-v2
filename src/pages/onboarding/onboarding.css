@@ -105,7 +105,7 @@
 }
 
 .selector-card.selected .card-sub {
-  color: rgba(167,139,250,0.8);
+  color: var(--text-accent);
 }
 
 /* Footer nav */
@@ -147,7 +147,7 @@
   inset: 0;
   border-radius: 50%;
   border: 2px solid transparent;
-  background: linear-gradient(135deg, var(--aura-violet-light), #7c3aed) border-box;
+  background: linear-gradient(135deg, var(--aura-violet), var(--aura-violet-glow)) border-box;
   -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: destination-out;
   mask-composite: exclude;
@@ -156,7 +156,7 @@
 
 .complete-icon {
   font-size: 40px;
-  filter: drop-shadow(0 0 12px rgba(124,58,237,0.6));
+  filter: drop-shadow(0 0 12px var(--aura-violet-glow));
 }
 
 .complete-stats {
@@ -207,8 +207,8 @@
   font-size: var(--text-sm);
   color: var(--text-secondary);
   padding: 10px 14px;
-  background: rgba(16,185,129,0.06);
-  border: 1px solid rgba(16,185,129,0.15);
+  background: var(--bg-translucent-sm);
+  border: 1px solid var(--border-translucent-medium);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
